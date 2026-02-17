@@ -1,0 +1,1 @@
+![Assimp_data](./Assimp_data.png)  
