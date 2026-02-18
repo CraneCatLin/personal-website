@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面未找到</title>
+    <style>
+        /* 极简样式，仅保证可读和柔和 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f7f9fc;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 500px;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeef2;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0 0 0.5rem;
+            font-weight: 400;
+            color: #9b6b9c;
+            /* 柔和紫色 */
+            letter-spacing: 2px;
+        }
+
+        p {
+            margin: 1rem 0;
+            color: #5d6d7e;
+        }
+
+        a {
+            color: #79589f;
+            text-decoration: none;
+            border-bottom: 1px dotted #79589f;
+            transition: border-color 0.2s;
+        }
+
+        a:hover {
+            border-bottom-style: solid;
+        }
+
+        .small-note {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <p>你访问的页面好像飘走了～</p>
+        <p>正在自动跳转回首页…</p>
+        <p>
+            <a href="/" id="homeLink">如果未自动跳转，点击这里</a>
+        </p>
+        <div class="small-note">喵？别担心，笔记都还在～</div>
+    </div>
+
+    <script>
+        (function () {
+            // 获取当前请求的完整路径（包含路径和文件名，如 /notes/example.md）
+            var currentPath = window.location.pathname;
+            // 构造重定向目标：/index.html#/notes/example.md
+            // 使用绝对路径，确保在任何子目录下都能正确跳转
+            var redirectUrl = '/index.html#' + currentPath;
+            // 尝试自动跳转
+            window.location.href = redirectUrl;
+
+            // 同时更新链接的 href，方便用户手动点击（包含 hash）
+            var homeLink = document.getElementById('homeLink');
+            if (homeLink) {
+                homeLink.href = redirectUrl;
+            }
+        })();
+    </script>
+</body>
+
+</html>
