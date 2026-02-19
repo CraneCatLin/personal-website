@@ -18,12 +18,39 @@ const outputFile = args[1] || path.join(__dirname, '../frontend/tree.json');
 
 // 需要忽略的隐藏文件/文件夹名称（精确匹配）
 const IGNORED_NAMES = new Set(['.DS_Store', '.gitkeep', '.git', '.hg', '.svn', 'Thumbs.db']);
+const EXCLUDED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'];
 
+// 需要忽略的特定路径（相对于项目根目录）
+const IGNORED_PATHS = new Set(['/images']);
+function shouldIncludeFile(filename) {
+    const extension = path.extname(filename).toLowerCase();
+    return !EXCLUDED_EXTENSIONS.includes(extension);
+}
 /**
  * 判断是否为隐藏文件（以点开头）
  */
 function isHidden(name) {
     return name.startsWith('.');
+}
+
+/**
+ * 判断路径是否应该被忽略
+ */
+function shouldIgnorePath(currentPath, baseDir) {
+    const relativePath = path.relative(baseDir, currentPath);
+    const normalizedRelativePath = '/' + relativePath.replace(/\\/g, '/');
+
+    // 检查是否在忽略路径列表中
+    for (const ignoredPath of IGNORED_PATHS) {
+        if (normalizedRelativePath === ignoredPath ||
+            normalizedRelativePath.startsWith(ignoredPath + '/') ||
+            normalizedRelativePath.startsWith(ignoredPath + '\\')) {
+            return true;
+        }
+    }
+
+    const name = path.basename(currentPath);
+    return isHidden(name) || IGNORED_NAMES.has(name);
 }
 
 /**
@@ -44,13 +71,13 @@ function walkDir(currentPath, baseDir, relPath) {
 
     const name = path.basename(currentPath);
 
-    // 忽略隐藏文件和特定名称
-    if (isHidden(name) || IGNORED_NAMES.has(name)) {
+    // 使用增强的忽略判断函数
+    if (shouldIgnorePath(currentPath, baseDir)) {
         return null;
     }
 
     // 处理文件
-    if (stats.isFile()) {
+    if (stats.isFile() && shouldIncludeFile(name)) {
         const ext = path.extname(name).toLowerCase();
         return {
             type: 'file',

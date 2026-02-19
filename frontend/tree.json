@@ -43,18 +43,6 @@
           "name": "tips.md",
           "path": "DIP G/tips.md",
           "ext": ".md"
-        },
-        {
-          "type": "file",
-          "name": "unsharp-masking.png",
-          "path": "DIP G/unsharp-masking.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "双线性插值.png",
-          "path": "DIP G/双线性插值.png",
-          "ext": ".png"
         }
       ]
     },
@@ -89,27 +77,9 @@
         },
         {
           "type": "file",
-          "name": "双线性插值.png",
-          "path": "GAMES/双线性插值.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
           "name": "变换.md",
           "path": "GAMES/变换.md",
           "ext": ".md"
-        },
-        {
-          "type": "file",
-          "name": "方位角旋转分角.png",
-          "path": "GAMES/方位角旋转分角.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "时域&频域.png",
-          "path": "GAMES/时域&频域.png",
-          "ext": ".png"
         },
         {
           "type": "file",
@@ -134,24 +104,6 @@
           "name": "纹理.md",
           "path": "GAMES/纹理.md",
           "ext": ".md"
-        },
-        {
-          "type": "file",
-          "name": "纹理映射_mipmap.png",
-          "path": "GAMES/纹理映射_mipmap.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "视场.png",
-          "path": "GAMES/视场.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "镜面反射.png",
-          "path": "GAMES/镜面反射.png",
-          "ext": ".png"
         },
         {
           "type": "file",
@@ -246,12 +198,6 @@
         },
         {
           "type": "file",
-          "name": "对极几何示意图.png",
-          "path": "Multiple View Geometry in CV/对极几何示意图.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
           "name": "射影几何中几何体的关系.md",
           "path": "Multiple View Geometry in CV/射影几何中几何体的关系.md",
           "ext": ".md"
@@ -261,24 +207,6 @@
           "name": "总结.md",
           "path": "Multiple View Geometry in CV/总结.md",
           "ext": ".md"
-        },
-        {
-          "type": "file",
-          "name": "旋转分解.png",
-          "path": "Multiple View Geometry in CV/旋转分解.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "相对长度测量像平面.png",
-          "path": "Multiple View Geometry in CV/相对长度测量像平面.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "相对长度测量空间点.png",
-          "path": "Multiple View Geometry in CV/相对长度测量空间点.png",
-          "ext": ".png"
         }
       ]
     },
@@ -314,45 +242,15 @@
       "children": [
         {
           "type": "file",
-          "name": "Assimp_data.png",
-          "path": "opengl/Assimp_data.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
           "name": "Assimp模型库.md",
           "path": "opengl/Assimp模型库.md",
           "ext": ".md"
         },
         {
           "type": "file",
-          "name": "Fatt-table.png",
-          "path": "opengl/Fatt-table.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "pipeline.png",
-          "path": "opengl/pipeline.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "z-depth-value.png",
-          "path": "opengl/z-depth-value.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
           "name": "光照.md",
           "path": "opengl/光照.md",
           "ext": ".md"
-        },
-        {
-          "type": "file",
-          "name": "平行光.png",
-          "path": "opengl/平行光.png",
-          "ext": ".png"
         },
         {
           "type": "file",
@@ -389,18 +287,6 @@
           "name": "纹理贴图.md",
           "path": "opengl/纹理贴图.md",
           "ext": ".md"
-        },
-        {
-          "type": "file",
-          "name": "聚光.png",
-          "path": "opengl/聚光.png",
-          "ext": ".png"
-        },
-        {
-          "type": "file",
-          "name": "镜面.png",
-          "path": "opengl/镜面.png",
-          "ext": ".png"
         }
       ]
     }

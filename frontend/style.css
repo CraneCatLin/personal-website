@@ -12,29 +12,46 @@
 
 :root {
     /* 主色调 — 柔和中性 */
-    --bg-body: #f5f7fa;
-    --bg-sidebar: #ffffff;
-    --bg-main: #ffffff;
+    --bg-body: rgba(245, 247, 250, 0.92);
+    --bg-sidebar: rgba(255, 255, 255, 0.75);
+    --bg-main: rgba(255, 255, 255, 0.75);
+    --bg-hover: rgba(240, 242, 245, 0.5);
+    --bg-selected: rgba(208, 240, 255, 0.6);
+    /* 青色系选中背景 */
+
     --border-light: #eaeef2;
     --text-primary: #2c3e50;
     --text-secondary: #5d6d7e;
     --text-muted: #7f8c8d;
-    --accent-color: #9b6b9c;
-    /* 淡紫色，参考原站猫爪感觉 */
-    --accent-hover: #b37bb4;
-    --link-color: #79589f;
-    /* 紫罗兰色 */
-    --code-bg: #f8f9fa;
-    --code-border: #e9ecef;
-    --hover-bg: #f0f2f5;
-    --selected-bg: #e6d7f0;
-    /* 淡紫选中 */
+
+    /* 青色系主色调 */
+    --accent-color: #20b2aa;
+    /* 青色加深版 */
+    --accent-hover: #3cb371;
+    /* 青绿色 */
+    --link-color: #4682b4;
+    /* 钢蓝色 */
+
+    --code-bg: rgba(240, 248, 255, 0.5);
+    /* 爱丽丝蓝半透明 */
+    --code-border: #b0d4f1;
+    /* 淡蓝色边框 */
+    --hover-bg: #e0f6ff;
+    /* 淡青蓝色 */
+    --selected-bg: #d0f0ff;
+    /* 淡青选中 */
+
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.02);
     --transition: all 0.2s ease;
 }
 
 body {
-    background-color: var(--bg-body);
+    background-color: transparent;
+    background-image: url('/images/home-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
@@ -42,31 +59,236 @@ body {
     height: 100vh;
     overflow: hidden;
     /* 防止body滚动，由内部容器滚动 */
+    padding-top: 48px;
+    /* 为固定顶栏留出空间 */
+    transition: background-image 0.5s ease-in-out;
+}
+
+/* ---------- 固定顶栏 ---------- */
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 48px;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(4px);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.topbar-inner {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topbar-left .menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text-primary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.topbar-left .menu-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+}
+
+.topbar-center .site-title {
+    font-weight: 450;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.topbar-right {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.topbar-right .nav-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.topbar-right .nav-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+    border-color: var(--border-light);
+}
+
+/* 移动端顶栏调整 */
+@media screen and (max-width: 768px) {
+    .topbar-center .site-title {
+        font-size: 0.9rem;
+    }
+
+    .topbar-right .nav-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
 }
 
 /* ---------- 左右分栏网格布局 ---------- */
 .app-grid {
     display: grid;
-    grid-template-columns: 250px 1fr;
+    grid-template-columns: 250px 1fr 220px;
+    /* 左侧树 | 内容 | TOC */
     grid-template-rows: 100vh;
     height: 100vh;
     overflow: hidden;
     transition: all 0.3s ease;
 }
 
-/* 首页模式：侧边栏隐藏，主内容全宽 */
+/* 首页模式：只保留主内容，其余隐藏 */
 body.homepage .app-grid {
     grid-template-columns: 1fr;
 }
 
+body.homepage #sidebar,
+body.homepage .toc-sidebar {
+    display: none;
+}
+
+/* TOC笔记内目录*/
+.toc-sidebar {
+    background-color: rgba(250, 251, 252, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(2px);
+    border-left: 1px solid var(--border-light);
+    overflow-y: auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+}
+
+.toc-header {
+    padding: 1rem 0.8rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-light);
+    font-weight: 450;
+    color: var(--text-secondary);
+}
+
+.toc-collapse-btn {
+    background: none;
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.toc-collapse-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+}
+
+.toc-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.8rem 0.5rem 1rem 0.8rem;
+    scrollbar-width: thin;
+}
+
+/* 目录树样式 */
+.toc-content ul {
+    list-style: none;
+    padding-left: 1rem;
+    margin: 0.2rem 0;
+}
+
+.toc-content li {
+    margin: 0.2rem 0;
+    line-height: 1.4;
+}
+
+.toc-content a {
+    display: block;
+    padding: 0.2rem 0.3rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: var(--transition);
+}
+
+.toc-content a:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+}
+
+.toc-content a:active {
+    background-color: var(--selected-bg);
+}
+
+/* 不同级别缩进 */
+.toc-content .toc-level-2 {
+    padding-left: 0.5rem;
+}
+
+.toc-content .toc-level-3 {
+    padding-left: 1rem;
+}
+
+.toc-content .toc-level-4 {
+    padding-left: 1.5rem;
+}
+
+.toc-content .toc-level-5 {
+    padding-left: 2rem;
+}
+
+.toc-content .toc-level-6 {
+    padding-left: 2.5rem;
+}
+
+
 /* ---------- 左侧边栏 (目录树) ---------- */
 .sidebar {
-    background-color: var(--bg-sidebar, #2c3e50);
-    color: white;
+    background-color: var(--bg-sidebar);
+    color: var(--text-primary);
     overflow-y: auto;
     z-index: 10;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 /* 首页模式下隐藏侧边栏 */
@@ -80,8 +302,9 @@ body.homepage #sidebar {
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border-light);
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     flex-shrink: 0;
 }
 
@@ -185,7 +408,7 @@ body.homepage #sidebar {
     padding-left: 0.3rem;
 }
 
-/* 图标 (使用伪元素，假设HTML里没有额外图标) */
+/* 图标 (使用伪元素) */
 .tree .folder>.item::before {
     content: "📁 ";
     font-size: 1rem;
@@ -220,7 +443,7 @@ body.homepage #sidebar {
     color: var(--text-muted);
     border-top: 1px dashed var(--border-light);
     text-align: center;
-    background: #fafbfc;
+    background: rgba(250, 251, 252, 0.5);
     flex-shrink: 0;
 }
 
@@ -231,12 +454,19 @@ body.homepage #sidebar {
     padding: 1.8rem 2.2rem;
     position: relative;
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 /* 首页模式下主内容全宽 */
 body.homepage #mainContent {
     width: 100%;
     padding: 1.8rem 2.2rem;
+}
+
+/* 笔记页面的背景图 - 通过 body 上的类来切换 */
+body.note-page {
+    background-image: url('/images/note-bg.png');
+    /* 笔记页背景图 */
 }
 
 /* 内容查看器 (动态区域) */
@@ -357,7 +587,7 @@ body.homepage #mainContent {
     margin: 1.2rem 0;
     padding: 0.5rem 1.2rem;
     border-left: 4px solid var(--accent-color);
-    background-color: #f8f6fa;
+    background-color: rgba(248, 246, 250, 0.5);
     color: var(--text-secondary);
     font-style: italic;
     border-radius: 0 8px 8px 0;
@@ -421,7 +651,7 @@ body.homepage #mainContent {
 }
 
 .markdown-body th {
-    background-color: #f2f0f7;
+    background-color: rgba(242, 240, 247, 0.5);
     font-weight: 500;
     padding: 0.6rem 1rem;
     border: 1px solid var(--border-light);
@@ -434,7 +664,7 @@ body.homepage #mainContent {
 }
 
 .markdown-body tr:nth-child(even) {
-    background-color: #faf9fc;
+    background-color: rgba(250, 249, 252, 0.5);
 }
 
 /* 关于本站 details 样式 (隐藏点击显示) */
@@ -443,7 +673,7 @@ details.about-details {
     border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 0.5rem 1.2rem;
-    background: #fcfaff;
+    background: rgba(252, 250, 255, 0.5);
     box-shadow: var(--shadow-sm);
 }
 
@@ -501,8 +731,8 @@ details.about-details .about-content {
 /* 平板及以下：左侧可折叠为侧滑菜单 */
 @media screen and (max-width: 880px) {
     .app-grid {
-        grid-template-columns: 240px 1fr;
-        /* 稍微缩小左侧 */
+        grid-template-columns: 240px 1fr 180px;
+        /* 稍微缩小三列 */
     }
 }
 
@@ -514,12 +744,25 @@ details.about-details .about-content {
         /* 取消grid，用绝对定位控制左侧 */
         position: relative;
         overflow: hidden;
-        height: 100vh;
+        height: 100%;
+    }
+
+    /* 左侧边栏依旧为侧滑菜单，保持不变 */
+    .toc-sidebar {
+        display: none;
+        /* 小屏直接隐藏 TOC，需要时可增加按钮呼出 */
+    }
+
+    .toc-sidebar.collapsed {
+        display: none;
+        /* 或改为宽度0的样式，此处简单隐藏 */
     }
 
     .sidebar {
+        background-color: var(--bg-sidebar);
         position: fixed;
-        top: 0;
+        top: 48px;
+        /* 顶栏高度 */
         left: 0;
         bottom: 0;
         width: 260px;
@@ -529,6 +772,7 @@ details.about-details .about-content {
         z-index: 1050;
         box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
         border-right: none;
+        height: calc(100vh - 48px);
     }
 
     /* 侧栏打开状态 (由JS在body添加类) */
@@ -540,7 +784,8 @@ details.about-details .about-content {
     body.sidebar-open::after {
         content: '';
         position: fixed;
-        top: 0;
+        top: 48px;
+        /* 从顶栏下方开始 */
         left: 0;
         right: 0;
         bottom: 0;
@@ -548,46 +793,21 @@ details.about-details .about-content {
         backdrop-filter: blur(1px);
         z-index: 1040;
         pointer-events: none;
-        /* 让点击可以穿透到关闭按钮(但需要JS处理点击遮罩关闭) 这里仅样式 */
     }
 
     .main-content {
+        background-color: var(--bg-main);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
         width: 100%;
-        height: 100vh;
+        height: 100%;
         overflow-y: auto;
         padding: 1rem 1.2rem;
     }
 
-    /* 调整折叠按钮 → 变成浮动菜单按钮 (固定在左上角) */
+    /* 隐藏原有的浮动折叠按钮（已由顶栏菜单替代） */
     #toggleSidebar {
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        z-index: 1100;
-        width: 40px;
-        height: 40px;
-        border-radius: 30px;
-        background: white;
-        border: 1px solid var(--border-light);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        font-size: 1.3rem;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition);
-    }
-
-    #toggleSidebar:hover {
-        background: var(--hover-bg);
-        color: var(--accent-color);
-    }
-
-    /* 当侧栏打开时，按钮可改为关闭符号，但需JS配合更改内容，样式提供基础 */
-    body.sidebar-open #toggleSidebar {
-        background-color: var(--accent-color);
-        color: white;
-        border-color: var(--accent-color);
+        display: none !important;
     }
 
     /* 左侧标题栏稍微调整 */

@@ -9,30 +9,119 @@
     // ---------- 全局变量 ----------
     const treeContainer = document.getElementById('treeContainer');      // 目录树容器
     const viewer = document.getElementById('viewer');                    // 内容展示区
-    const toggleBtn = document.getElementById('toggleSidebar');         // 折叠/菜单按钮
     const body = document.body;
     let currentFilePath = '';                // 当前加载的文件路径（相对根目录）
     let treeData = null;                     // 存储解析后的树数据
+    let defaultNotePath = null;              // 默认第一个笔记路径（供“笔记”按钮使用）
     const SUPPORTED_IMG = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'];
     const SUPPORTED_VIDEO = ['.mp4', '.webm', '.ogg', '.mov'];
+
+    // 顶栏元素
+    const menuToggle = document.getElementById('menuToggle');
+    const homeBtn = document.getElementById('homeBtn');
+    const notesBtn = document.getElementById('notesBtn');
+    // const aboutBtn = document.getElementById('aboutBtn');
 
     // ---------- 工具函数：获取文件扩展名 ----------
     function getFileExtension(filename) {
         const dotIndex = filename.lastIndexOf('.');
         return dotIndex === -1 ? '' : filename.slice(dotIndex + 1).toLowerCase();
     }
+    function setBackgroundForPage(isHomePage) {
+        if (isHomePage) {
+            // 如果是首页，移除 note-page 类
+            // body 默认就有首页背景图（在 CSS 中定义）
+            body.classList.remove('note-page');
+        } else {
+            // 如果是笔记页，添加 note-page 类
+            // 这个类会让 CSS 中的笔记页背景图生效
+            body.classList.add('note-page');
+        }
+    }
+    // 将标题文本转为 URL 友好的 id
+    function slugify(text) {
+        return text
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\u4e00-\u9fa5\-]+/g, '') // 保留中文字符和连字符
+            .replace(/\-\-+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
 
+    // 从内联 token 中提取纯文本（处理加粗、链接等）
+    function getInlineText(token) {
+        if (!token) return '';
+        if (token.type === 'text') return token.content;
+        if (token.children) {
+            return token.children.map(child => getInlineText(child)).join('');
+        }
+        return token.content || '';
+    }
+    // 将扁平 headings 转换为嵌套 HTML 目录
+    function renderTOC(headings) {
+        const tocContainer = document.getElementById('tocContent');
+        if (!tocContainer) return;
+
+        if (!headings || headings.length === 0) {
+            tocContainer.innerHTML = '<p style="color: var(--text-muted); padding: 0.5rem;">无目录/文档空白</p>';
+            return;
+        }
+
+        // 构建树形结构
+        const root = { level: 0, children: [] };
+        const stack = [root];
+        for (const h of headings) {
+            const node = { ...h, children: [] };
+            // 找到合适的父级
+            while (stack.length > 1 && stack[stack.length - 1].level >= h.level) {
+                stack.pop();
+            }
+            stack[stack.length - 1].children.push(node);
+            stack.push(node);
+        }
+
+        // 递归生成 HTML
+        function buildHTML(nodes) {
+            if (nodes.length === 0) return '';
+            let html = '<ul>';
+            for (const node of nodes) {
+                html += `<li><a href="#${node.id}" class="toc-level-${node.level}">${escapeHtml(node.text)}</a>`;
+                if (node.children.length > 0) {
+                    html += buildHTML(node.children);
+                }
+                html += '</li>';
+            }
+            html += '</ul>';
+            return html;
+        }
+
+        tocContainer.innerHTML = buildHTML(root.children);
+    }
+
+    // 转义 HTML 防止 XSS（可复用之前的 escapeHtml 函数）
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+    function clearTOC() {
+        const tocContainer = document.getElementById('tocContent');
+        if (tocContainer) tocContainer.innerHTML = '';
+    }
     // ---------- 渲染默认"关于本站"内容 ----------
     function renderDefaultAbout() {
+        clearTOC()
         const aboutHTML = `
             <div class="markdown-body homepage">
-                <h1>欢迎来到我的小站</h1>
+                <h1></h1>
                 <blockquote>
-                    <p>这里是我的个人知识库</p>
+                    <p>这里是我的个人网站，有我写的笔记、技能树、作品展示（这个还没有）</p>
                 </blockquote>
-                <h3>简介</h3>
-                <p>这是我的个人学习笔记整理库，涵盖了各种技术领域的知识点。</p>
-                
                 <h3>开始浏览</h3>
                 <div class="homepage-links">
                     <a href="#/" class="nav-link primary-link">进入笔记库</a>
@@ -61,11 +150,8 @@
                 if (link.getAttribute('href') === '#/') {
                     e.preventDefault();
                     // 跳转到第一个可用的笔记或者显示目录
-                    // 这里我们让它显示第一个笔记目录
-                    const firstFolder = document.querySelector('.tree .folder > .item');
-                    if (firstFolder) {
-                        const path = firstFolder.dataset.path;
-                        window.location.hash = '#' + encodeURIComponent(path);
+                    if (defaultNotePath) {
+                        window.location.hash = '#' + encodeURIComponent(defaultNotePath);
                         loadFromHash();
                     } else {
                         // 如果找不到目录，尝试加载一个默认笔记
@@ -86,11 +172,32 @@
             // 同时清除所有文件高亮
             document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
             currentFilePath = '';
+            // 添加 homepage 类以隐藏侧边栏
+            document.body.classList.add('homepage');
+
+            // ==== 新增：设置背景为首页背景 ====
+            setBackgroundForPage(true);  // true 表示首页
             return;
         }
 
+        // 特殊链接处理
+        if (hash === 'about') {
+            renderDefaultAbout();
+            document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
+            currentFilePath = '';
+            document.body.classList.add('homepage');
+
+            // ==== 新增：设置背景为首页背景 ====
+            setBackgroundForPage(true);  // true 表示首页
+            return;
+        }
+
+        // 移除 homepage 类以显示侧边栏
+        body.classList.remove('homepage');
+        setBackgroundForPage(false);  // false 表示笔记页
         // 解码 URI 中的路径
         const filePath = decodeURIComponent(hash);
+
         // 检查文件类型并加载
         loadFileByPath(filePath);
     }
@@ -159,6 +266,7 @@
 
     // 渲染图片
     function renderImage(filePath) {
+        clearTOC()
         viewer.innerHTML = `
             <div class="markdown-body image-view">
                 <h2>🖼️ 图片预览</h2>
@@ -170,6 +278,7 @@
 
     // 渲染视频
     function renderVideo(filePath) {
+        clearTOC()
         viewer.innerHTML = `
             <div class="markdown-body video-view">
                 <h2>🎬 视频播放</h2>
@@ -181,6 +290,7 @@
 
     // 渲染不支持的文件
     function renderUnsupported(filePath) {
+        clearTOC()
         const fileName = filePath.split('/').pop();
         viewer.innerHTML = `
             <div class="markdown-body unsupported">
@@ -189,39 +299,6 @@
                 <p><a href="${filePath}" download="${fileName}">点击下载文件</a></p>
             </div>
         `;
-    }
-    // ---------- 根据 hash 加载内容 ----------
-    function loadFromHash() {
-        const hash = window.location.hash.slice(1) || '';  // 去掉开头的 '#'
-        if (!hash) {
-            // 无 hash，显示默认关于页
-            renderDefaultAbout();
-            // 同时清除所有文件高亮
-            document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
-            currentFilePath = '';
-            // 添加 homepage 类以隐藏侧边栏
-            document.body.classList.add('homepage');
-            return;
-        }
-
-        // 特殊链接处理
-        if (hash === 'about') {
-            renderDefaultAbout();
-            document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
-            currentFilePath = '';
-            document.body.classList.add('homepage');
-            return;
-        }
-
-
-        // 移除 homepage 类以显示侧边栏
-        document.body.classList.remove('homepage');
-
-        // 解码 URI 中的路径
-        const filePath = decodeURIComponent(hash);
-
-        // 检查文件类型并加载
-        loadFileByPath(filePath);
     }
 
     // 渲染 Markdown (使用 marked、highlight.js 和 KaTeX)
@@ -243,7 +320,46 @@
                 typographer: true,
                 quotes: '""\'\''
             });
+            // ---------- 新增：标题收集与 TOC 生成 ----------
+            let headings = [];
+            let headingCounts = {};
 
+            // 保存默认 heading_open 渲染器
+            const defaultHeadingOpen = md.renderer.rules.heading_open || function (tokens, idx, options, env, self) {
+                return self.renderToken(tokens, idx, options);
+            };
+
+            // 自定义 heading_open：为标题添加 id，并收集信息
+            md.renderer.rules.heading_open = function (tokens, idx, options, env, self) {
+                const token = tokens[idx];
+                // 获取标题文本（从下一个 inline token 中提取）
+                const nextToken = tokens[idx + 1];
+                let text = '';
+                if (nextToken && nextToken.type === 'inline') {
+                    text = getInlineText(nextToken);  // 使用上面定义的函数提取纯文本
+                }
+
+                // 生成唯一 id
+                const baseId = slugify(text) || 'heading';
+                if (!headingCounts[baseId]) {
+                    headingCounts[baseId] = 0;
+                } else {
+                    headingCounts[baseId]++;
+                }
+                const id = headingCounts[baseId] === 0 ? baseId : baseId + '-' + headingCounts[baseId];
+
+                // 设置 id 属性
+                token.attrSet('id', id);
+
+                // 收集标题
+                headings.push({
+                    level: parseInt(token.tag.substring(1)), // 'h2' -> 2
+                    text: text,
+                    id: id
+                });
+
+                return defaultHeadingOpen(tokens, idx, options, env, self);
+            };
             let pluginEnabled = false; // 标记插件是否成功启用
 
             // 尝试注册 markdown-it-katex 插件（兼容不同变量名）
@@ -293,7 +409,7 @@
                 // 插件已启用 或 KaTeX 不存在 → 直接渲染
                 finalHtml = md.render(markdownText);
             }
-
+            renderTOC(headings);
             // 设置页面标题
             document.title = `${fileNameWithoutExt} - 笔记系统`;
 
@@ -486,6 +602,10 @@
                 treeContainer.innerHTML = treeHTML;
                 bindTreeEvents();
 
+                // 查找第一个笔记文件路径，供“笔记”按钮使用
+                defaultNotePath = findFirstFile(nodes);
+                console.log('默认笔记路径:', defaultNotePath);
+
                 // 加载完成后，根据当前 hash 决定显示内容
                 loadFromHash();
             })
@@ -496,27 +616,87 @@
             });
     }
 
+    // 递归查找第一个文件路径
+    function findFirstFile(nodes, parentPath = '') {
+        for (let node of nodes) {
+            const nodePath = parentPath ? `${parentPath}/${node.name}` : node.name;
+            if (node.type === 'file') {
+                return nodePath;
+            } else if (node.type === 'folder' && node.children) {
+                const found = findFirstFile(node.children, nodePath);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
     // ---------- 路由监听 ----------
     window.addEventListener('hashchange', () => {
         loadFromHash();
     });
 
-    // ---------- 移动端侧边栏控制 ----------
-    function initMobileSidebar() {
-        if (!toggleBtn) return;
+    // ---------- 顶栏交互 ----------
+    function initTOCSidebar() {
+        const toggleToc = document.getElementById('toggleToc');
+        const tocSidebar = document.getElementById('tocSidebar');
+        if (!toggleToc || !tocSidebar) return;
 
-        toggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            body.classList.toggle('sidebar-open');
+        toggleToc.addEventListener('click', () => {
+            tocSidebar.classList.toggle('collapsed');
+            // 改变按钮符号
+            toggleToc.textContent = tocSidebar.classList.contains('collapsed') ? '⏵⏴' : '⏴⏵';
         });
+    }
+
+    function initTopbar() {
+        initTOCSidebar();
+        // 菜单按钮：切换侧边栏（移动端）
+        if (menuToggle) {
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                body.classList.toggle('sidebar-open');
+            });
+        }
+
+        // 首页按钮
+        if (homeBtn) {
+            homeBtn.addEventListener('click', () => {
+                window.location.hash = '';
+                // 关闭侧边栏（如果打开）
+                body.classList.remove('sidebar-open');
+            });
+        }
+
+        // 笔记按钮
+        if (notesBtn) {
+            notesBtn.addEventListener('click', () => {
+                if (defaultNotePath) {
+                    window.location.hash = '#' + encodeURIComponent(defaultNotePath);
+                } else {
+                    // 如果树还未加载，尝试使用硬编码，或暂时忽略
+                    console.warn('默认笔记路径未就绪');
+                    // 可选：设置为一个常见路径
+                    window.location.hash = '#DIP G/2. 数字图像基础.md';
+                }
+                // 关闭侧边栏（移动端）
+                body.classList.remove('sidebar-open');
+            });
+        }
+
+        // 关于按钮
+        // if (aboutBtn) {
+        //     aboutBtn.addEventListener('click', () => {
+        //         window.location.hash = '#about';
+        //         body.classList.remove('sidebar-open');
+        //     });
+        // }
 
         // 点击遮罩层关闭侧边栏 (监听 document 点击)
         document.addEventListener('click', (e) => {
-            // 如果侧边栏打开，且点击的目标不在侧边栏内部，也不是切换按钮，则关闭
             if (body.classList.contains('sidebar-open')) {
                 const isClickInsideSidebar = e.target.closest('.sidebar');
-                const isClickToggle = e.target.closest('#toggleSidebar');
-                if (!isClickInsideSidebar && !isClickToggle) {
+                const isClickMenuToggle = e.target.closest('#menuToggle');
+                if (!isClickInsideSidebar && !isClickMenuToggle) {
                     body.classList.remove('sidebar-open');
                 }
             }
@@ -533,8 +713,8 @@
     // ---------- 初始化 ----------
     function init() {
         loadTree();
-        initMobileSidebar();
-
+        initTopbar();
+        const hash = window.location.hash.slice(1) || '';
         // 如果 marked 或 hljs 未加载，给出提示但功能正常
         if (!window.marked) {
             console.warn('marked.js 未加载，Markdown 将无法渲染。');
