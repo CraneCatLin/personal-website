@@ -9,10 +9,10 @@ $P_W^T F Q_W=0$
 已知有N组对应点的世界坐标，求摄像机外参：  
 方程组  
 $$  
-\begin{gather}  
+\begin{gathered}  
 z_i \cdot f = 0 \\  
 i \in \{1,2,…,N\}  
-\end{gather}  
+\end{gathered}  
 $$  
 对于摄像机$c_0$ $c_1$坐标系下一组点$x_{i0}$ $x_{i1}$  
 $z_i$ 为$\mathbf{x_{i1}} \mathbf{x_{i0}}^T$向量化，$f$为本质矩阵E的向量化  
@@ -45,7 +45,7 @@ $$E=U\Sigma V^T=
 	\right]$$   
   	  
 $$  
-	\begin{gather}  
+	\begin{gathered}  
 	W = \begin{bmatrix}  
 0 & -1 & 0 \\  
 1 & 0 & 0 \\  
@@ -57,7 +57,7 @@ $$
 \mathbf{P}_2 = R \mathbf{P}_1 + t \\ \\  
 筛选最优Rt规则：\\|R|=1\\  
 计算出的P正手性的比例最大  
-	\end{gather}  
+	\end{gathered}  
 $$  
   
   
@@ -96,7 +96,7 @@ $$F=U\Sigma V^T=
   
   
 $$  
-\begin{gather}  
+\begin{gathered}  
 \frac{u_1^T D_0 u_1}{\sigma_0^2 v_0^T D_1 v_0} = -\frac{u_0^T D_0 u_1}{\sigma_0 \sigma_1 v_0^T D_1 v_1} = \frac{u_0^T D_0 u_0}{\sigma_1^2 v_1^T D_1 v_1} \\ \\  
 D_j = K_j K_j^T = \text{diag}(f_j^2, f_j^2, 1) =   
 \begin{bmatrix}  
@@ -112,5 +112,5 @@ e_{ij1}(f_1^2) = \sigma_i \sigma_j v_i^T D_1 v_j = c_{ij} + d_{ij} f_1^2 \\ \\
   
 \\ \\  
 e_{ij0}(f_0^2) = \lambda e_{ij1}(f_1^2)\\ \\  
-\end{gather}  
+\end{gathered}  
 $$  

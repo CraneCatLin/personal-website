@@ -280,6 +280,9 @@
                 };
             }
 
+            // 提取文件名作为标题（去掉扩展名）
+            const fileNameWithoutExt = filePath.split('/').pop().replace(/\.[^/.]+$/, "");
+
             // 决定最终要渲染的文本
             let finalHtml;
             if (!pluginEnabled && window.katex) {
@@ -291,8 +294,14 @@
                 finalHtml = md.render(markdownText);
             }
 
+            // 设置页面标题
+            document.title = `${fileNameWithoutExt} - 笔记系统`;
+
+            // 在渲染的内容前添加标题
+            const contentWithHeader = `<h1 class="note-title">${fileNameWithoutExt}</h1>\n<div class="note-content">${finalHtml}</div>`;
+
             // 处理相对路径图片
-            finalHtml = finalHtml.replace(/<img\s+src="([^"]+)"([^>]*)>/gi, function (match, src, rest) {
+            finalHtml = contentWithHeader.replace(/<img\s+src="([^"]+)"([^>]*)>/gi, function (match, src, rest) {
                 if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('/')) {
                     const dir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
                     const newSrc = '/public/' + dir + src;
@@ -455,7 +464,7 @@
 
     // 从 tree.json 加载目录树
     function loadTree() {
-        fetch('./tree.json')
+        fetch('/tree.json')
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 return response.json();

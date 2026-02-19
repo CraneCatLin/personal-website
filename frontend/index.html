@@ -5,64 +5,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>CraneCat喵 - 笔记库</title>
-    <!-- 外部样式 & 资源 -->
-    <link rel="stylesheet" href="./style.css">
-    <!-- Markdown 渲染核心 & 代码高亮 (CDN) -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="/style.css">
+    <!-- Markdown renderer & syntax highlighter -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it-imsize@2.0.1/dist/markdown-it-imsize.min.js"></script>
-    <!-- 可选高亮主题 (github风格) 通过style.css也可以自定义，此处CDN备用 -->
+    <!-- Syntax highlight theme -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-    <!-- KaTeX for better math rendering -->
+    <!-- KaTeX for math rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-    <!-- MarkdownIt for better markdown rendering -->
+    <!-- MarkdownIt for enhanced markdown -->
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it-katex@2.0.3/dist/markdown-it-katex.min.js"></script>
-    <!-- 主逻辑 (外部js，将在底部加载) -->
-    <script src="./script.js" defer></script>
-    <!-- 为了演示完整性，style.css 和 script.js 的内容将在本文件最后的注释块中提供，请按需创建对应文件。 -->
+    <!-- Main logic -->
+    <script src="/script.js" defer></script>
 </head>
 
 <body class="homepage">
-    <!-- 布局容器：左右分栏，flex/grid 混合，默认 grid 更稳健 -->
+    <!-- Grid layout: sidebar + content -->
     <div class="app-grid" id="appGrid">
-        <!-- 左侧边栏：可折叠目录树区域 -->
+        <!-- Sidebar: collapsible tree -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">
-                    <span class="emoji-icon">📚 笔记目录
+                    <span class="emoji-icon">笔记目录
                 </div>
-                <button class="collapse-btn" id="toggleSidebar" aria-label="折叠左侧目录" title="折叠/展开侧边栏">⏴⏵</button>
+                <button class="collapse-btn" id="toggleSidebar" aria-label="Collapse sidebar"
+                    title="Toggle sidebar">⏴⏵</button>
             </div>
-            <!-- 目录树将动态渲染到此nav中 -->
+            <!-- Tree renders here -->
             <nav class="tree-container" id="treeContainer">
-                <!-- 加载中占位，或静态提示 -->
-                <div class="tree-placeholder">加载目录结构中…</div>
+                <div class="tree-placeholder">Loading...</div>
             </nav>
-            <!-- 底部小彩蛋 / 参考原站猫爪风格 -->
             <div class="sidebar-footer">tbc~</div>
         </aside>
 
-        <!-- 右侧主内容区：展示markdown/图片/视频，以及隐藏的"关于本站"部分 -->
+        <!-- Main content: markdown/images/videos -->
         <main class="main-content" id="mainContent">
-            <!-- 内容查看器，初始会填充默认欢迎页面（含折叠关于） -->
             <div class="viewer" id="viewer">
-                <!-- 初始内容由 JavaScript 动态渲染，确保关于部分隐藏/点击展开 -->
             </div>
-            <!-- 可选的浮动装饰，模仿原站灵动感 -->
             <div class="content-footer-decoration">*@#$</div>
         </main>
     </div>
 
-    <!-- 
-        说明：以下 script 部分仅作为初始化保底，主要逻辑依赖外部 script.js。
-        但为了在外部文件未就绪时能看到基本结构，这里做最简单的默认填充。
-        实际全部交互功能移至 script.js 中实现。
-    -->
+    <!-- Fallback if JS fails -->
     <script>
-        // 极简保底：如果外部 script 加载失败或尚未执行，viewer 内至少显示点东西
         (function safeFallback() {
             if (!document.getElementById('viewer').innerHTML.trim()) {
                 document.getElementById('viewer').innerHTML = `
@@ -70,7 +60,7 @@
                         <h1>笔记库</h1>
                         <p>左侧目录树正在构建……若长时间无内容，请确认 <code>tree.json</code> 是否存在，以及网络状态。</p>
                         <details class="about-details" open>
-                            <summary>📌 关于本站 · 点击折叠/展开</summary>
+                            <summary>关于本站 · 点击折叠/展开</summary>
                             <div class="about-content">
                                 <p>邮箱：cranecat_rain@163.com</p>
                                 <p>QQ：2019412832</p>
@@ -82,7 +72,6 @@
             }
         })();
     </script>
-    <!-- 确保 marked 和 hljs 可用，已放在 head 中 -->
 </body>
 
 </html>
