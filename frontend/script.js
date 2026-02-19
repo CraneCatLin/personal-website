@@ -26,9 +26,9 @@
     function renderDefaultAbout() {
         const aboutHTML = `
             <div class="markdown-body homepage">
-                <h1>欢迎来到我的笔记库</h1>
+                <h1>欢迎来到我的小站</h1>
                 <blockquote>
-                    <p>这里是您的个人知识库</p>
+                    <p>这里是我的个人知识库</p>
                 </blockquote>
                 <h3>简介</h3>
                 <p>这是我的个人学习笔记整理库，涵盖了各种技术领域的知识点。</p>

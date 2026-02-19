@@ -403,12 +403,6 @@
           "ext": ".png"
         }
       ]
-    },
-    {
-      "type": "file",
-      "name": "z-depth.md",
-      "path": "z-depth.md",
-      "ext": ".md"
     }
   ]
 }

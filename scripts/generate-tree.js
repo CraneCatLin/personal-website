@@ -13,7 +13,7 @@ const path = require('path');
 
 // 解析命令行参数
 const args = process.argv.slice(2);
-const inputDir = args[0] || path.join(__dirname, '../public');
+const inputDir = args[0] || path.join(__dirname, '../frontend/public');
 const outputFile = args[1] || path.join(__dirname, '../frontend/tree.json');
 
 // 需要忽略的隐藏文件/文件夹名称（精确匹配）
