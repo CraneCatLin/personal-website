@@ -106,6 +106,23 @@
         }
 
         tocContainer.innerHTML = buildHTML(root.children);
+        // ==== 新增：为所有 TOC 链接绑定点击事件，实现平滑滚动而不改变 hash ====
+        tocContainer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();                     // 阻止默认跳转（改变 hash）
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const targetId = href.substring(1);  // 去掉开头的 '#'
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
     }
     // 转义 HTML 防止 XSS（可复用之前的 escapeHtml 函数）
     function escapeHtml(unsafe) {
@@ -411,7 +428,7 @@
                 // 插件已启用 或 KaTeX 不存在 → 直接渲染
                 finalHtml = md.render(markdownText);
             }
-            renderTOCFromDOM();
+
             // 设置页面标题
             document.title = `${fileNameWithoutExt} - 笔记系统`;
 
@@ -476,10 +493,11 @@
                     });
                 }
             });
-
+            renderTOCFromDOM();
         } catch (error) {
             console.error('Markdown 渲染出错:', error);
             viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p><pre>${escapeHtml(markdownText.substring(0, 200))}...</pre></div>`;
+            clearTOC();
         }
     }
 
