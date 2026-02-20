@@ -541,9 +541,10 @@
                 }
                 html += `</li>`;
             } else if (node.type === 'file') {
-                // 文件
+                // 文件：去除扩展名显示
+                const displayName = node.name.replace(/\.[^/.]+$/, ""); // 去除扩展名
                 html += `<li class="file">`;
-                html += `<div class="item" data-path="${nodePath}" data-type="file">${node.name}</div>`;
+                html += `<div class="item" data-path="${nodePath}" data-type="file">${displayName}</div>`;
                 html += `</li>`;
             }
         }

@@ -100,17 +100,17 @@ function walkDir(currentPath, baseDir, relPath) {
 
         for (const item of items) {
             const itemPath = path.join(currentPath, item);
-            const itemRelPath = relPath ? path.join(relPath, item) : item;
-            const child = walkDir(itemPath, baseDir, itemRelPath);
+            const child = walkDir(itemPath, inputDir, item);
             if (child) {
                 children.push(child);
             }
         }
 
-        // 如果 children 为空，则忽略此文件夹（空文件夹不输出）
-        if (children.length === 0) {
-            return null;
-        }
+        // 对children进行自然排序
+        children.sort((a, b) => {
+            // 使用自然排序比较函数
+            return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        });
 
         return {
             type: 'folder',
