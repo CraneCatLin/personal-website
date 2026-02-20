@@ -60,21 +60,29 @@
         return token.content || '';
     }
     // 将扁平 headings 转换为嵌套 HTML 目录
-    function renderTOC(headings) {
+    function renderTOCFromDOM() {
         const tocContainer = document.getElementById('tocContent');
         if (!tocContainer) return;
 
-        if (!headings || headings.length === 0) {
+        // 获取所有标题元素，排除 .note-title（手动添加的文件名标题）
+        const headings = Array.from(document.querySelectorAll('#viewer :is(h1, h2, h3, h4, h5, h6):not(.note-title)'));
+        if (headings.length === 0) {
             tocContainer.innerHTML = '<p style="color: var(--text-muted); padding: 0.5rem;">无目录/文档空白</p>';
             return;
         }
 
-        // 构建树形结构
+        // 构建标题数组，包含 level, id, html (已渲染的 innerHTML)
+        const headingItems = headings.map(h => ({
+            level: parseInt(h.tagName.substring(1)),
+            id: h.id,
+            html: h.innerHTML   // 这里包含 KaTeX 生成的 HTML 标签
+        }));
+
+        // 构建树形结构（与原有 renderTOC 逻辑一致）
         const root = { level: 0, children: [] };
         const stack = [root];
-        for (const h of headings) {
+        for (const h of headingItems) {
             const node = { ...h, children: [] };
-            // 找到合适的父级
             while (stack.length > 1 && stack[stack.length - 1].level >= h.level) {
                 stack.pop();
             }
@@ -82,12 +90,12 @@
             stack.push(node);
         }
 
-        // 递归生成 HTML
+        // 递归生成 HTML（注意直接插入 node.html，无需转义，因为已由 marked 和 KaTeX 安全渲染）
         function buildHTML(nodes) {
             if (nodes.length === 0) return '';
             let html = '<ul>';
             for (const node of nodes) {
-                html += `<li><a href="#${node.id}" class="toc-level-${node.level}">${escapeHtml(node.text)}</a>`;
+                html += `<li><a href="#${node.id}" class="toc-level-${node.level}">${node.html}</a>`;
                 if (node.children.length > 0) {
                     html += buildHTML(node.children);
                 }
@@ -99,7 +107,6 @@
 
         tocContainer.innerHTML = buildHTML(root.children);
     }
-
     // 转义 HTML 防止 XSS（可复用之前的 escapeHtml 函数）
     function escapeHtml(unsafe) {
         return unsafe
@@ -362,26 +369,21 @@
             };
             let pluginEnabled = false; // 标记插件是否成功启用
 
-            // 尝试注册 markdown-it-katex 插件（兼容不同变量名）
-            const katexPlugin = window.markdownitKatex || window.markdownItKatex;
-            if (katexPlugin) {
+            // 尝试注册 markdown-it-texmath 插件
+            if (window.texmath && window.katex) {
                 try {
-                    md.use(katexPlugin, {
-                        throwOnError: false,           // 公式错误时不中断渲染
-                        delimiters: [                   // 明确指定定界符
-                            { left: '$$', right: '$$', display: true },
-                            { left: '$', right: '$', display: false },
-                            { left: '\\(', right: '\\)', display: false },
-                            { left: '\\[', right: '\\]', display: true }
-                        ]
+                    md.use(window.texmath, {
+                        engine: window.katex,           // 传入 KaTeX 引擎
+                        delimiters: 'dollars',           // 使用 $...$ 和 $$...$$ 作为分隔符
+                        katexOptions: { throwOnError: false } // KaTeX 渲染选项
                     });
                     pluginEnabled = true;
-                    console.log('markdown-it-katex 插件已启用');
+                    console.log('markdown-it-texmath 插件已启用');
                 } catch (err) {
-                    console.warn('插件注册失败，将使用后备公式处理:', err);
+                    console.warn('texmath 插件注册失败，将使用后备公式处理:', err);
                 }
             } else {
-                console.warn('markdown-it-katex 插件未找到，将使用后备公式处理。');
+                console.warn('texmath 或 katex 未加载，将使用后备公式处理。');
             }
 
             // 配置代码高亮
@@ -409,7 +411,7 @@
                 // 插件已启用 或 KaTeX 不存在 → 直接渲染
                 finalHtml = md.render(markdownText);
             }
-            renderTOC(headings);
+            renderTOCFromDOM();
             // 设置页面标题
             document.title = `${fileNameWithoutExt} - 笔记系统`;
 
