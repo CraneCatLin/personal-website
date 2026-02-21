@@ -151,13 +151,17 @@
                     <a href="#/" class="nav-link primary-link">进入笔记库</a>
                 </div>
                 
-                <h3>联系方式</h3>
+                <h3>Info</h3>
                 <ul>
                     <li>邮箱：cranecat_rain@163.com</li>
                     <li>QQ：2019412832</li>
+                    <li>github:https://github.com/CraneCatLin （咳暂时也没有能公开的项目）</li>
                     <li>（内容有误、显示有bug、有建议、有想法都欢迎联系）</li>
                 </ul>
-
+                <blockquote>
+                    <h4>声明</h4>
+                    <p>本网站内容均为原创，无转载内容。笔记系本人学习时整理、记录结果。</p>
+                </blockquote>
                 <details class="about-details" open>
                     <summary>更多内容</summary>
                     <div class="about-content">
