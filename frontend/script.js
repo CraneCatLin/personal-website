@@ -111,15 +111,26 @@
         // ==== 新增：为所有 TOC 链接绑定点击事件，实现平滑滚动而不改变 hash ====
         tocContainer.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault();                     // 阻止默认跳转（改变 hash）
+                e.preventDefault();
                 const href = link.getAttribute('href');
                 if (href && href.startsWith('#')) {
-                    const targetId = href.substring(1);  // 去掉开头的 '#'
+                    const targetId = href.substring(1);
                     const targetElement = document.getElementById(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
+                    const mainContent = document.getElementById('mainContent');
+                    if (targetElement && mainContent) {
+                        // 获取目标元素相对于 mainContent 顶部的位置
+                        const targetRect = targetElement.getBoundingClientRect();
+                        const mainRect = mainContent.getBoundingClientRect();
+                        const targetTopRelativeToMain = targetRect.top - mainRect.top + mainContent.scrollTop;
+                        // 减去偏移量（顶栏高度48px + 额外12px间距，保持与 scroll-margin-top 一致）
+                        const scrollTo = targetTopRelativeToMain - 60;
+                        // 确保不超出滚动范围
+                        const maxScroll = mainContent.scrollHeight - mainContent.clientHeight;
+                        const finalScroll = Math.min(Math.max(scrollTo, 0), maxScroll);
+
+                        mainContent.scrollTo({
+                            top: finalScroll,
+                            behavior: 'smooth'
                         });
                     }
                 }

@@ -59,10 +59,13 @@ body {
     height: 100vh;
     overflow: hidden;
     /* 防止body滚动，由内部容器滚动 */
-    padding-top: 48px;
+    height: calc(100vh - 48px);
+    /* 剩余视口高度 */
+    /* margin-top: 48px; */
     /* 为固定顶栏留出空间 */
     transition: background-image 0.5s ease-in-out;
     /* 保留，但实际过渡由伪元素实现 */
+    padding-top: 0;
 }
 
 /* ===== 新增：伪元素实现背景淡入淡出 ===== */
@@ -190,8 +193,9 @@ body.note-page::before {
     grid-template-columns: 250px 1fr;
     /* 左侧树 | 内容 | TOC */
     grid-template-rows: 100vh;
-    height: 100vh;
+    height: calc(100vh-48px);
     overflow: hidden;
+    margin-top: 48px;
     transition: all 0.3s ease;
 }
 
