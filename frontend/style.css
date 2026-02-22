@@ -524,6 +524,7 @@ body.homepage #sidebar {
     /* 防止内容溢出 */
     overflow: hidden;
     /* 确保内部滚动正常 */
+    height: 100%;
 }
 
 /* 首页模式下主内容全宽 */
