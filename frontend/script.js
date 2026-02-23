@@ -14,7 +14,7 @@
     let fileNameMap = new Map();       // 文件名（无扩展名） -> 完整路径
     let fullPathNoExtMap = new Map();  // 完整路径（无扩展名） -> 完整路径
     let treeData = null;                     // 存储解析后的树数据
-    let defaultNotePath = null;              // 默认第一个笔记路径（供“笔记”按钮使用）
+    let defaultNotePath = null;              // 默认第一个笔记路径（供"笔记"按钮使用）
     const SUPPORTED_IMG = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'];
     const SUPPORTED_VIDEO = ['.mp4', '.webm', '.ogg', '.mov'];
 
@@ -22,7 +22,6 @@
     const menuToggle = document.getElementById('menuToggle');
     const homeBtn = document.getElementById('homeBtn');
     const notesBtn = document.getElementById('notesBtn');
-    // const aboutBtn = document.getElementById('aboutBtn');
 
     // ---------- 工具函数：获取文件扩展名 ----------
     function getFileExtension(filename) {
@@ -151,6 +150,7 @@
         if (tocContainer) tocContainer.innerHTML = '';
         updateTOCActive();
     }
+
     // ---------- 渲染默认"关于本站"内容 ----------
     function renderDefaultAbout() {
         clearTOC()
@@ -224,7 +224,7 @@
         `;
     }
 
-    // 渲染笔记库过渡页（点击“笔记”按钮后默认显示）
+    // 渲染笔记库过渡页（点击"笔记"按钮后默认显示）
     function renderNotesHub() {
         clearTOC();
         const hubHTML = `
@@ -319,7 +319,9 @@
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.text();
                 })
-                .then(markdown => renderMarkdown(markdown, filePath))
+                .then(markdown => {
+                    renderMarkdown(markdown, filePath);
+                })
                 .catch(error => {
                     viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 加载失败</h2><p>无法加载文件 ${filePath} (${error.message})</p></div>`;
                 });
@@ -859,8 +861,7 @@
                 const treeHTML = buildTreeHTML(nodes, '');  // 从根路径开始
                 treeContainer.innerHTML = treeHTML;
                 bindTreeEvents();
-
-                // 查找第一个笔记文件路径，供“笔记”按钮使用
+                // 查找第一个笔记文件路径，供"笔记"按钮使用
                 defaultNotePath = findFirstFile(nodes);
                 console.log('默认笔记路径:', defaultNotePath);
 
