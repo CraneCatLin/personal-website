@@ -39,6 +39,24 @@
             body.classList.add('note-page');
         }
     }
+    // ---------- 工具函数：根据文件路径从树数据中查找节点 ----------
+    function findFileNodeInTree(nodes, targetPath) {
+        // console.log(`[路径追踪] 开始查找，目标路径: "${targetPath}"`);
+        for (const node of nodes) {
+            if (node.type === 'file') {
+                // console.log(`[路径追踪] 正在比较 -> 节点路径: "${node.path}"`);
+                if (node.path === targetPath) {
+                    // console.log(`[路径追踪] √ 匹配成功！`);
+                    return node;
+                }
+            } else if (node.type === 'folder' && node.children) {
+                const found = findFileNodeInTree(node.children, targetPath);
+                if (found) return found;
+            }
+        }
+        console.log(`[路径追踪] × 遍历完成，未找到匹配项。`);
+        return null;
+    }
     // 将标题文本转为 URL 友好的 id
     function slugify(text) {
         return text
@@ -561,6 +579,39 @@
             finalHtml = processImageSizes(finalHtml);
 
             viewer.innerHTML = `<div class="markdown-body">${finalHtml}</div>`;
+
+            try {
+                if (treeData && treeData.children) {
+                    // console.log("[调试] 正在查找文件节点，传入的 filePath 为:", filePath);
+                    const fileNode = findFileNodeInTree(treeData.children, filePath);
+                    // console.log("[调试] findFileNodeInTree 返回的 fileNode 对象:", fileNode);
+                    if (fileNode) {
+                        console.log("[调试] 该节点的 mtime 属性值为:", fileNode.mtime);
+                    }
+                    if (fileNode && fileNode.mtime) {
+                        const dateContainer = document.createElement('div');
+                        dateContainer.className = 'file-modified-date';
+                        dateContainer.style.cssText = 'margin-top: 3rem; padding-top: 1rem; border-top: 1px dashed var(--border-light); color: var(--text-muted); font-size: 0.9em; text-align: center;';
+
+                        const dateObj = new Date(fileNode.mtime);
+                        // 格式化为本地日期时间字符串，例如 "2024-01-15 16:30"
+                        const formattedDate = dateObj.toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }).replace(/\//g, '-');
+
+                        dateContainer.textContent = `最后修改于: ${formattedDate}`;
+                        // 将日期信息插入到渲染内容的最底部
+                        viewer.querySelector('.markdown-body')?.appendChild(dateContainer);
+                    }
+                }
+            } catch (dateErr) {
+                console.warn('无法显示修改日期:', dateErr);
+            }
 
             // 如果 hljs 存在且未通过 markdown-it 高亮，手动高亮代码块
             if (window.hljs && !md.options.highlight) {

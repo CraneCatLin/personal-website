@@ -60,7 +60,7 @@ function shouldIgnorePath(currentPath, baseDir) {
  * @param {string} relPath - 相对于 baseDir 的路径（用于 path 字段）
  * @returns {object|null} 节点对象或 null（如果该文件夹/文件应被忽略）
  */
-function walkDir(currentPath, baseDir, relPath) {
+function walkDir(currentPath, baseDir, parentRelPath = '') {
     let stats;
     try {
         stats = fs.statSync(currentPath);
@@ -70,6 +70,10 @@ function walkDir(currentPath, baseDir, relPath) {
     }
 
     const name = path.basename(currentPath);
+
+    // 使用 path.relative 来正确计算相对于基目录的路径
+    const relativePath = path.relative(baseDir, currentPath);
+    const currentRelPath = relativePath.replace(/\\/g, '/');
 
     // 使用增强的忽略判断函数
     if (shouldIgnorePath(currentPath, baseDir)) {
@@ -82,8 +86,9 @@ function walkDir(currentPath, baseDir, relPath) {
         return {
             type: 'file',
             name: name,
-            path: relPath ? relPath.replace(/\\/g, '/') : name,  // 统一使用正斜杠
-            ext: ext
+            path: currentRelPath,  // 完整的相对路径
+            ext: ext,
+            mtime: stats.mtime.toISOString()
         };
     }
 
@@ -100,7 +105,7 @@ function walkDir(currentPath, baseDir, relPath) {
 
         for (const item of items) {
             const itemPath = path.join(currentPath, item);
-            const child = walkDir(itemPath, inputDir, item);
+            const child = walkDir(itemPath, baseDir, currentRelPath);
             if (child) {
                 children.push(child);
             }
@@ -115,8 +120,9 @@ function walkDir(currentPath, baseDir, relPath) {
         return {
             type: 'folder',
             name: name,
-            path: relPath ? relPath.replace(/\\/g, '/') : '',
-            children: children
+            path: currentRelPath,
+            children: children,
+            mtime: stats.mtime.toISOString()
         };
     }
 
