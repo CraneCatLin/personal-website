@@ -60,7 +60,7 @@ $$J = - \frac{1}{m} \sum\limits_{i = 0}^{m} \large\left(\small y^{(i)}\log\left(
 梯度推导方法即复合函数求导
 假如把z视为函数，w和b为参数，则2层神经网络有$$A=g^{[2]}(z^{[2]}(g^{[1]}(z^{[1]}(X))))$$
 相应的代入J中，对各层各个w和b依次求导
-示例流程：
+logistic示例流程：
 
 $$
 \begin{aligned}
