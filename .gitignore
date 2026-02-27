@@ -3,3 +3,4 @@ dist/
 .env
 config.ps1
 logs/
+frontend/public/.obsidian/
