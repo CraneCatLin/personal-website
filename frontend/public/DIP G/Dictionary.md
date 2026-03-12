@@ -22,3 +22,7 @@ isotropic 各向同性
 gradient 梯度  
 property 性质  
 magnitude 大小  
+  
+norm 范数  
+virance 方差  
+backdrop 反向传播  
