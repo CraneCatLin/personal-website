@@ -5,4 +5,4 @@ config.ps1
 logs/
 frontend/public/.obsidian/
 frontend/public/.smtcmp_json_db/
-.smtcmp_vector_db.tar.gz
+/frontend/public/.smtcmp_vector_db.tar.gz 
