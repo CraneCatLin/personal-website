@@ -3,7 +3,12 @@ $configFile = "./config.ps1"
 if (Test-Path $configFile) {
     . $configFile
 } else {
-    Write-Host "警告：未找到配置文件 config.ps1"
+    $configFile = "./WebsiteNote/config.ps1"
+    if (Test-Path $configFile) {
+        . $configFile
+    } else {
+        Write-Host "警告：未找到配置文件 config.ps1"
+    }
 }
 
 Write-Host "========================================"

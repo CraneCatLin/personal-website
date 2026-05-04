@@ -1,0 +1,9 @@
+{
+    "id": "update-script",
+    "name": "Update Script",
+    "version": "1.0.0",
+    "minAppVersion": "0.15.0",
+    "description": "点击按钮弹出终端执行本地提交脚本",
+    "author": "Cranecat",
+    "isDesktopOnly": true
+}
