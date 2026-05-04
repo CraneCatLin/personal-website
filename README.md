@@ -40,7 +40,7 @@
 1. 将笔记文件放入 `frontend/public/` 目录
 2. 运行 `node scripts/generate-tree.js` 生成目录结构
 3. 直接打开 `frontend/index.html` 即可浏览
-
+4. obsidian的提交插件是调用update.ps1，要求 Obsidian 仓库位于项目根目录下的 frontend/public，项目根目录下需包含 submit.ps1、config.ps1 等文件
 ### 线上部署
 配置oss地址，创建根目录脚本config.ps1并输入"$OSS_BUCKET_URL = "oss://your-bucket-name""
 运行 [update.ps1] 脚本：
