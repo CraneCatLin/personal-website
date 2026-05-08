@@ -50,5 +50,37 @@ if (-not $OSS_BUCKET_URL) {
 Write-Host "执行 ossutil sync ./frontend/ $OSS_BUCKET_URL --update --delete"
 ossutil sync ./frontend/ $OSS_BUCKET_URL --update --delete
 
+# ========== 新增：刷新 Cloudflare 缓存 ==========
+Write-Host "----------------------------------------"
+Write-Host "刷新 Cloudflare 缓存..."
+
+# 从配置文件读取（需要在 config.ps1 中添加这两个变量）
+if (-not $CF_ZONE_ID) {
+    Write-Host "警告：未设置 CF_ZONE_ID，跳过缓存刷新"
+} elseif (-not $CF_API_TOKEN) {
+    Write-Host "警告：未设置 CF_API_TOKEN，跳过缓存刷新"
+} else {
+    $purgeBody = '{"purge_everything": true}' | ConvertTo-Json -Compress
+    
+    try {
+        $response = Invoke-RestMethod -Uri "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" `
+            -Method POST `
+            -Headers @{
+                "Authorization" = "Bearer $CF_API_TOKEN"
+                "Content-Type"  = "application/json"
+            } `
+            -Body $purgeBody `
+            -ErrorAction Stop
+        
+        if ($response.success -eq $true) {
+            Write-Host "✓ Cloudflare 缓存已刷新（全站）"
+        } else {
+            Write-Host "✗ 缓存刷新失败：$($response.errors | ConvertTo-Json)"
+        }
+    } catch {
+        Write-Host "✗ 请求失败：$_"
+    }
+}
+
 Write-Host "========================================"
 Write-Host "所有操作完成。"
