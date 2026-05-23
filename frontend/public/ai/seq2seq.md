@@ -15,8 +15,8 @@ context经decoder成输出序列
 encoder与decoder均为RNN  
   
 流程：  
-![seq2seq_5](./resources/seq2seq_5.mp4)  
-![seq2seq_6](./resources/seq2seq_6.mp4)  
+![seq2seq_5](./rcs/seq2seq_5.mp4)  
+![seq2seq_6](./rcs/seq2seq_6.mp4)  
 在 encoder 中，输入序列的每个时间步依次送入 RNN，当前时刻的隐藏状态由前一时刻的隐藏状态与当前输入共同计算得到。  
   
 输入序列处理完毕后，最终隐藏状态（即context）被传递给 decoder。decoder 使用该上下文向量作为初始隐藏状态，逐步生成输出序列。  
