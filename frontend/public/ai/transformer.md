@@ -18,10 +18,25 @@ https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-s
 # 流程  
 ## embedding  
 一个句子拆成若干token，每个token经embedding算法转为语义向量；一个句子就变成一个向量列表  
-## encoding  
+## encoder  
+整体数据流：  
+  
+$$  
+\mathbf{x}_{\text{out}} = \mathrm{LayerNorm}\big(\mathbf{x} + \mathrm{Dropout}(\mathrm{FFN}(\mathbf{x}_{\text{attn}}))\big)  
+$$  
 编码器每次接受一个向量列表；最底部的编码器接受的就是embedding的直接产物  
 ![encoder_with_tensors](./rcs/encoder_with_tensors_2.png)  
-多个向量都会逐层通过encoder，其中在ffnn部分是可以并行的  
+多个向量都会逐层通过encoder  
+#### feed forward neural network  
+ffnn部分是可以并行的  
+ffnn是Position-wise（逐位置）的，即对序列中每一个位置的向量，都用同一组参数独立做一次相同的变换，不同位置之间不交互。  
+  
+对序列中某个位置的输入向量 $\mathbf{x} \in \mathbb{R}^{d_{\text{model}}}$，标准 FFN 执行两步线性变换，中间夹一个非线性激活函数：  
+  
+$$\mathrm{FFN}(\mathbf{x}) = \mathbf{W}_2 \, \sigma(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2$$  
+  
+- ffnn引入了非线性：自注意力本质上是对 Value 向量的加权求和，属于线性变换 + 组合权重。若没有 FFN，堆叠多层自注意力也只能实现有限的线性混合。FFN 中的非线性激活（ReLU/GELU 等）使得整个层可以学习复杂的非线性映射，是 Transformer 强大建模能力的重要来源。  
+- ffnn的参数量巨大，占transformer 的大头，作为主要记忆  
 #### self-attention  
 总结来说就是个加权表达过程，注意力分数就是权重  
 ###### QKV向量  
@@ -61,8 +76,8 @@ $W^O$矩阵也是随着整个模型一起训练的
   
 ###### 位置编码  
 通过特定函数将token在句子的位置编码成和嵌入向量一样维度的向量。  
-嵌入向量加上位置向量后再进行之前所说的流程。这样可以表示出token 的位置、token间的距离  
-  
+嵌入向量加上位置向量,这样可以表示出token 的位置、token间的距离  
+这个步骤在self-attention之前，也就是图里的Embedding with time signal（下文decoder部分的图）  
 具体计算函数依实际情况而定  
   
 #### 残差结构  

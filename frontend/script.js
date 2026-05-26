@@ -176,18 +176,18 @@
             <div class="markdown-body homepage">
                 <h1></h1>
                 <blockquote>
-                    <p>这里是我的个人网站，有我写的笔记、技能树、作品展示（这个还没有）</p>
+                    <p>这里是我的个人网站，有我写的笔记、日记以及一些杂七杂八的内容</p>
                 </blockquote>
                 <h3>开始浏览</h3>
                 <div class="homepage-links">
-                    <a href="#/" class="nav-link primary-link">进入笔记库</a>
+                    <a href="#/" class="nav-link primary-link">笔记本</a>
                 </div>
                 
                 <h3>Info</h3>
                 <ul>
                     <li>邮箱：cranecat_rain@163.com</li>
                     <li>QQ：2019412832</li>
-                    <li>github:https://github.com/CraneCatLin （咳暂时也没有能公开的项目）</li>
+                    <li>github:https://github.com/CraneCatLin （咳暂时也没有什么做完的项目）</li>
                     <li>（内容有误、显示有bug、有建议、有想法都欢迎联系）</li>
                 </ul>
                 <blockquote>
@@ -577,6 +577,37 @@
             }
 
             finalHtml = processImageSizes(finalHtml);
+
+            // ---------- 将指向视频文件的 <img> 标签转换为 <video> 标签 ----------
+            function convertVideoImgs(html) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const imgs = tempDiv.querySelectorAll('img');
+                imgs.forEach(img => {
+                    const src = img.getAttribute('src') || '';
+                    const ext = src.split('.').pop().toLowerCase();
+                    if (SUPPORTED_VIDEO.includes('.' + ext)) {
+                        const video = document.createElement('video');
+                        video.setAttribute('controls', '');
+                        video.setAttribute('src', src);
+                        video.style.width = '100%';
+                        video.style.maxHeight = '70vh';
+                        // 保留 alt 作为提示文字
+                        const alt = img.getAttribute('alt') || '';
+                        if (alt) {
+                            video.setAttribute('title', alt);
+                        }
+                        // 复制图片的 width/height 属性（如果之前 processImageSizes 设置了的话）
+                        const w = img.getAttribute('width');
+                        const h = img.getAttribute('height');
+                        if (w) video.style.width = w + 'px';
+                        if (h) video.style.maxHeight = h + 'px';
+                        img.replaceWith(video);
+                    }
+                });
+                return tempDiv.innerHTML;
+            }
+            finalHtml = convertVideoImgs(finalHtml);
 
             viewer.innerHTML = `<div class="markdown-body">${finalHtml}</div>`;
 
