@@ -722,8 +722,8 @@
         for (let node of nodes) {
             const nodePath = parentPath ? `${parentPath}/${node.name}` : node.name;
             if (node.type === 'folder') {
-                // 文件夹
-                html += `<li class="folder">`;
+                // 文件夹（默认折叠）
+                html += `<li class="folder collapsed">`;
                 html += `<div class="item" data-path="${nodePath}" data-type="folder">${node.name}</div>`;
                 if (node.children && node.children.length > 0) {
                     html += buildTreeHTML(node.children, nodePath);
