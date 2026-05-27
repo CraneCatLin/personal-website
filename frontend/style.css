@@ -6,38 +6,38 @@
 /* ---------- CSS Variables ---------- */
 :root {
     /* 主色调 */
-    --primary: #5b9bd5;
+    --primary: #5d9fd5;
     --primary-light: #7ab8e8;
-    --primary-dark: #3d7ab8;
-    --accent: #4ec9b0;
-    --accent-light: #6dd5c0;
+    --primary-dark: #4a8cc0;
+    --accent: #5cd9c0;
+    --accent-light: #7de5d0;
 
-    /* 背景 */
-    --bg-base: #f0f4f8;
-    --bg-card: rgba(255, 255, 255, 0.72);
-    --bg-card-hover: rgba(255, 255, 255, 0.88);
-    --bg-glass: rgba(255, 255, 255, 0.55);
-    --bg-glass-strong: rgba(255, 255, 255, 0.78);
-    --bg-sidebar: rgba(240, 244, 248, 0.85);
-    --bg-code: #1a1d25;
-    --bg-skeleton: rgba(0, 0, 0, 0.06);
+    /* 背景 — 暗色系 */
+    --bg-base: #0b1523;
+    --bg-card: rgba(22, 35, 55, 0.78);
+    --bg-card-hover: rgba(30, 45, 68, 0.90);
+    --bg-glass: rgba(22, 35, 55, 0.1);
+    --bg-glass-strong: rgba(22, 35, 55, 0.85);
+    --bg-sidebar: rgba(13, 22, 38, 0.88);
+    --bg-code: #0d1117;
+    --bg-skeleton: rgba(255, 255, 255, 0.05);
 
     /* 文字 */
-    --text-primary: #1e2836;
-    --text-secondary: #4a5568;
-    --text-muted: #8899aa;
-    --text-on-dark: #e2e8f0;
+    --text-primary: #e4edf4;
+    --text-secondary: #b0c4d8;
+    --text-muted: #7085a0;
+    --text-on-dark: #e4edf4;
 
     /* 边框 */
-    --border: rgba(0, 0, 0, 0.06);
-    --border-light: rgba(0, 0, 0, 0.04);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.05);
 
     /* 阴影 */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
-    --shadow-card: 0 2px 16px rgba(91, 155, 213, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
-    --shadow-glow: 0 0 24px rgba(91, 155, 213, 0.12);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.30), 0 1px 3px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(0, 0, 0, 0.25);
+    --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.30), 0 4px 8px rgba(0, 0, 0, 0.20);
+    --shadow-glow: 0 0 24px rgba(93, 159, 213, 0.15);
 
     /* 圆角 */
     --radius-sm: 8px;
@@ -84,6 +84,23 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    position: relative;
+}
+
+/* ---- 背景图伪元素（首页 & 友链页） ---- */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: url('/images/home-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0.35;
+    transition: opacity var(--transition-slow), background-image var(--transition-slow);
+    pointer-events: none;
 }
 
 /* 笔记页背景 — JS 通过 classList 控制（比首页更素雅） */
@@ -94,6 +111,17 @@ body.note-page {
         radial-gradient(ellipse 50% 50% at 50% 40%, rgba(160, 200, 235, 0.06) 0%, transparent 65%),
         var(--bg-base);
     background-attachment: fixed;
+}
+
+body.note-page::before {
+    background-image: url('/images/note-bg.png');
+    opacity: 0.25;
+}
+
+/* 友链页背景 — 与首页共用 home-bg */
+body.friends-page::before {
+    background-image: url('/images/home-bg.jpg');
+    opacity: 0.35;
 }
 
 /* ---------- Top Bar ---------- */
@@ -312,96 +340,231 @@ body.homepage .toc-sidebar {
     margin: 0;
 }
 
+/* 子级 ul 带缩进标记（左侧竖线引导线） */
 .tree ul {
     list-style: none;
-    padding-left: 20px;
+    padding: 0 0 0 18px;
+    margin: 0;
+    border-left: 1px solid var(--border);
+    margin-left: 7px;
 }
 
 .tree li {
-    margin: 2px 0;
+    margin: 1px 0;
 }
 
-/* 文件夹 */
-.tree-folder {
+/* 共用的 .item 基础样式 */
+.tree .item {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 12px;
+    padding: 7px 10px 7px 6px;
     border-radius: var(--radius-sm);
     cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease,
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    font-size: 0.87rem;
+    position: relative;
+    border-left: 3px solid transparent;
+    overflow: hidden;
+}
+
+/* ===== Ripple 点击波纹 ===== */
+.tree .item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.35s ease-out;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.tree .item:active::after {
+    opacity: 0.07;
+    transition: opacity 0s;
+}
+
+/* 确保文字、图标在波纹上方 */
+.tree .item>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== 文件夹 item ===== */
+.tree .folder>.item {
     color: var(--text-primary);
     font-weight: 600;
-    font-size: 0.9rem;
-    transition: all var(--transition);
-    user-select: none;
+    background: rgba(91, 155, 213, 0.025);
 }
 
-.tree-folder:hover {
+.tree .folder>.item:hover {
     background: rgba(91, 155, 213, 0.08);
     color: var(--primary-dark);
-}
-
-.tree-folder .folder-arrow {
-    display: inline-block;
-    width: 16px;
-    font-size: 0.7rem;
-    transition: transform var(--transition);
-    flex-shrink: 0;
-    text-align: center;
-    color: var(--text-muted);
-}
-
-.tree-folder.open>.folder-arrow {
-    transform: rotate(90deg);
-}
-
-.tree-folder .folder-icon {
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-
-/* 文件 */
-.tree-file {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px 6px 24px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-    transition: all var(--transition);
-    text-decoration: none;
-}
-
-.tree-file:hover {
-    background: rgba(91, 155, 213, 0.06);
-    color: var(--primary);
+    border-left-color: var(--accent);
+    box-shadow: inset 2px 0 0 var(--accent);
     transform: translateX(2px);
 }
 
-.tree-file.active {
+.tree .folder>.item:active {
+    background: rgba(78, 201, 176, 0.16);
+    border-left-color: var(--accent);
+    box-shadow: inset 2px 0 0 var(--accent);
+    transform: translateX(1px) scale(0.97);
+    transition: all 0.08s ease;
+}
+
+/* 展开状态：青色左边线高亮 + 淡青背景 */
+.tree .folder:not(.collapsed)>.item {
+    background: rgba(78, 201, 176, 0.06);
+    border-left-color: var(--accent);
+    box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* 文件夹箭头 */
+.tree .folder-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    line-height: 1;
+    border-radius: 5px;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.2s ease,
+        background 0.2s ease;
+}
+
+.tree .folder>.item:hover .folder-arrow {
+    color: var(--accent);
+    background: rgba(78, 201, 176, 0.1);
+}
+
+/* 展开时箭头顺时针旋转 90° */
+.tree .folder:not(.collapsed)>.item .folder-arrow {
+    transform: rotate(90deg);
+    color: var(--accent);
+}
+
+/* 文件夹图标 */
+.tree .folder-icon {
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.tree .folder>.item:hover .folder-icon {
+    transform: scale(1.15);
+}
+
+/* 文件夹子项数量角标 */
+.tree .folder-count {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: rgba(91, 155, 213, 0.08);
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-left: auto;
+    flex-shrink: 0;
+    line-height: 1.4;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tree .folder>.item:hover .folder-count {
+    background: rgba(78, 201, 176, 0.15);
+    color: var(--accent);
+}
+
+/* ===== 文件 item ===== */
+.tree .file>.item {
+    color: var(--text-secondary);
+    font-weight: 400;
+    padding-left: 22px;
+    /* 与文件夹箭头+图标位置对齐 */
+}
+
+.tree .file>.item:hover {
+    background: rgba(91, 155, 213, 0.07);
+    color: var(--primary);
+    border-left-color: var(--primary-light);
+    box-shadow: inset 2px 0 0 var(--primary-light);
+    transform: translateX(2px);
+}
+
+.tree .file>.item:active {
+    background: rgba(91, 155, 213, 0.14);
+    border-left-color: var(--primary);
+    box-shadow: inset 2px 0 0 var(--primary);
+    transform: translateX(1px) scale(0.97);
+    transition: all 0.08s ease;
+}
+
+.tree .file>.item.active {
     background: linear-gradient(135deg, rgba(91, 155, 213, 0.12), rgba(78, 201, 176, 0.08));
     color: var(--primary-dark);
     font-weight: 600;
+    border-left-color: var(--primary);
     box-shadow: inset 3px 0 0 var(--primary);
 }
 
-.tree-file .file-icon {
-    font-size: 0.9rem;
+/* 文件图标 */
+.tree .file-icon {
+    font-size: 0.85rem;
     flex-shrink: 0;
-    opacity: 0.6;
+    opacity: 0.5;
+    transition: opacity var(--transition), transform 0.2s ease;
 }
 
-/* 折叠子目录 */
-.tree-children {
+.tree .file>.item:hover .file-icon,
+.tree .file>.item.active .file-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* 条目名称：超出省略 */
+.tree .item-name {
     overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
 
-.tree-children.collapsed {
+/* ===== 文件夹折叠 / 展开动画 ===== */
+.tree .folder>ul {
     max-height: 0;
+    overflow: hidden;
     opacity: 0;
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease;
+}
+
+.tree .folder:not(.collapsed)>ul {
+    max-height: 4000px;
+    opacity: 1;
+}
+
+/* 空文件夹提示 */
+.tree .empty-folder {
+    padding: 2px 0 2px 24px;
+}
+
+.tree .empty-hint {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-style: italic;
+    opacity: 0.7;
 }
 
 /* ---------- Main Content Area ---------- */
@@ -434,89 +597,434 @@ body.homepage .toc-sidebar {
     box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
-/* 首页内容卡片 */
+/* ===========================================================================
+   首页卡片式布局 — 动态卡片风格 (Homepage Card Layout)
+   =========================================================================== */
+
+/* 首页 viewer 全局容器 */
 body.homepage .viewer {
-    padding: 48px;
+    padding: 32px 24px 48px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    max-width: 1100px;
+    /* 3D 透视基准 */
+    perspective: 1200px;
 }
 
-/* 底部装饰（保留原元素，如果不想要可隐藏） */
-.content-footer-decoration {
-    display: none;
+body.homepage .viewer:hover {
+    box-shadow: none;
 }
 
-/* ---------- Homepage Hub ---------- */
-.hub-container {
-    text-align: center;
-    padding: 20px 0;
-}
-
-.hub-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.hub-subtitle {
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin-bottom: 40px;
-    font-weight: 400;
-}
-
-.hub-links {
+/* 卡片网格 */
+.home-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    max-width: 700px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 0;
 }
 
-.hub-link-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 28px 20px;
-    border-radius: var(--radius-md);
-    background: var(--bg-glass);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--border-light);
-    text-decoration: none;
-    color: var(--text-primary);
-    transition: all var(--transition);
+/* 大卡片（跨两列） */
+.home-cards .card-span-2 {
+    grid-column: span 2;
+}
+
+/* ===== 单张卡片 ===== */
+.home-card {
+    position: relative;
+    padding: 28px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: var(--shadow-card);
+    cursor: default;
+    /* 3D 变换支持 */
+    transform-style: preserve-3d;
+    transform: translateY(0) rotateX(0deg) rotateY(0deg);
+    transition: transform 0.15s ease-out,
+        box-shadow 0.25s ease,
+        border-color var(--transition);
+    will-change: transform;
+    /* 入场动画初始状态 */
+    opacity: 0;
+    animation: cardFadeInUp 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* ===== Glare 高光反射层 ===== */
+.home-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse at center,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.02) 50%,
+            transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.25s ease;
+}
+
+/* 鼠标悬浮时显示 glare */
+.home-card.glare-active::before {
+    opacity: 1;
+}
+
+/* 卡牌浮动动画（不同卡牌错开时间） */
+.home-card {
+    animation:
+        cardFadeInUp 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards,
+        cardFloat 5s ease-in-out infinite;
+}
+
+/* 可点击卡片 */
+.home-card.card-clickable {
     cursor: pointer;
 }
 
-.hub-link-card:hover {
-    background: var(--bg-card-hover);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg), 0 0 20px rgba(91, 155, 213, 0.1);
-    border-color: rgba(91, 155, 213, 0.2);
+.home-card.card-clickable:active {
+    transition: transform 0.1s ease;
 }
 
-.hub-link-card .hub-icon {
-    font-size: 2.4rem;
+/* JS 接管 hover，不再用 CSS hover 位移 */
+.home-card:hover {
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    border-color: rgba(91, 155, 213, 0.25);
+}
+
+/* 卡片内图标 */
+.home-card .card-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    display: block;
     line-height: 1;
 }
 
-.hub-link-card .hub-label {
-    font-size: 0.95rem;
-    font-weight: 600;
+/* 卡片标题 */
+.home-card .card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.hub-link-card .hub-desc {
-    font-size: 0.8rem;
+/* 卡片描述 */
+.home-card .card-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 卡片底部操作区 */
+.home-card .card-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* 卡片内链接按钮 */
+.home-card .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition);
+}
+
+.home-card .card-link.primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(91, 155, 213, 0.25);
+}
+
+.home-card .card-link.primary:hover {
+    box-shadow: 0 4px 14px rgba(91, 155, 213, 0.35);
+    transform: translateY(-1px);
+}
+
+.home-card .card-link.outline {
+    border: 1.5px solid var(--primary-light);
+    color: var(--primary);
+    background: transparent;
+}
+
+.home-card .card-link.outline:hover {
+    background: rgba(91, 155, 213, 0.08);
+    border-color: var(--primary);
+}
+
+/* ===== 最近笔记列表 ===== */
+.home-card .recent-notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0 0;
+}
+
+.home-card .recent-notes-list li {
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+}
+
+.home-card .recent-notes-list li:hover {
+    background: rgba(91, 155, 213, 0.06);
+    color: var(--primary-dark);
+    border-color: rgba(91, 155, 213, 0.12);
+    transform: translateX(3px);
+}
+
+.home-card .recent-notes-list li .note-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.home-card .recent-notes-list li .note-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-card .recent-notes-list li .note-date {
+    font-size: 0.78rem;
     color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+/* ===== 标签行 ===== */
+.home-card .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.home-card .tag-item {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: rgba(91, 155, 213, 0.08);
+    color: var(--primary-dark);
+    cursor: pointer;
+    transition: all var(--transition);
+    border: 1px solid transparent;
+}
+
+.home-card .tag-item:hover {
+    background: rgba(91, 155, 213, 0.16);
+    border-color: rgba(91, 155, 213, 0.3);
+    transform: translateY(-1px);
+}
+
+/* ===== 关于信息（不折叠） ===== */
+.home-card .about-info {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-light);
+}
+
+.home-card .about-info p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
-/* ---------- About Details (Fallback) ---------- */
+.home-card .about-info a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.home-card .about-info a:hover {
+    text-decoration: underline;
+}
+
+/* ===== 随机刷新按钮 ===== */
+.home-card .card-title .random-refresh-btn {
+    margin-left: auto;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.home-card .card-title .random-refresh-btn:hover {
+    background: rgba(91, 155, 213, 0.1);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
+
+/* ===== 随机笔记闪烁动效（刷新时） ===== */
+.random-note.random-flash {
+    animation: randomFlash 0.4s ease;
+}
+
+@keyframes randomFlash {
+
+    0%,
+    100% {
+        background: rgba(91, 155, 213, 0.06);
+    }
+
+    50% {
+        background: rgba(91, 155, 213, 0.18);
+    }
+}
+
+/* ===== 卡片内 details 折叠（保留供未来使用） ===== */
+.home-card details {
+    margin-top: 8px;
+}
+
+.home-card details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.88rem;
+    list-style: none;
+    user-select: none;
+}
+
+.home-card details summary::-webkit-details-marker {
+    display: none;
+}
+
+.home-card details .details-content {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+/* ===== 随机推荐卡片 ===== */
+.home-card .random-note:hover {
+    background: rgba(91, 155, 213, 0.12) !important;
+    border-color: rgba(91, 155, 213, 0.3) !important;
+    transform: translateX(4px);
+}
+
+/* ===== 点击涟漪效果 ===== */
+.home-card.card-clickable {
+    overflow: hidden;
+}
+
+.home-card.card-clickable .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(91, 155, 213, 0.2);
+    transform: scale(0);
+    animation: rippleEffect 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes rippleEffect {
+    to {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+/* ===== 站点统计数字动画 ===== */
+.home-card .stat-number {
+    display: inline-block;
+    animation: countUp 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes countUp {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 入场动画 ===== */
+@keyframes cardFadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(28px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 卡片浮动动画 ===== */
+@keyframes cardFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* 不同卡片错开浮动时间，更具韵律感 */
+.home-card:nth-child(1) {
+    animation-delay: 0s, 0.1s;
+}
+
+.home-card:nth-child(2) {
+    animation-delay: 0.1s, 0.2s;
+}
+
+.home-card:nth-child(3) {
+    animation-delay: 0.2s, 0.3s;
+}
+
+.home-card:nth-child(4) {
+    animation-delay: 0.3s, 0.4s;
+}
+
+.home-card:nth-child(5) {
+    animation-delay: 0.35s, 0.45s;
+}
+
+.home-card:nth-child(6) {
+    animation-delay: 0.4s, 0.5s;
+}
+
+/* ---------- 旧样式保留（JS 失效时回退） ---------- */
 .about-details {
     margin-top: 24px;
     padding: 16px;
@@ -1024,16 +1532,17 @@ body.homepage .viewer {
         font-size: 1.4rem;
     }
 
-    .hub-links {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .hub-title {
-        font-size: 1.6rem;
-    }
-
     body.homepage .viewer {
-        padding: 32px 20px;
+        padding: 24px 12px 40px;
+    }
+
+    .home-cards {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .home-cards .card-span-2 {
+        grid-column: span 1;
     }
 }
 
@@ -1056,8 +1565,566 @@ body.homepage .viewer {
         border-radius: var(--radius-sm);
     }
 
-    .hub-links {
+    .home-cards {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ===== 友链卡片布局 ===== */
+body.friends-page .app-grid {
+    grid-template-columns: 1fr;
+}
+
+body.friends-page .sidebar,
+body.friends-page .toc-sidebar {
+    display: none;
+}
+
+body.friends-page .viewer {
+    padding: 32px 24px 48px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    max-width: 1100px;
+}
+
+body.friends-page .viewer:hover {
+    box-shadow: none;
+}
+
+.friends-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 0;
+}
+
+.friend-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 20px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s ease, box-shadow var(--transition), border-color var(--transition);
+    cursor: default;
+    opacity: 0;
+    animation: cardFadeInUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.friend-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    border-color: rgba(91, 155, 213, 0.25);
+}
+
+.friend-card .friend-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.friend-card .friend-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.friend-card .friend-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.friend-card .friend-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.friend-card .friend-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(91, 155, 213, 0.2);
+    transition: all var(--transition);
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.friend-card .friend-link-btn:hover {
+    box-shadow: 0 4px 14px rgba(91, 155, 213, 0.35);
+    transform: translateY(-1px);
+}
+
+/* 友链页标题 */
+.friends-page-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+/* ============================================================
+   日志页面样式
+   ============================================================ */
+
+/* ---- 日志页布局（隐藏侧边栏/TOC） ---- */
+body.log-page .app-grid {
+    grid-template-columns: 1fr;
+}
+
+body.log-page .sidebar,
+body.log-page .toc-sidebar {
+    display: none;
+}
+
+body.log-page .viewer {
+    padding: 32px 24px 48px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    max-width: 1000px;
+}
+
+body.log-page .viewer:hover {
+    box-shadow: none;
+}
+
+body.log-page::before {
+    background-image: url('/images/home-bg.jpg');
+    opacity: 0.30;
+}
+
+/* ---- 日志页标题 ---- */
+.log-page-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.log-page-subtitle {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+/* ---- 日志分类切换标签 ---- */
+.log-category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.log-category-tab {
+    padding: 8px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.log-category-tab:hover {
+    background: rgba(91, 155, 213, 0.12);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.log-category-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(91, 155, 213, 0.3);
+}
+
+/* ---- 日历热力图容器 ---- */
+.log-calendar-container {
+    background: var(--bg-card);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-card);
+}
+
+.log-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.log-calendar-year {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.log-calendar-nav {
+    display: flex;
+    gap: 6px;
+}
+
+.log-calendar-nav-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+.log-calendar-nav-btn:hover {
+    background: rgba(91, 155, 213, 0.12);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
+
+/* ---- 热力图网格 ---- */
+.log-heatmap-grid {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.log-heatmap-week {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.log-heatmap-week-label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-align: center;
+    height: 14px;
+    line-height: 14px;
+    margin-bottom: 2px;
+}
+
+.log-heatmap-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    position: relative;
+}
+
+.log-heatmap-cell:hover {
+    transform: scale(1.4);
+    z-index: 2;
+    box-shadow: 0 0 8px rgba(91, 155, 213, 0.3);
+}
+
+.log-heatmap-cell[data-level="1"] {
+    background: rgba(91, 155, 213, 0.15);
+}
+
+.log-heatmap-cell[data-level="2"] {
+    background: rgba(91, 155, 213, 0.30);
+}
+
+.log-heatmap-cell[data-level="3"] {
+    background: rgba(91, 155, 213, 0.50);
+}
+
+.log-heatmap-cell[data-level="4"] {
+    background: rgba(91, 155, 213, 0.75);
+}
+
+/* 今天标记 */
+.log-heatmap-cell.today {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+/* 热力图图例 */
+.log-heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.log-legend-label {
+    margin: 0 4px;
+}
+
+.log-legend-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.log-legend-cell.l0 {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.log-legend-cell.l1 {
+    background: rgba(91, 155, 213, 0.15);
+}
+
+.log-legend-cell.l2 {
+    background: rgba(91, 155, 213, 0.30);
+}
+
+.log-legend-cell.l3 {
+    background: rgba(91, 155, 213, 0.50);
+}
+
+.log-legend-cell.l4 {
+    background: rgba(91, 155, 213, 0.75);
+}
+
+/* ---- 日志列表 ---- */
+.log-list-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 28px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.log-entry {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    margin: 8px 0;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all var(--transition);
+    animation: cardFadeInUp 0.4s ease forwards;
+    opacity: 0;
+}
+
+.log-entry:hover {
+    transform: translateX(4px);
+    border-color: rgba(91, 155, 213, 0.2);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+.log-entry-date {
+    flex-shrink: 0;
+    width: 52px;
+    text-align: center;
+    padding-top: 2px;
+}
+
+.log-entry-month-day {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.log-entry-weekday {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.log-entry-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    margin-top: 8px;
+    box-shadow: 0 0 6px rgba(91, 155, 213, 0.4);
+}
+
+.log-entry-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.log-entry-name {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.log-entry-preview {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.log-entry-arrow {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: 6px;
+    transition: transform var(--transition);
+}
+
+.log-entry:hover .log-entry-arrow {
+    transform: translateX(4px);
+    color: var(--primary);
+}
+
+/* ---- 日志阅读页 ---- */
+.log-reading-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+}
+
+.log-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.log-back-btn:hover {
+    background: rgba(91, 155, 213, 0.12);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.log-reading-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ---- 空状态 ---- */
+.log-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+}
+
+.log-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.log-empty-text {
+    font-size: 0.95rem;
+}
+
+/* ---- 日历响应式 ---- */
+@media (max-width: 768px) {
+    .log-calendar-container {
+        padding: 16px 12px;
+    }
+
+    .log-heatmap-cell {
+        width: 10px;
+        height: 10px;
+    }
+
+    .log-heatmap-grid {
+        gap: 2px;
+    }
+
+    .log-entry {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .log-entry-date {
+        width: 42px;
+    }
+
+    .log-entry-month-day {
+        font-size: 0.95rem;
+    }
+
+    .log-category-tabs {
+        gap: 6px;
+    }
+
+    .log-category-tab {
+        padding: 6px 14px;
+        font-size: 0.82rem;
+    }
+
+    .log-reading-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
