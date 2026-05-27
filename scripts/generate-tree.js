@@ -2,10 +2,11 @@
 
 /**
  * generate-tree.js
- * 递归扫描目录，生成表示目录结构的 tree.json
+ * 递归扫描目录，生成表示目录结构的 tree.json 和 tree-log.json
  * 用法: node generate-tree.js [输入目录] [输出文件]
- * 默认输入目录: 脚本所在目录的 ../public
+ * 默认输入目录: 脚本所在目录的 ../frontend/public
  * 默认输出文件: 脚本所在目录的 ../frontend/tree.json
+ * 日志输出文件: ../frontend/tree-log.json
  */
 
 const fs = require('fs');
@@ -15,17 +16,20 @@ const path = require('path');
 const args = process.argv.slice(2);
 const inputDir = args[0] || path.join(__dirname, '../frontend/public');
 const outputFile = args[1] || path.join(__dirname, '../frontend/tree.json');
+const logOutputFile = path.join(__dirname, '../frontend/tree-log.json');
 
 // 需要忽略的隐藏文件/文件夹名称（精确匹配）
 const IGNORED_NAMES = new Set(['.DS_Store', '.gitkeep', '.git', '.hg', '.svn', 'Thumbs.db']);
 const EXCLUDED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'];
 
 // 需要忽略的特定路径（相对于项目根目录）
-const IGNORED_PATHS = new Set(['/images']);
+const IGNORED_PATHS = new Set(['/images', '/日志']);
+
 function shouldIncludeFile(filename) {
     const extension = path.extname(filename).toLowerCase();
     return !EXCLUDED_EXTENSIONS.includes(extension);
 }
+
 /**
  * 判断是否为隐藏文件（以点开头）
  */
@@ -131,6 +135,65 @@ function walkDir(currentPath, baseDir, parentRelPath = '') {
 }
 
 /**
+ * 生成树结构
+ */
+function generateTree(baseDir, name) {
+    const tree = {
+        type: 'folder',
+        name: name,
+        path: '',
+        children: []
+    };
+
+    let items;
+    try {
+        items = fs.readdirSync(baseDir);
+    } catch (err) {
+        console.error(`无法读取目录 ${baseDir}: ${err.message}`);
+        return tree;
+    }
+
+    for (const item of items) {
+        const itemPath = path.join(baseDir, item);
+        const child = walkDir(itemPath, baseDir, item);
+        if (child) {
+            tree.children.push(child);
+        }
+    }
+
+    return tree;
+}
+
+/**
+ * 确保输出目录存在
+ */
+function ensureDir(filePath) {
+    const outputDir = path.dirname(filePath);
+    if (!fs.existsSync(outputDir)) {
+        try {
+            fs.mkdirSync(outputDir, { recursive: true });
+            console.log(`创建输出目录: ${outputDir}`);
+        } catch (err) {
+            console.error(`无法创建输出目录: ${err.message}`);
+            process.exit(1);
+        }
+    }
+}
+
+/**
+ * 写入 JSON 文件
+ */
+function writeJSON(filePath, data) {
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+        console.log(`✅ 已生成: ${filePath}`);
+    } catch (err) {
+        console.error(`写入文件失败: ${err.message}`);
+        process.exit(1);
+    }
+}
+
+/**
  * 主函数
  */
 function main() {
@@ -149,57 +212,28 @@ function main() {
 
     console.log(`扫描目录: ${inputDir}`);
 
-    // 生成树结构（根目录名称固定为 'public'，但我们可以使用实际文件夹名称）
-    // 但要求根对象 name 为 "public"，path 为空
-    const rootName = path.basename(inputDir); // 实际上可能是 "public"
-    const tree = {
-        type: 'folder',
-        name: rootName,
-        path: '',
-        children: []
-    };
+    // ---- 生成主目录树 tree.json（排除日志目录）----
+    const tree = generateTree(inputDir, path.basename(inputDir));
 
-    // 遍历根目录下的所有项目
-    let items;
-    try {
-        items = fs.readdirSync(inputDir);
-    } catch (err) {
-        console.error(`无法读取根目录: ${err.message}`);
-        process.exit(1);
-    }
-
-    for (const item of items) {
-        const itemPath = path.join(inputDir, item);
-        const child = walkDir(itemPath, inputDir, item);
-        if (child) {
-            tree.children.push(child);
-        }
-    }
-
-    // 如果根目录下没有任何有效子项，则输出空树（但通常不会）
     if (tree.children.length === 0) {
         console.warn('警告：根目录下没有找到任何有效文件/文件夹');
     }
 
-    // 确保输出目录存在
-    const outputDir = path.dirname(outputFile);
-    if (!fs.existsSync(outputDir)) {
-        try {
-            fs.mkdirSync(outputDir, { recursive: true });
-            console.log(`创建输出目录: ${outputDir}`);
-        } catch (err) {
-            console.error(`无法创建输出目录: ${err.message}`);
-            process.exit(1);
-        }
-    }
+    ensureDir(outputFile);
+    writeJSON(outputFile, tree);
 
-    // 写入 JSON 文件
-    try {
-        fs.writeFileSync(outputFile, JSON.stringify(tree, null, 2), 'utf8');
-        console.log(`✅ tree.json 已生成: ${outputFile}`);
-    } catch (err) {
-        console.error(`写入文件失败: ${err.message}`);
-        process.exit(1);
+    // ---- 生成日志目录树 tree-log.json ----
+    const logDir = path.join(inputDir, '日志');
+    if (fs.existsSync(logDir) && fs.statSync(logDir).isDirectory()) {
+        console.log(`扫描日志目录: ${logDir}`);
+        const logTree = generateTree(logDir, '日志');
+        ensureDir(logOutputFile);
+        writeJSON(logOutputFile, logTree);
+    } else {
+        console.log('未找到日志目录，跳过 tree-log.json 生成。');
+        // 生成空日志树
+        ensureDir(logOutputFile);
+        writeJSON(logOutputFile, { type: 'folder', name: '日志', path: '', children: [] });
     }
 }
 
