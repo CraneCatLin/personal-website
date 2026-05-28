@@ -44,10 +44,12 @@
 - 仅在运行 `update.ps1` 时由 `generate-tree.js` 重新生成
 - 新增/删除笔记文件后必须重新生成，否则目录树不更新
 
-### 5.9 模块化文件拆分（2026-05-28）
-- **JS 拆分**：`frontend/script.js` → `frontend/js/` 下 8 个模块（core / home / note-renderer / tree / friends / log / router / app），通过 `index.html` 按依赖顺序 `<script defer>` 加载
+### 5.9 模块化文件拆分（2026-05-29）
+- **JS 拆分**：`frontend/script.js` → `frontend/js/` 下 9 个模块（core / log / home / note-renderer / tree / friends / router / app 等），通过 `index.html` 按依赖顺序 `<script defer>` 加载
 - **CSS 拆分**：`frontend/style.css` → `frontend/css/` 下 9 个模块（variables / base / topbar / sidebar / home / note-viewer / friends / log / responsive）
-- 保留 `frontend/script.js` 和 `frontend/style.css` 作为后备（不主动删除），但 `index.html` 不再引用它们
+- 保留 `frontend/script.js` 和 `frontend/style.css` 作为后备（不主动删除），但 `index.html` 不再引用 `frontend/style.css`（仍在引用 `script.js`）
+- `js/core.js`：核心共享模块，包含 DOM 引用（viewer, body）、常量（SUPPORTED_IMG, SUPPORTED_VIDEO）和工具函数（setBackgroundForPage, clearTOC, showContentSkeleton, escapeHtml, processMathFormulas, enhanceCodeBlocks 等），通过 `window.CoreModule` 导出
+- `js/log.js`：日志模块，包含 logTreeData、logFilesAll、logDateMap 等数据和 renderLogPage、buildLogPageUI、showLogDateDetail、loadLogFile、renderLogMarkdown 等函数，通过 `window.LogModule` 导出（仅导出 renderLogPage 和 loadLogFile）
 - 修改特定组件时只需阅读对应的模块文件，大幅减少误修改风险
 
 ---
