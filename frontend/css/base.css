@@ -1,0 +1,87 @@
+/* ============================================================
+   Reset & Base — 全局重置、body、滚动条、背景伪元素
+   ============================================================ */
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+        'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    color: var(--text-primary);
+    background:
+        radial-gradient(ellipse 80% 60% at 15% 25%, rgba(91, 155, 213, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 80% at 85% 65%, rgba(78, 201, 176, 0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 40%, rgba(160, 200, 235, 0.10) 0%, transparent 65%),
+        var(--bg-base);
+    background-attachment: fixed;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+}
+
+/* ---- 背景图伪元素（首页 & 友链页） ---- */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: url('/images/home-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+body.homepage::before {
+    opacity: 0.35;
+}
+
+body.note-page::before {
+    background-image: url('/images/note-bg.png');
+    opacity: 0.30;
+}
+
+body.friends-page::before {
+    background-image: url('/images/home-bg.jpg');
+    opacity: 0.35;
+}
+
+body.log-page::before {
+    background-image: url('/images/note-bg.png');
+    opacity: 0.28;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+}

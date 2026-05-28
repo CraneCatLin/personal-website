@@ -5,8 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>CraneCat喵~</title>
-    <!-- CSS -->
-    <link rel="stylesheet" href="/style.css">
+    <!-- CSS: 模块化拆分 -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/topbar.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/note-viewer.css">
+    <link rel="stylesheet" href="/css/friends.css">
+    <link rel="stylesheet" href="/css/log.css">
+    <link rel="stylesheet" href="/css/responsive.css">
     <!-- Markdown renderer & syntax highlighter -->
     <script src="/libs/js/marked.min.js"></script>
     <script src="/libs/js/highlight.min.js"></script>
@@ -20,7 +28,15 @@
     <!-- MarkdownIt -->
     <script src="/libs/js/markdown-it.min.js"></script>
     <script src="/libs/js/texmath.js"></script>
-    <script src="/script.js" defer></script>
+    <!-- JS: 模块化拆分 -->
+    <script src="/js/core.js" defer></script>
+    <script src="/js/home.js" defer></script>
+    <script src="/js/note-renderer.js" defer></script>
+    <script src="/js/tree.js" defer></script>
+    <script src="/js/friends.js" defer></script>
+    <script src="/js/log.js" defer></script>
+    <script src="/js/router.js" defer></script>
+    <script src="/js/app.js" defer></script>
 </head>
 
 <body class="homepage">

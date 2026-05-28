@@ -35,7 +35,7 @@
 
 ### 5.7 友链页
 - 路由：`#friends` hash
-- 友链数据硬编码在 `script.js` 的 `renderFriendsPage()` 函数中
+- 友链数据硬编码在 `frontend/js/friends.js` 的 `renderFriendsPage()` 函数中
 - 每张卡片包含：头像（`friend-avatar`）、昵称（`friend-name`）、简介（`friend-desc`）、访问按钮（`friend-link-btn`）
 - 顶栏"友链"按钮点击跳转到 `#friends`
 - 友链页背景与首页共用 `home-bg.jpg`（通过 `friends-page` class 控制）
@@ -44,14 +44,27 @@
 - 仅在运行 `update.ps1` 时由 `generate-tree.js` 重新生成
 - 新增/删除笔记文件后必须重新生成，否则目录树不更新
 
+### 5.9 模块化文件拆分（2026-05-28）
+- **JS 拆分**：`frontend/script.js` → `frontend/js/` 下 8 个模块（core / home / note-renderer / tree / friends / log / router / app），通过 `index.html` 按依赖顺序 `<script defer>` 加载
+- **CSS 拆分**：`frontend/style.css` → `frontend/css/` 下 9 个模块（variables / base / topbar / sidebar / home / note-viewer / friends / log / responsive）
+- 保留 `frontend/script.js` 和 `frontend/style.css` 作为后备（不主动删除），但 `index.html` 不再引用它们
+- 修改特定组件时只需阅读对应的模块文件，大幅减少误修改风险
+
 ---
 
 ## 6. AI 接手最小阅读清单
 
 如果只需要做**前端修改**（UI/渲染/交互），读：
 1. `frontend/index.html` — 了解 DOM 结构和库依赖
-2. `frontend/script.js` — 全部逻辑
-3. `frontend/style.css` — 按需搜索类名
+2. `frontend/js/app.js` — 入口编排
+3. `frontend/js/core.js` — 共享状态和工具函数
+4. `frontend/js/router.js` — 路由映射和页面切换
+5. 按需读 `frontend/js/{组件}.js` 和 `frontend/css/{组件}.css`
+   - `home`：首页渲染
+   - `note-renderer`：Markdown 渲染
+   - `tree`：侧边栏目录树
+   - `friends`：友链页
+   - `log`：日志页（含日历）
 
 如果只需要做**后端脚本修改**（部署/预处理），读：
 1. `update.ps1` — 部署流程
@@ -67,3 +80,4 @@
 - `frontend/libs/` 下的第三方库源码
 - `frontend/images/` 下的图片二进制
 - `frontend/tree.json` 的内容（结构从 generate-tree.js 可知）
+- `frontend/style.css` 和 `frontend/script.js`（已拆分不再引用，保留仅作备份）

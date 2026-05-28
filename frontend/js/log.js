@@ -1,0 +1,357 @@
+import { viewer, showContentSkeleton, setBackgroundForPage, escapeHtml, processMathFormulas, enhanceCodeBlocks, clearTOC, loadTreeFromGlobal } from './core.js';
+
+// ==================== 日志页面 ====================
+
+let logDateMap = {};
+
+function parseLogName(filename) {
+    const match = filename.match(/^(\d{4})-(\d{2})-(\d{2})-(.+)\.md$/);
+    if (match) {
+        return {
+            date: match[1] + '-' + match[2] + '-' + match[3],
+            name: match[4]
+        };
+    }
+    return null;
+}
+
+function loadLogEntries() {
+    const tree = loadTreeFromGlobal();
+    const logs = [];
+    if (tree && tree.children) {
+        function walk(node, parentPath) {
+            const currentPath = parentPath ? parentPath + '/' + node.name : node.name;
+            if (node.type === 'file') {
+                if (currentPath.startsWith('log/') || currentPath.startsWith('日志/')) {
+                    logs.push({ path: currentPath, name: node.name });
+                }
+            } else if (node.type === 'directory') {
+                for (const child of (node.children || [])) {
+                    walk(child, currentPath);
+                }
+            }
+        }
+        for (const child of tree.children) {
+            walk(child, '');
+        }
+    }
+    return logs;
+}
+
+function buildLogPageUI(year, month) {
+    const allLogs = loadLogEntries();
+    logDateMap = {};
+
+    // 按日期分组
+    for (const f of allLogs) {
+        const parsed = parseLogName(f.name);
+        if (parsed) {
+            if (!logDateMap[parsed.date]) {
+                logDateMap[parsed.date] = [];
+            }
+            logDateMap[parsed.date].push(f);
+        }
+    }
+
+    // 日历渲染
+    const now = new Date();
+    if (year === undefined) year = now.getFullYear();
+    if (month === undefined) month = now.getMonth() + 1;
+
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const totalRows = Math.ceil((firstDay + daysInMonth) / 7);
+    const weekLabels = ['日', '一', '二', '三', '四', '五', '六'];
+    const todayKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+    // 构建日历 HTML
+    let calHTML = '<table class="log-calendar-table">';
+    calHTML += '<thead><tr>' + weekLabels.map(w => `<th>${w}</th>`).join('') + '</tr></thead>';
+    calHTML += '<tbody>';
+
+    for (let r = 0; r < totalRows; r++) {
+        calHTML += '<tr>';
+        for (let c = 0; c < 7; c++) {
+            const cellDay = r * 7 + c - firstDay + 1;
+            if (cellDay < 1 || cellDay > daysInMonth) {
+                calHTML += '<td class="log-cal-empty"></td>';
+            } else {
+                const dateKey = year + '-' + String(month).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                const entries = logDateMap[dateKey] || [];
+                const count = entries.length;
+                let levelClass = '';
+                if (count >= 3) levelClass = 'log-cal-level-3';
+                else if (count >= 2) levelClass = 'log-cal-level-2';
+                else if (count >= 1) levelClass = 'log-cal-level-1';
+                else levelClass = 'log-cal-no-log';
+                const isToday = dateKey === todayKey;
+                const todayClass = isToday ? ' log-cal-today' : '';
+                const clickableClass = count > 0 ? ' log-cal-clickable' : '';
+                const titleAttr = count > 0 ? ` title="${dateKey}: ${count} 篇日志"` : ` title="${dateKey}: 无日志"`;
+                calHTML += `<td class="log-cal-cell ${levelClass}${todayClass}${clickableClass}" data-date="${dateKey}"${titleAttr}>${cellDay}</td>`;
+            }
+        }
+        calHTML += '</tr>';
+    }
+    calHTML += '</tbody></table>';
+
+    // 收集所有可用年份和月份
+    const allYears = new Set();
+    for (const key of Object.keys(logDateMap)) {
+        allYears.add(parseInt(key.split('-')[0]));
+    }
+    allYears.add(new Date().getFullYear());
+    const sortedYears = Array.from(allYears).sort((a, b) => b - a);
+
+    const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+    // 构建年份/月份下拉选择器
+    const yearSelectHTML = sortedYears.map(y =>
+        `<option value="${y}"${y === year ? ' selected' : ''}>${y} 年</option>`
+    ).join('');
+    const monthSelectHTML = monthNames.map((name, i) =>
+        `<option value="${i + 1}"${(i + 1) === month ? ' selected' : ''}>${name}</option>`
+    ).join('');
+
+    viewer.innerHTML = `
+        <div class="log-page">
+            <div class="log-page-header">
+                <h1>📅 日志</h1>
+            </div>
+            <div class="log-calendar-container">
+                <div class="log-calendar-header">
+                    <button class="log-nav-btn" id="logPrevMonth" title="上个月">◀</button>
+                    <div class="log-calendar-jump">
+                        <select id="logJumpYear" class="log-jump-select">${yearSelectHTML}</select>
+                        <select id="logJumpMonth" class="log-jump-select">${monthSelectHTML}</select>
+                    </div>
+                    <button class="log-nav-btn" id="logNextMonth" title="下个月">▶</button>
+                </div>
+                ${calHTML}
+            </div>
+            <div id="log-date-detail" class="log-date-detail" style="display:none;"></div>
+        </div>`;
+
+    // 年份/月份下拉跳转
+    const jumpYear = viewer.querySelector('#logJumpYear');
+    const jumpMonth = viewer.querySelector('#logJumpMonth');
+    if (jumpYear && jumpMonth) {
+        const doJump = () => {
+            const y = parseInt(jumpYear.value);
+            const m = parseInt(jumpMonth.value);
+            buildLogPageUI(y, m);
+        };
+        jumpYear.addEventListener('change', doJump);
+        jumpMonth.addEventListener('change', doJump);
+    }
+
+    // 月份导航
+    const prevBtn = viewer.querySelector('#logPrevMonth');
+    const nextBtn = viewer.querySelector('#logNextMonth');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            let y = year, m = month - 1;
+            if (m < 1) { m = 12; y--; }
+            buildLogPageUI(y, m);
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            let y = year, m = month + 1;
+            if (m > 12) { m = 1; y++; }
+            buildLogPageUI(y, m);
+        });
+    }
+
+    // 日历单元格点击 → 直接跳转到日志文件
+    viewer.querySelectorAll('.log-cal-cell.log-cal-clickable').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const dateKey = cell.dataset.date;
+            const entries = logDateMap[dateKey] || [];
+            if (entries.length > 0) {
+                const filePath = entries[0].path;
+                window.location.hash = '#' + encodeURIComponent('log:' + filePath);
+                loadLogFile(filePath);
+            }
+        });
+    });
+}
+
+// 显示某一天的日志条目（从日历点击进入）
+function showLogDateDetail(dateKey, entries) {
+    const detailDiv = document.getElementById('log-date-detail');
+    if (!detailDiv) return;
+
+    if (entries.length === 0) {
+        detailDiv.innerHTML = `<p style="text-align:center;color:var(--text-muted);">该日无日志</p>`;
+        detailDiv.style.display = 'block';
+        return;
+    }
+
+    // 解析日期用于显示
+    const parts = dateKey.split('-');
+    const displayDate = parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日';
+
+    let listHTML = `<div class="log-detail-header">
+        <button class="log-back-btn" id="logBackToCal">← 返回日历</button>
+        <span class="log-detail-date">${displayDate}</span>
+        <span class="log-detail-count">${entries.length} 篇</span>
+    </div>`;
+    listHTML += '<ul class="log-detail-list">';
+
+    for (const f of entries) {
+        const displayName = (f.name || '').replace(/\.[^.]+$/, '');
+        const path = f.path || '';
+        listHTML += `<li class="log-item" data-path="${escapeHtml(path)}">
+            <span class="log-item-icon">📝</span>
+            <span class="log-item-name">${escapeHtml(displayName)}</span>
+        </li>`;
+    }
+    listHTML += '</ul>';
+
+    detailDiv.innerHTML = listHTML;
+    detailDiv.style.display = 'block';
+
+    // 返回按钮
+    const backBtn = detailDiv.querySelector('#logBackToCal');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            detailDiv.style.display = 'none';
+        });
+    }
+
+    // 日志条目点击 → 阅读日志
+    detailDiv.querySelectorAll('.log-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const path = item.dataset.path;
+            if (path) {
+                window.location.hash = '#' + encodeURIComponent('log:' + path);
+                loadLogFile(path);
+            }
+        });
+    });
+
+    detailDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 加载单个日志文件
+function loadLogFile(filePath) {
+    showContentSkeleton();
+    const fullPath = '/public/' + filePath;
+    fetch(fullPath, {
+        headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.text();
+        })
+        .then(markdown => {
+            renderLogMarkdown(markdown, filePath);
+        })
+        .catch(error => {
+            viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 加载日志失败</h2><p>无法加载 ${filePath} (${error.message})</p></div>`;
+        });
+    // currentFilePath not needed as it's tracked via hash
+    document.body.classList.remove('homepage');
+    setBackgroundForPage('log');
+}
+
+// 渲染日志 Markdown（带头部返回按钮，无 TOC）
+function renderLogMarkdown(markdownText, filePath) {
+    if (!window.markdownit) {
+        viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>markdown-it 未加载</p></div>`;
+        return;
+    }
+
+    try {
+        const md = window.markdownit({
+            html: true,
+            xhtmlOut: true,
+            breaks: true,
+            langPrefix: 'language-',
+            linkify: true,
+            typographer: true,
+            quotes: '""\'\''
+        });
+
+        let pluginEnabled = false;
+        if (window.texmath && window.katex) {
+            try {
+                md.use(window.texmath, {
+                    engine: window.katex,
+                    delimiters: 'dollars',
+                    katexOptions: { throwOnError: false }
+                });
+                pluginEnabled = true;
+            } catch (err) { }
+        }
+
+        if (window.hljs) {
+            md.options.highlight = function (str, lang) {
+                if (lang && window.hljs.getLanguage(lang)) {
+                    try { return window.hljs.highlight(str, { language: lang }).value; } catch (__) { }
+                }
+                return md.utils.escapeHtml(str);
+            };
+        }
+
+        const fileNameWithoutExt = filePath.split('/').pop().replace(/\.[^/.]+$/, "");
+
+        let finalHtml;
+        if (!pluginEnabled && window.katex) {
+            finalHtml = md.render(processMathFormulas(markdownText));
+        } else {
+            finalHtml = md.render(markdownText);
+        }
+
+        document.title = `${fileNameWithoutExt} - 日志`;
+
+        // 处理图片路径
+        finalHtml = finalHtml.replace(/<img\s+src="([^"]+)"([^>]*)>/gi, function (match, src, rest) {
+            if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('/')) {
+                const dir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
+                const newSrc = '/public/' + dir + src;
+                return `<img src="${newSrc}"${rest}>`;
+            }
+            return match;
+        });
+
+        // 返回按钮 + 内容
+        viewer.innerHTML = `
+            <div class="log-reading">
+                <div class="log-reading-header">
+                    <a href="#logs" class="log-back-btn">← 返回日历</a>
+                    <span class="log-reading-title">${escapeHtml(fileNameWithoutExt)}</span>
+                </div>
+                <div class="log-reading-content markdown-body">
+                    ${finalHtml}
+                </div>
+            </div>`;
+
+        if (window.hljs && !md.options.highlight) {
+            document.querySelectorAll('.log-reading-content pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
+        enhanceCodeBlocks();
+        clearTOC();
+    } catch (error) {
+        console.error('日志 Markdown 渲染出错:', error);
+        viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p></div>`;
+        clearTOC();
+    }
+}
+
+// ==================== 公开 API ====================
+
+export function renderLogPage() {
+    document.title = '日志';
+    const now = new Date();
+    buildLogPageUI(now.getFullYear(), now.getMonth() + 1);
+    document.body.classList.remove('homepage');
+    setBackgroundForPage('log');
+}

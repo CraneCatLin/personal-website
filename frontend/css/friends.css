@@ -1,0 +1,96 @@
+/* ============================================================
+   Friends — 友链卡片
+   ============================================================ */
+
+/* ---------- Friends Container ---------- */
+.friends-page .friends-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.friends-page .friends-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.friends-page .friends-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.friends-page .friends-header p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Friend Card ---------- */
+.friends-page .friend-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 24px 20px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.friends-page .friend-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+    border-color: rgba(91, 155, 213, 0.2);
+}
+
+.friends-page .friend-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 2px solid rgba(91, 155, 213, 0.2);
+    transition: all var(--transition);
+}
+
+.friends-page .friend-card:hover .friend-avatar {
+    border-color: var(--primary-light);
+}
+
+.friends-page .friend-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.friends-page .friend-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 14px;
+    flex: 1;
+}
+
+.friends-page .friend-link-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: all var(--transition);
+    display: inline-block;
+}
+
+.friends-page .friend-link-btn:hover {
+    box-shadow: 0 4px 12px rgba(91, 155, 213, 0.3);
+    transform: translateY(-1px);
+}

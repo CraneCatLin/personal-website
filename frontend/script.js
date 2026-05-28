@@ -240,20 +240,9 @@
 
         const fileCount = allFiles.length;
         const folderCount = folderNames.length;
-        // 最近更新：按 mtime 倒序取前 5
-        const recentFiles = [...allFiles]
-            .filter(f => f.mtime)
-            .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
-            .slice(0, 5);
-        // 随机推荐（每次刷新不同）
+        // 随机推荐（一次抽三篇，每次刷新不同）
         const shuffled = [...allFiles].sort(() => Math.random() - 0.5);
-        const randomPick = shuffled[0];
-
-        function formatDate(mtime) {
-            if (!mtime) return '';
-            const d = new Date(mtime);
-            return `${d.getMonth() + 1}-${d.getDate()}`;
-        }
+        const randomPicks = shuffled.slice(0, 3);
 
         // ----- 构建卡片 HTML -----
         const cards = [];
@@ -279,37 +268,23 @@
             </div>
         </div>`);
 
-        // 卡片3：最近更新
-        if (recentFiles.length > 0) {
-            let recentHTML = recentFiles.map(f => {
-                const name = (f.name || '').replace(/\.[^.]+$/, '');
-                const icon = getExtIcon(f.ext);
-                const date = formatDate(f.mtime);
-                return `<li data-path="${escapeHtml(f.path || '')}" title="${escapeHtml(f.name || '')}">
-                    <span class="note-name">${escapeHtml(name)}</span>
-                    <span class="note-date">${date}</span>
-                </li>`;
+        // 卡片3：随机阅读（一次三篇，带刷新按钮）
+        if (randomPicks.length > 0) {
+            const picksHTML = randomPicks.map(p => {
+                const pName = (p.name || '').replace(/\.[^.]+$/, '');
+                const pPath = p.path || '';
+                return `<div class="random-note" data-path="${escapeHtml(pPath)}" style="margin-top:8px; padding:10px 14px; background:rgba(91,155,213,0.06); border-radius:10px; cursor:pointer; transition:all var(--transition); border:1px solid transparent;">
+                    <span style="color:var(--text-primary); font-weight:600;">${escapeHtml(pName)}</span>
+                    <span style="float:right; font-size:0.78rem; color:var(--text-muted);">去看看 →</span>
+                </div>`;
             }).join('');
             cards.push(`<div class="home-card" style="animation-delay: 0.12s;">
-                <div class="card-title">最近更新</div>
-                <ul class="recent-notes-list">${recentHTML}</ul>
-            </div>`);
-        }
-
-        // 卡片4：随机阅读（带刷新按钮）
-        if (randomPick) {
-            const rName = (randomPick.name || '').replace(/\.[^.]+$/, '');
-            const rPath = randomPick.path || '';
-            cards.push(`<div class="home-card" style="animation-delay: 0.19s;">
                 <div class="card-title">
                     随机阅读
-                    <button class="random-refresh-btn" title="换一篇">换一篇</button>
+                    <button class="random-refresh-btn" title="换一批">换一批</button>
                 </div>
-                <p class="card-desc">不知道该看什么？这里有一篇随机推荐给你的笔记：</p>
-                <div class="random-note" data-path="${escapeHtml(rPath)}" style="margin-top:12px; padding:12px 16px; background:rgba(91,155,213,0.06); border-radius:12px; cursor:pointer; transition:all var(--transition); border:1px solid transparent;">
-                    <strong style="color:var(--text-primary);">${escapeHtml(rName)}</strong>
-                    <span style="float:right; font-size:0.8rem; color:var(--text-muted);">去看看 →</span>
-                </div>
+                <p class="card-desc">不知道该看什么？这里有三篇随机推荐给你的笔记：</p>
+                <div class="random-notes-list">${picksHTML}</div>
             </div>`);
         }
 
@@ -356,20 +331,8 @@
             });
         }
 
-        // 最近笔记列表项点击
-        viewer.querySelectorAll('.recent-notes-list li[data-path]').forEach(li => {
-            li.addEventListener('click', () => {
-                const path = li.dataset.path;
-                if (path) {
-                    window.location.hash = '#' + encodeURIComponent(path);
-                    loadFileByPath(path);
-                }
-            });
-        });
-
-        // 随机阅读卡片点击
-        const randomNote = viewer.querySelector('.random-note');
-        if (randomNote) {
+        // 随机阅读卡片点击（多篇）
+        viewer.querySelectorAll('.random-note').forEach(randomNote => {
             randomNote.addEventListener('click', () => {
                 const path = randomNote.dataset.path;
                 if (path) {
@@ -377,7 +340,7 @@
                     loadFileByPath(path);
                 }
             });
-        }
+        });
 
         // 分类标签点击 → 打开对应文件夹
         viewer.querySelectorAll('.tag-item[data-tag]').forEach(tag => {
@@ -478,7 +441,7 @@
         });
     }
 
-    // 刷新随机阅读卡片（重新从所有文件中随机选一篇）
+    // 刷新随机阅读卡片（重新从所有文件中随机选三篇）
     function refreshRandomCard() {
         if (!treeData || !treeData.children) return;
         const allFiles = [];
@@ -491,17 +454,19 @@
         }
         collect(treeData.children);
         if (allFiles.length === 0) return;
-        const pick = allFiles[Math.floor(Math.random() * allFiles.length)];
-        const rName = (pick.name || '').replace(/\.[^.]+$/, '');
-        const rPath = pick.path || '';
-        const card = viewer.querySelector('.random-note');
-        if (card) {
+        const shuffled = [...allFiles].sort(() => Math.random() - 0.5);
+        const picks = shuffled.slice(0, 3);
+        const cards = viewer.querySelectorAll('.random-note');
+        cards.forEach((card, i) => {
+            const pick = picks[i] || picks[0]; // fallback if fewer than 3 files
+            const rName = (pick.name || '').replace(/\.[^.]+$/, '');
+            const rPath = pick.path || '';
             card.dataset.path = rPath;
-            const strong = card.querySelector('strong');
-            if (strong) strong.textContent = rName;
+            const span = card.querySelector('span');
+            if (span) span.textContent = rName;
             card.classList.add('random-flash');
             setTimeout(() => card.classList.remove('random-flash'), 400);
-        }
+        });
     }
 
     // 在文件夹中递归查找第一个 .md 文件
@@ -934,32 +899,6 @@
 
             viewer.innerHTML = `<div class="markdown-body">${finalHtml}</div>`;
 
-            try {
-                if (treeData && treeData.children) {
-                    const fileNode = findFileNodeInTree(treeData.children, filePath);
-                    if (fileNode && fileNode.mtime) {
-                        const dateContainer = document.createElement('div');
-                        dateContainer.className = 'file-modified-date';
-                        dateContainer.style.cssText = 'margin-top: 3rem; padding-top: 1rem; border-top: 1px dashed var(--border-light); color: var(--text-muted); font-size: 0.9em; text-align: center;';
-
-                        const dateObj = new Date(fileNode.mtime);
-                        const formattedDate = dateObj.toLocaleString('zh-CN', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false
-                        }).replace(/\//g, '-');
-
-                        dateContainer.textContent = `最后修改于: ${formattedDate}`;
-                        viewer.querySelector('.markdown-body')?.appendChild(dateContainer);
-                    }
-                }
-            } catch (dateErr) {
-                console.warn('无法显示修改日期:', dateErr);
-            }
-
             if (window.hljs && !md.options.highlight) {
                 document.querySelectorAll('.markdown-body pre code').forEach((block) => {
                     hljs.highlightElement(block);
@@ -1291,8 +1230,8 @@
                     for (const n of fileNodes) {
                         const np = parentPath ? parentPath + '/' + n.name : n.name;
                         if (n.type === 'file') {
-                            // 确保节点有 path 属性（tree-log.json 中节点可能没有）
-                            if (!n.path) n.path = np;
+                            // 确保节点有 path 属性，用基于根目录的完整路径覆盖
+                            n.path = np;
                             logFilesAll.push(n);
                             // 从文件名解析日期 YYYY-MM-DD 格式
                             let dateKey = '';
@@ -1310,7 +1249,12 @@
                     }
                 }
                 collectFiles(nodes, (data && data.name) || '');
-                logFilesAll.sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
+                // 按文件名（日期）排序
+                logFilesAll.sort((a, b) => {
+                    const nameA = (a.name || '').replace(/\.[^.]+$/, '');
+                    const nameB = (b.name || '').replace(/\.[^.]+$/, '');
+                    return nameB.localeCompare(nameA);
+                });
 
                 if (logFilesAll.length === 0) {
                     viewer.innerHTML = `
@@ -1320,17 +1264,10 @@
                     return;
                 }
 
-                // 默认显示最新日志所在年月的日历
-                let curYear, curMonth;
-                if (logFilesAll[0] && logFilesAll[0].mtime) {
-                    const d = new Date(logFilesAll[0].mtime);
-                    curYear = d.getFullYear();
-                    curMonth = d.getMonth() + 1;
-                } else {
-                    const now = new Date();
-                    curYear = now.getFullYear();
-                    curMonth = now.getMonth() + 1;
-                }
+                // 默认显示最新年份和月份
+                const now = new Date();
+                let curYear = now.getFullYear();
+                let curMonth = now.getMonth() + 1;
 
                 buildLogPageUI(curYear, curMonth);
             })
@@ -1379,6 +1316,7 @@
                     if (count >= 3) levelClass = 'log-cal-level-3';
                     else if (count >= 2) levelClass = 'log-cal-level-2';
                     else if (count >= 1) levelClass = 'log-cal-level-1';
+                    else levelClass = 'log-cal-no-log';
                     const isToday = dateKey === todayKey;
                     const todayClass = isToday ? ' log-cal-today' : '';
                     const clickableClass = count > 0 ? ' log-cal-clickable' : '';
@@ -1390,19 +1328,23 @@
         }
         calHTML += '</tbody></table>';
 
-        // 月份选择器
-        const yearOptions = [];
+        // 收集所有可用年份和月份
         const allYears = new Set();
         for (const key of Object.keys(logDateMap)) {
             allYears.add(parseInt(key.split('-')[0]));
         }
         allYears.add(new Date().getFullYear());
         const sortedYears = Array.from(allYears).sort((a, b) => b - a);
-        for (const y of sortedYears) {
-            yearOptions.push(`<span class="log-year-opt" data-year="${y}">${y}</span>`);
-        }
 
         const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+        // 构建年份/月份下拉选择器
+        const yearSelectHTML = sortedYears.map(y =>
+            `<option value="${y}"${y === year ? ' selected' : ''}>${y} 年</option>`
+        ).join('');
+        const monthSelectHTML = monthNames.map((name, i) =>
+            `<option value="${i + 1}"${(i + 1) === month ? ' selected' : ''}>${name}</option>`
+        ).join('');
 
         viewer.innerHTML = `
             <div class="log-page">
@@ -1412,32 +1354,29 @@
                 <div class="log-calendar-container">
                     <div class="log-calendar-header">
                         <button class="log-nav-btn" id="logPrevMonth" title="上个月">◀</button>
-                        <div class="log-calendar-year">
-                            <span id="logCurYear">${year}</span> 年
-                            <span id="logCurMonth">${month}</span> 月
+                        <div class="log-calendar-jump">
+                            <select id="logJumpYear" class="log-jump-select">${yearSelectHTML}</select>
+                            <select id="logJumpMonth" class="log-jump-select">${monthSelectHTML}</select>
                         </div>
                         <button class="log-nav-btn" id="logNextMonth" title="下个月">▶</button>
                     </div>
                     ${calHTML}
-                    <div class="log-year-selector">
-                        ${yearOptions.join('')}
-                    </div>
                 </div>
                 <div id="log-date-detail" class="log-date-detail" style="display:none;"></div>
             </div>`;
 
-        // 绑定年份选择
-        viewer.querySelectorAll('.log-year-opt').forEach(opt => {
-            opt.addEventListener('click', () => {
-                const y = parseInt(opt.dataset.year);
-                const m = parseInt(viewer.querySelector('#logCurMonth')?.textContent || 1);
+        // 年份/月份下拉跳转
+        const jumpYear = viewer.querySelector('#logJumpYear');
+        const jumpMonth = viewer.querySelector('#logJumpMonth');
+        if (jumpYear && jumpMonth) {
+            const doJump = () => {
+                const y = parseInt(jumpYear.value);
+                const m = parseInt(jumpMonth.value);
                 buildLogPageUI(y, m);
-            });
-        });
-
-        // 当前年份高亮
-        const curYearOpt = viewer.querySelector(`.log-year-opt[data-year="${year}"]`);
-        if (curYearOpt) curYearOpt.classList.add('active');
+            };
+            jumpYear.addEventListener('change', doJump);
+            jumpMonth.addEventListener('change', doJump);
+        }
 
         // 月份导航
         const prevBtn = viewer.querySelector('#logPrevMonth');
@@ -1457,12 +1396,16 @@
             });
         }
 
-        // 日历单元格点击 → 显示当天日志列表
+        // 日历单元格点击 → 直接跳转到日志文件
         viewer.querySelectorAll('.log-cal-cell.log-cal-clickable').forEach(cell => {
             cell.addEventListener('click', () => {
                 const dateKey = cell.dataset.date;
                 const entries = logDateMap[dateKey] || [];
-                showLogDateDetail(dateKey, entries);
+                if (entries.length > 0) {
+                    const filePath = entries[0].path;
+                    window.location.hash = '#' + encodeURIComponent('log:' + filePath);
+                    loadLogFile(filePath);
+                }
             });
         });
     }
@@ -1614,7 +1557,7 @@
             viewer.innerHTML = `
                 <div class="log-reading">
                     <div class="log-reading-header">
-                        <a href="#logs" class="log-back-btn">← 返回日志</a>
+                        <a href="#logs" class="log-back-btn">← 返回日历</a>
                         <span class="log-reading-title">${escapeHtml(fileNameWithoutExt)}</span>
                     </div>
                     <div class="log-reading-content markdown-body">
