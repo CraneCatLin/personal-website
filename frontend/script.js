@@ -250,7 +250,7 @@
         // 卡片1：欢迎 — 网站名 + 一句话介绍
         cards.push(`<div class="home-card card-span-2" style="animation-delay: 0.05s;">
             <div class="card-title">CraneCat 喵~</div>
-            <p class="card-desc">这里是我的个人笔记网站，记录学习过程中的点点滴滴。涵盖计算机科学、数学、杂谈等各种内容。</p>
+            <p class="card-desc">这里是我的个人网站，记录学习与生活。涵盖计算机科学、数学、杂谈等各种内容。</p>
             <div class="card-actions">
                 <a href="#/" class="card-link primary">进入笔记库</a>
             </div>
@@ -527,7 +527,7 @@
         </div>
         `;
         viewer.innerHTML = hubHTML;
-        document.body.classList.remove('homepage');
+        document.body.classList.remove('homepage', 'log-page', 'hide-sidebar');
         setBackgroundForPage(false);
         document.title = '笔记库';
         document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
@@ -541,14 +541,14 @@
             {
                 avatar: 'https://github.com/CraneCatLin.png',
                 name: 'CraneCat',
-                desc: '🎵 这是站长自己，欢迎友链互链 ~',
+                desc: '欢迎友链互链 ~',
                 url: 'https://cranecat.cn'
             },
             {
-                avatar: 'https://avatars.githubusercontent.com/u/0?v=4',
-                name: '示例友链',
-                desc: '这是一个友链示例，替换为你自己的朋友信息即可。',
-                url: 'https://example.com'
+                avatar: 'https://axi404.top/avatar/avatar.png',
+                name: 'Axi\'s Blog',
+                desc: '一只可爱小猫',
+                url: 'https://axi404.top'
             }
         ];
 
@@ -581,7 +581,7 @@
             renderDefaultAbout();
             document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
             currentFilePath = '';
-            document.body.classList.add('homepage');
+            document.body.classList.add('homepage', 'hide-sidebar');
             setBackgroundForPage(true);
             return;
         }
@@ -593,14 +593,16 @@
             renderDefaultAbout();
             document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
             currentFilePath = '';
-            document.body.classList.add('homepage');
+            document.body.classList.remove('log-page');
+            document.body.classList.add('homepage', 'hide-sidebar');
             setBackgroundForPage(true);
             return;
         }
 
         // 友链页面
         if (hash === 'friends') {
-            body.classList.remove('homepage');
+            body.classList.remove('homepage', 'log-page');
+            body.classList.add('hide-sidebar');
             setBackgroundForPage('friends');
             renderFriendsPage();
             return;
@@ -609,24 +611,25 @@
         // 日志页面
         if (hash === 'logs') {
             body.classList.remove('homepage');
-            body.classList.add('log-page');
+            body.classList.add('log-page', 'hide-sidebar');
             setBackgroundForPage('log');
             renderLogPage();
             return;
         }
 
         // 日志文件阅读 — 通过 #log:文件路径 标识
-        if (hash.startsWith('log:')) {
+        const decodedHash = decodeURIComponent(hash);
+        if (decodedHash.startsWith('log:')) {
             body.classList.remove('homepage');
-            body.classList.add('log-page');
+            body.classList.add('log-page', 'hide-sidebar');
             setBackgroundForPage('log');
-            const logPath = decodeURIComponent(hash.slice(4));
+            const logPath = decodedHash.slice(4);
             loadLogFile(logPath);
             return;
         }
 
-        // 移除 homepage / log-page 类以显示侧边栏
-        body.classList.remove('homepage', 'log-page');
+        // 移除 homepage / log-page / hide-sidebar 类以显示侧边栏和 TOC
+        body.classList.remove('homepage', 'log-page', 'hide-sidebar');
         setBackgroundForPage(false);
         const filePath = decodeURIComponent(hash);
         loadFileByPath(filePath);
@@ -1489,7 +1492,8 @@
                 viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 加载日志失败</h2><p>无法加载 ${filePath} (${error.message})</p></div>`;
             });
         currentFilePath = filePath;
-        document.body.classList.remove('homepage');
+        document.body.classList.remove('homepage', 'note-page');
+        document.body.classList.add('hide-sidebar');
         setBackgroundForPage('log');
     }
 

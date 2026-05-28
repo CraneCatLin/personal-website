@@ -1516,6 +1516,22 @@ body.log-page::before {
     }
 }
 
+/* ---------- 非笔记页面隐藏侧边栏和 TOC，内容居中 ---------- */
+body.hide-sidebar .sidebar,
+body.hide-sidebar .toc-sidebar {
+    display: none;
+}
+
+body.hide-sidebar .app-grid {
+    justify-content: center;
+}
+
+body.hide-sidebar .main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 /* ---------- Print ---------- */
 @media print {
 
