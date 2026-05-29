@@ -1,7 +1,8 @@
 /**
  * 日志模块 - 从 script.js 拆分
- * 依赖：core.js（提供全局 viewer, body, currentFilePath, clearTOC, showContentSkeleton, 
+ * 依赖：core.js（提供全局 viewer, body, currentFilePath, showContentSkeleton, 
  *       escapeHtml, processMathFormulas, enhanceCodeBlocks 等变量和函数）
+ * 依赖：toc.js（提供 window.TOCModule.clearTOC）
  */
 
 // ==================== 日志页面 ====================
@@ -12,7 +13,7 @@ let logDateMap = {}; // "2026-05-27" -> [file, file, ...]
 
 function renderLogPage() {
     document.title = '日志 - CraneCat喵~';
-    clearTOC();
+    window.TOCModule.clearTOC();
 
     viewer.innerHTML = `<div style="text-align:center; padding:60px 20px; color:var(--text-muted);">加载中...</div>`;
 
@@ -382,11 +383,11 @@ function renderLogMarkdown(markdownText, filePath) {
             });
         }
         enhanceCodeBlocks();
-        clearTOC();
+        window.TOCModule.clearTOC();
     } catch (error) {
         console.error('日志 Markdown 渲染出错:', error);
         viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p></div>`;
-        clearTOC();
+        window.TOCModule.clearTOC();
     }
 }
 

@@ -1,3 +1,298 @@
+# PROJECT INDEX — WebsiteNote 项目索引
+
+> **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
+> **更新日期**：2026-05-29
+> **变更摘要**：从 script.js 拆分目录树模块（buildTreeHTML、bindTreeEvents、findFirstFile、loadTree）到独立文件 js/tree.js；script.js ~477 行；更新目录结构、索引和行数
+
+---
+
+## 1. 项目概览
+
+| 项目 | 说明 |
+|------|------|
+| **名称** | WebsiteNote / CraneCat喵~ |
+| **网址** | https://cranecat.cn |
+| **类型** | 纯静态个人笔记网站（无后端、无框架） |
+| **部署** | OSS 静态托管 + Cloudflare CDN |
+| **笔记格式** | Markdown，Obsidian 编写 |
+| **VCS** | GitHub: `CraneCatLin/personal-website` |
+
+### 一句话架构
+
+**Obsidian 写 Markdown → 脚本处理格式 + 生成 JSON 目录树 → 纯前端 SPA（JS 路由 + markdown-it 渲染 + KaTeX 数学公式）→ OSS + Cloudflare**
+
+---
+
+## 2. 目录结构总览
+
+```
+WebsiteNote/                    # 项目根 = Git 仓库根
+├── .gitignore
+├── README.md                   # 人类阅读的项目说明
+├── PROJECT_INDEX.md            # 本文件：AI 索引
+├── config.ps1                  # 敏感配置（OSS_BUCKET_URL, CF_ZONE_ID, CF_API_TOKEN），gitignore
+├── update.ps1                  # 一键部署脚本（PowerShell）
+│
+├── frontend/                   # ★ 前端站点根目录（部署到 OSS 的目录）
+│   ├── index.html              # 入口 HTML，单页面骨架
+│   ├── 404.html                # 自定义 404 页面（自动跳转首页 + hash）
+│   ├── script.js               # ★ 核心 JS：路由、树渲染、内容加载 (~659行)
+│   ├── style.css               # ★ 全部样式 (~1728行)
+│   ├── tree.json               # 目录树 JSON（由 generate-tree.js 生成）
+│   ├── tree-log.json           # 日志目录树 JSON（由 generate-tree.js 单独为日志目录生成）
+│   ├── picture-link-convert.py # 一次性工具：转换图片链接格式
+│   ├── images/                 # 背景图片（home-bg.jpg, note-bg.png）
+│   ├── js/                     # ★ JS 模块目录
+│   │   ├── core.js             # 共享模块：DOM引用、工具函数、KaTeX公式渲染、代码复制按钮
+│   │   ├── home.js             # 首页模块：动态卡片首页、随机阅读、3D倾斜效果
+│   │   ├── log.js              # 日志模块：日历视图、日志列表、日志阅读渲染
+│   │   ├── friends.js          # 友链模块：友链页面渲染
+│   │   ├── notes.js            # 笔记渲染模块：Markdown渲染、图片/视频预览
+│   │   ├── toc.js              # TOC模块：目录树生成、滚动高亮
+│   │   └── tree.js             # 目录树模块：从tree.json加载、构建HTML、绑定交互事件
+│   ├── libs/                   # 第三方库
+│   │   ├── js/                 # JS库（marked, highlight.js, KaTeX, markdown-it 等）
+│   │   ├── css/                # CSS库（如 github.min.css 语法高亮主题）
+│   │   └── katex/              # KaTeX CSS 样式
+│   └── public/                 # ★ 笔记文件仓库 + Obsidian Vault
+│       ├── .obsidian/          # Obsidian 配置 + 插件（update-script 插件在此）
+│
+├── scripts/                    # ★ 预处理脚本（update.ps1 调用）
+│   ├── generate-tree.js        # Node：扫描 public/ 生成 frontend/tree.json
+│   ├── addLine.py              # Python：确保 $$ 公式前有空行
+│   ├── add_line_breaks.py      # Python：每行末尾加两个空格（Markdown 换行用）
+│   └── gatherToAligned.py      # Python：替换 aligned → gathered 环境名
+│
+└── update-script/              # Obsidian 插件源码
+    ├── main.js                 # 插件逻辑：在 Obsidian Ribbon 添加按钮调用 update.ps1
+    └── manifest.json           # 插件元数据
+```
+
+---
+
+## 3. 文件职责与关键细节
+
+### 3.1 前端核心
+
+#### `frontend/index.html`
+- **角色**：SPA 唯一 HTML 页面
+- **内容**：顶栏（首页/笔记/友链/日志按钮 + 移动端菜单按钮）、左侧目录树侧边栏、中间内容区、右侧 TOC 侧边栏
+- **加载的库**：`marked` + `highlight.js` + `markdown-it` + `markdown-it-imsize` + `KaTeX` + `texmath`
+- **入口脚本**：按序加载 `core.js` → `toc.js` → `notes.js` → `friends.js` → `home.js` → `log.js` → `script.js`（均为 defer）
+
+#### `frontend/script.js`（~435 行）
+- **角色**：主要交互逻辑（路由、树渲染、内容渲染）
+- **说明**：原始全部逻辑已拆分，部分功能移至 `js/core.js`（共享工具函数）、`js/home.js`（首页模块）、`js/log.js`（日志模块）、`js/friends.js`（友链模块）、`js/notes.js`（笔记渲染模块）、`js/toc.js`（TOC 模块）、`js/tree.js`（目录树模块）
+- **IIFE 变量暴露**：通过 `Object.defineProperty` getter 将 `treeData`、`defaultNotePath`、`loadFileByPath`、`loadFromHash` 暴露为 `window.treeData` 等全局属性，供 `js/home.js` 以自由变量形式访问
+- **核心机制**：
+  - **路由**：基于 `window.location.hash`（`#文件路径`），`hashchange` 事件驱动
+  - **目录树**：fetch `/tree.json` → `buildTreeHTML()` 生成 DOM → `bindTreeEvents()` 绑定点击/折叠。加载时自动过滤掉名称为"日志"的文件夹（日志由 `tree-log.json` 单独管理）
+  - **内容渲染**：fetch `/public/文件路径` → `markdown-it` 渲染 → 注入 viewer
+  - **Wikilink**：`[[文件名]]` 语法 → 替换为 `<a href="#...">`
+  - **图片尺寸**：`![alt|宽x高](path)` → 在渲染后通过 DOM 操作设置 width/height 属性
+  - **TOC**（移至 `js/toc.js`）：从渲染后的 DOM 提取标题（`:is(h1~h6):not(.note-title)`）→ 构建嵌套目录
+  - **数学公式**：优先用 `markdown-it-texmath` 插件；若失败则用正则 + KaTeX 手动替换
+  - **代码高亮**：`markdown-it` 的 highlight 回调 + 防退手动 `hljs.highlightElement`
+  - **代码复制按钮**：`enhanceCodeBlocks()` 为每个 pre 包裹 wrapper + 复制按钮（移至 `js/core.js`）
+  - **骨架屏**：加载时显示 CSS 动画骨架
+  - **最后修改时间**：从 `tree.json` 的 `mtime` 读取显示在每个笔记底部
+  - **页面切换**：`setBackgroundForPage()` 支持四种模式：首页（默认）、`note-page`（笔记）、`friends-page`（友链）、`log-page`（日志），动态切换背景图和 sidebar 显隐
+- **全局状态**：
+  - `treeData`：tree.json 解析结果
+  - `currentFilePath`：当前加载的文件相对路径
+  - `fileNameMap` / `fullPathNoExtMap`：Wiki 链接快速查找 Map
+  - `defaultNotePath`：默认第一个笔记路径（供"笔记"按钮使用）
+
+#### `frontend/style.css`（~1728 行）
+- **角色**：全部视觉样式
+- **关键设计**：
+  - CSS 变量定义在 `:root`（颜色、阴影、过渡）
+  - 布局：`grid-template-columns: 250px 1fr`（左侧边栏 + 主区域），主区域再 flex 分内容区和 TOC
+  - 移动端：768px 以下左侧边栏变为固定侧滑菜单（`transform: translateX`），TOC 隐藏
+  - 背景：`body` 和 `body::before` 伪元素实现首页/笔记页背景切换（淡入淡出）
+  - 骨架屏动画：`skeleton-shimmer` keyframes
+  - 代码块复制按钮：`.code-copy-btn` 绝对定位在 `pre` 右上角
+
+#### `frontend/js/core.js`（~203 行）
+- **角色**：核心共享模块（从 `script.js` 拆分）
+- **内容**：
+  - **DOM 引用**：`viewer`、`body`、`currentFilePath`
+  - **常量**：`SUPPORTED_IMG`（图片扩展名列表）、`SUPPORTED_VIDEO`（视频扩展名列表）
+  - **工具函数**：
+    - `getFileExtension()` — 获取文件扩展名
+    - `setBackgroundForPage()` — 设置页面背景（首页/笔记/友链/日志）
+    - `showContentSkeleton()` — 显示骨架屏
+    - `escapeHtml()` — HTML 转义防 XSS
+    - `processMathFormulas()` — 手动 KaTeX 公式渲染（块级 `$$`、行内 `$` 和 `\(`）
+    - `enhanceCodeBlocks()` — 为代码块添加复制按钮及事件
+- **导出**：通过 `window.CoreModule` 暴露给其他模块
+
+#### `frontend/js/log.js`（~397 行）
+- **角色**：日志模块（从 `script.js` 拆分）
+- **依赖**：`js/core.js`（使用 CoreModule 导出的函数）
+- **核心功能**：
+  - **日志日历页**：`renderLogPage()` — 加载 `tree-log.json`，构建月份日历表格，支持年/月选择切换
+  - **日志数据**：`logDateMap` 以日期为 key 索引日志文件
+  - **日历渲染**：按月份生成 7 列表格，日期有日志时显示为可点击（颜色深度反映当日日志数量）
+  - **日历导航**：上/下月按钮 + 年份/月份下拉跳转
+  - **日志阅读**：`loadLogFile()` + `renderLogMarkdown()` — 加载并渲染 Markdown，显示"← 返回日历"按钮
+  - **页面标识**：阅读日志时设置 `body.hide-sidebar` + `log-page` 类
+- **导出**：通过 `window.LogModule` 暴露给 `script.js`
+
+#### `frontend/js/home.js`（~310 行）
+- **角色**：首页模块（从 `script.js` 拆分）
+- **依赖**：通过 script.js IIFE 暴露的全局变量 `window.treeData`、`window.defaultNotePath`、`window.loadFileByPath`、`window.loadFromHash`（以自由变量形式引用）；通过 core.js 的全局变量 `viewer`、`escapeHtml`；通过 toc.js 的 `window.TOCModule.clearTOC`
+- **核心功能**：
+  - `renderDefaultAbout()` — 渲染卡片式首页（欢迎卡片、关于、随机阅读、统计、标签）
+  - `bindHomeCardEvents()` — 绑定首页卡片交互（进入笔记库、随机阅读点击、标签点击、刷新、3D倾斜）
+  - `initCardTilt()` — 卡片 3D 倾斜 + Glare 高光鼠标跟随效果
+  - `refreshRandomCard()` — 刷新随机推荐卡片内容
+  - `findFirstMd()` — 递归查找文件夹内第一个 .md 文件
+  - `navigateToFirstNote()` — 跳转到笔记库第一篇笔记
+- **导出**：通过 `window.HomeModule` 暴露 `renderDefaultAbout` 和 `navigateToFirstNote`
+
+#### `frontend/js/friends.js`（~46 行）
+- **角色**：友链模块（从 `script.js` 拆分）
+- **依赖**：使用全局 `viewer`；通过 toc.js 的 `window.TOCModule.clearTOC`
+- **核心功能**：
+  - `renderFriendsPage()` — 渲染友链卡片列表，设置页面标题，清空 TOC
+- **导出**：通过 `window.FriendsModule` 暴露给 `script.js`
+
+#### `frontend/js/toc.js`（~145 行）
+- **角色**：TOC 模块（从 `script.js` 拆分）
+- **依赖**：通过 `window.TOCModule` 导出 `renderTOCFromDOM`、`clearTOC`、`updateTOCActive`
+- **核心功能**：
+  - `renderTOCFromDOM()` — 从渲染后的 DOM 提取标题，构建嵌套目录树
+  - `clearTOC()` — 清空 TOC 内容
+  - `updateTOCActive()` — 滚动时高亮当前目录项（滚动监听事件在 `script.js` 的 `init()` 中绑定）
+- **导出**：通过 `window.TOCModule` 暴露给其他模块
+
+#### `frontend/js/notes.js`（~243 行）
+- **角色**：笔记渲染模块（从 `script.js` 拆分）
+- **依赖**：通过 `window.CoreModule` 使用 `processMathFormulas`、`escapeHtml` 等函数
+- **核心功能**：
+  - `renderMarkdown()` — 使用 markdown-it 渲染 Markdown 内容，处理 Wikilink、图片尺寸、代码高亮、TOC 生成
+  - `renderImage()` — 渲染图片文件（根据扩展名判断是否支持的图片格式）
+  - `renderVideo()` — 渲染视频文件
+  - `renderUnsupported()` — 显示不支持的文件类型提示
+  - `processImageSizes()` — 在 DOM 层面设置图片宽高属性
+  - `convertVideoImgs()` — 转换视频相关的 `<img>` 标签
+- **导出**：通过 `window.NotesModule` 暴露 `renderMarkdown`、`renderImage`、`renderVideo`、`renderUnsupported`
+
+#### `frontend/tree.json`
+- **角色**：目录树数据（由 `scripts/generate-tree.js` 每次部署前生成）
+- **结构**：`{ type, name, path, children[], ext?, mtime? }` 递归嵌套
+- **path 字段**：相对于 `public/` 的相对路径（如 `"ai/CNN.md"`）
+
+#### `frontend/tree-log.json`
+- **角色**：日志目录树数据（由 `scripts/generate-tree.js` 单独为 `public/日志/` 目录生成）
+- **结构**：与 `tree.json` 相同（`{ type, name, path, children[], ext?, mtime? }`）
+- **用途**：日志模块专用，避免与主笔记目录树混淆
+
+#### `frontend/404.html`
+- **角色**：OSS 自定义 404，当访问不存在的路径时自动跳转到 `index.html#原路径`
+- **逻辑**：`window.location.pathname` → 设置 `window.location.href = '/index.html#' + currentPath`
+
+#### `frontend/picture-link-convert.py`
+- **角色**：一次性工具脚本
+- **功能**：将 `![](path =WxH)` 格式批量转换为 `![](alt|WxH)` 格式
+- **已执行完毕，不再需要常规运行**
+
+---
+
+### 3.2 预处理脚本
+
+#### `scripts/generate-tree.js`
+- **角色**：部署流程核心，生成 `frontend/tree.json`
+- **运行方式**：`node scripts/generate-tree.js`
+- **输入**：`frontend/public/` 目录
+- **输出**：`frontend/tree.json`
+- **过滤规则**：
+  - 忽略隐藏文件（`.` 开头）
+  - 忽略 `.DS_Store`, `.gitkeep`, `.git`, `.hg`, `.svn`, `Thumbs.db`
+  - 忽略 `/images` 目录
+  - 忽略图片扩展名（`.jpg`, `.png`, `.gif`, `.svg`, `.webp`, `.bmp`）
+- **排序**：`localeCompare` 自然排序
+
+#### `scripts/addLine.py`
+- **角色**：确保 Markdown 文件中 `$$` 块级公式前有空行，避免渲染问题
+- **输入/输出**：原地修改 `frontend/public/**/*.md`
+
+#### `scripts/add_line_breaks.py`
+- **角色**：在每行末尾添加两个空格（Markdown 硬换行语法）
+- **输入/输出**：原地修改 `frontend/public/**/*.md`
+
+#### `scripts/gatherToAligned.py`
+- **角色**：将 Markdown 中的 `aligned` LaTeX 环境替换为 `gathered`
+- **实际行为**：正则 `\baligned\b` → `gathered`
+- **输入/输出**：原地修改 `frontend/public/**/*.md`
+
+---
+
+### 3.3 部署系统
+
+#### `update.ps1`
+- **角色**：一键部署主脚本
+- **流程**：
+  1. 加载 `config.ps1`（OSS/CF 凭证）
+  2. 选择提交模式（自动/手动 commit message）
+  3. 依次运行预处理脚本：`addLine.py` → `gatherToAligned.py` → `add_line_breaks.py` → `generate-tree.js`
+  4. `git add .` → `git commit` → `git push`
+  5. `ossutil sync ./frontend/ $OSS_BUCKET_URL --update --delete`
+  6. 调用 Cloudflare API 刷新全站缓存
+
+#### `config.ps1`
+- **内容**：`$OSS_BUCKET_URL`, `$CF_ZONE_ID`, `$CF_API_TOKEN`
+- **已 gitignore，不可提交**
+
+#### `update-script/`（Obsidian 插件）
+- **`main.js`**：在 Obsidian 左侧 Ribbon 添加终端图标按钮，点击后弹出 PowerShell 窗口执行 `update.ps1`
+- **路径计算**：从 `vaultPath`（通常是 `.../WebsiteNote/frontend/public`）向上 3 级到项目根，拼接 `./WebsiteNote/update.ps1`
+- **`manifest.json`**：插件元数据，`id: "update-script"`, `isDesktopOnly: true`
+
+---
+
+## 4. 数据流图
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  开发阶段（本地）                                        │
+│                                                         │
+│  Obsidian (frontend/public)                             │
+│       │                                                 │
+│       ▼                                                 │
+│  用户编辑 Markdown 笔记                                  │
+│       │                                                 │
+│       ▼ (点击 Obsidian 插件按钮 或 手动运行)              │
+│  update.ps1                                             │
+│       │                                                 │
+│       ├─► scripts/addLine.py          (处理公式格式)     │
+│       ├─► scripts/gatherToAligned.py  (替换 LaTeX 环境)  │
+│       ├─► scripts/add_line_breaks.py  (添加换行符)       │
+│       ├─► scripts/generate-tree.js    (生成 tree.json)   │
+│       ├─► git add/commit/push                             │
+│       ├─► ossutil sync ./frontend/ → OSS桶               │
+│       └─► Cloudflare API: purge_cache (刷新全站)         │
+└─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│  访问阶段（线上）                                        │
+│                                                         │
+│  用户浏览器                                              │
+│       │                                                 │
+│       ▼  https://cranecat.cn                            │
+│  Cloudflare CDN → OSS                                   │
+│       │                                                 │
+│       ▼  frontend/index.html                            │
+│  加载 script.js                                          │
+│       │                                                 │
+│       ├─► fetch /tree.json → 构建目录树                  │
+│       ├─► 读取 hash → 确定要加载的文件路径                │
+│       ├─► fetch /public/{path}.md → markdown-it 渲染     │
+│       └─► KaTeX 渲染数学公式, hljs 代码高亮               │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -27,46 +322,34 @@
 - 这可能导致不必要的换行——如果某些行不需要硬换行，这是已知副作用
 
 ### 5.6 背景图
-- **首页**（`body.homepage`）：`body.homepage::before` 伪元素，`background-image: /images/home-bg.jpg`，opacity 0.35
-- **笔记页**（`body.note-page`）：`body.note-page::before`，`background-image: /images/note-bg.png`，opacity 0.25
-- **友链页**（`body.friends-page`）：`body.friends-page::before`，与首页共用 `home-bg.jpg`，opacity 0.35
-- 切换通过 JS 的 `setBackgroundForPage()` 函数添加/移除 `homepage` / `note-page` / `friends-page` class
-- 切换时有 CSS `opacity` + `background-image` 过渡动画
+- 首页：`body` 的 `background-image: /images/home-bg.jpg`
+- 笔记页：`body.note-page::before` 伪元素的 `background-image: /images/note-bg.png`
+- 友链页：`body.friends-page::before` 伪元素（背景图与笔记页相同）
+- 日志页：`body.log-page` 专用样式（隐藏 sidebar + 独立背景）
+- 切换时有 CSS `opacity` 过渡动画
 
-### 5.7 友链页
-- 路由：`#friends` hash
-- 友链数据硬编码在 `frontend/js/friends.js` 的 `renderFriendsPage()` 函数中
-- 每张卡片包含：头像（`friend-avatar`）、昵称（`friend-name`）、简介（`friend-desc`）、访问按钮（`friend-link-btn`）
-- 顶栏"友链"按钮点击跳转到 `#friends`
-- 友链页背景与首页共用 `home-bg.jpg`（通过 `friends-page` class 控制）
-
-### 5.8 tree.json 更新时机
+### 5.7 tree.json 更新时机
 - 仅在运行 `update.ps1` 时由 `generate-tree.js` 重新生成
 - 新增/删除笔记文件后必须重新生成，否则目录树不更新
 
-### 5.9 模块化文件拆分（2026-05-29）
-- **JS 拆分**：`frontend/script.js` → `frontend/js/` 下 9 个模块（core / log / home / note-renderer / tree / friends / router / app 等），通过 `index.html` 按依赖顺序 `<script defer>` 加载
-- **CSS 拆分**：`frontend/style.css` → `frontend/css/` 下 9 个模块（variables / base / topbar / sidebar / home / note-viewer / friends / log / responsive）
-- 保留 `frontend/script.js` 和 `frontend/style.css` 作为后备（不主动删除），但 `index.html` 不再引用 `frontend/style.css`（仍在引用 `script.js`）
-- `js/core.js`：核心共享模块，包含 DOM 引用（viewer, body）、常量（SUPPORTED_IMG, SUPPORTED_VIDEO）和工具函数（setBackgroundForPage, clearTOC, showContentSkeleton, escapeHtml, processMathFormulas, enhanceCodeBlocks 等），通过 `window.CoreModule` 导出
-- `js/log.js`：日志模块，包含 logTreeData、logFilesAll、logDateMap 等数据和 renderLogPage、buildLogPageUI、showLogDateDetail、loadLogFile、renderLogMarkdown 等函数，通过 `window.LogModule` 导出（仅导出 renderLogPage 和 loadLogFile）
-- 修改特定组件时只需阅读对应的模块文件，大幅减少误修改风险
+### 5.8 tree-log.json 更新时机
+- 与 tree.json 同时由 `generate-tree.js` 生成（扫描 `public/日志/` 目录）
+- 新增/删除日志文件后必须重新生成，否则日志日历不更新
 
 ---
 
 ## 6. AI 接手最小阅读清单
 
 如果只需要做**前端修改**（UI/渲染/交互），读：
-1. `frontend/index.html` — 了解 DOM 结构和库依赖
-2. `frontend/js/app.js` — 入口编排
-3. `frontend/js/core.js` — 共享状态和工具函数
-4. `frontend/js/router.js` — 路由映射和页面切换
-5. 按需读 `frontend/js/{组件}.js` 和 `frontend/css/{组件}.css`
-   - `home`：首页渲染
-   - `note-renderer`：Markdown 渲染
-   - `tree`：侧边栏目录树
-   - `friends`：友链页
-   - `log`：日志页（含日历）
+ 1. `frontend/index.html` — 了解 DOM 结构和库依赖
+ 2. `frontend/js/core.js` — 共享工具函数
+ 3. `frontend/js/home.js` — 首页模块
+ 4. `frontend/js/log.js` — 日志模块
+ 5. `frontend/js/friends.js` — 友链模块
+ 6. `frontend/js/notes.js` — 笔记渲染模块
+ 7. `frontend/js/toc.js` — TOC 模块
+ 8. `frontend/script.js` — 主要交互逻辑
+ 9. `frontend/style.css` — 按需搜索类名
 
 如果只需要做**后端脚本修改**（部署/预处理），读：
 1. `update.ps1` — 部署流程
@@ -82,4 +365,3 @@
 - `frontend/libs/` 下的第三方库源码
 - `frontend/images/` 下的图片二进制
 - `frontend/tree.json` 的内容（结构从 generate-tree.js 可知）
-- `frontend/style.css` 和 `frontend/script.js`（已拆分不再引用，保留仅作备份）

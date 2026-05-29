@@ -29,57 +29,8 @@ function setBackgroundForPage(isHomePage) {
     }
 }
 
-function updateTOCActive() {
-    const tocLinks = document.querySelectorAll('#tocContent a');
-    if (!tocLinks.length) return;
-
-    const headings = Array.from(document.querySelectorAll('#viewer :is(h1, h2, h3, h4, h5, h6):not(.note-title)'));
-    if (!headings.length) {
-        tocLinks.forEach(link => link.classList.remove('active'));
-        return;
-    }
-
-    let bestHeading = null;
-    let bestDistance = Infinity;
-
-    headings.forEach(heading => {
-        const rect = heading.getBoundingClientRect();
-        const top = rect.top;
-        if (top >= 0 && top < bestDistance) {
-            bestDistance = top;
-            bestHeading = heading;
-        }
-    });
-
-    if (!bestHeading) {
-        headings.forEach(heading => {
-            const top = heading.getBoundingClientRect().top;
-            const absTop = Math.abs(top);
-            if (absTop < bestDistance) {
-                bestDistance = absTop;
-                bestHeading = heading;
-            }
-        });
-    }
-
-    if (bestHeading) {
-        const id = bestHeading.id;
-        tocLinks.forEach(link => link.classList.remove('active'));
-        const activeLink = Array.from(tocLinks).find(link => link.getAttribute('href') === `#${id}`);
-        if (activeLink) activeLink.classList.add('active');
-    } else {
-        tocLinks.forEach(link => link.classList.remove('active'));
-    }
-}
-
-function clearTOC() {
-    const tocContainer = document.getElementById('tocContent');
-    if (tocContainer) tocContainer.innerHTML = '';
-    updateTOCActive();
-}
-
 function showContentSkeleton() {
-    clearTOC();
+    window.TOCModule.clearTOC();
     viewer.innerHTML = `
     <div class="markdown-body" style="padding: 1rem 0;">
         <div class="skeleton skeleton-title"></div>
@@ -195,7 +146,6 @@ window.CoreModule = {
     SUPPORTED_VIDEO: SUPPORTED_VIDEO,
     getFileExtension: getFileExtension,
     setBackgroundForPage: setBackgroundForPage,
-    clearTOC: clearTOC,
     showContentSkeleton: showContentSkeleton,
     escapeHtml: escapeHtml,
     processMathFormulas: processMathFormulas,
