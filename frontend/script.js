@@ -539,7 +539,7 @@
         const friends = [
             {
                 avatar: 'https://github.com/CraneCatLin.png',
-                name: 'CraneCat',
+                name: 'CraneCat\'s Blog',
                 desc: '欢迎友链互链 ~',
                 url: 'https://cranecat.cn'
             },
