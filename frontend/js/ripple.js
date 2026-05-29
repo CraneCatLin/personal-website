@@ -165,6 +165,7 @@
             fastFade: false,              // 是否正在快速淡出
             fastFadeStart: 0,             // 快速淡出开始时间
             frozenRadius: 0,              // 快速淡出时冻结的半径
+            fadeStartIntensity: 0,        // 触发快速淡出时的当前强度
         };
     }
 
@@ -175,11 +176,11 @@
      */
     function updateRipple(ripple, now) {
         if (ripple.fastFade) {
-            // 快速淡出模式
+            // 快速淡出模式：从触发瞬间的当前强度平滑下降到 0
             const fadeElapsed = now - ripple.fastFadeStart;
             const fadeProgress = Math.min(fadeElapsed / CONFIG.CLICK_FAST_FADE_DURATION, 1.0);
             ripple.radius = ripple.frozenRadius;
-            ripple.intensity = Math.max(0, 1.0 - fadeProgress);
+            ripple.intensity = ripple.fadeStartIntensity * Math.max(0, 1.0 - fadeProgress);
             return fadeProgress >= 1.0; // 返回 true 表示可以移除
         }
 
@@ -643,16 +644,19 @@
 
             if (x < 0 || x > 1 || y < 0 || y > 1) return; // 点击不在画布范围内
 
-            // 检查是否达到上限
-            if (this.clickRipples.length >= CONFIG.CLICK_COUNT_MAX) {
-                // 强制移除最早的鼠标涟漪（快速淡出）
-                const oldest = this.clickRipples[0];
-                if (oldest && !oldest.fastFade) {
-                    oldest.fastFade = true;
-                    oldest.fastFadeStart = performance.now();
-                    oldest.frozenRadius = oldest.radius;
+            // 统计非快速淡出中的鼠标涟漪数量
+            const activeClickRipples = this.clickRipples.filter(r => !r.fastFade);
+
+            // 如果活跃涟漪已达上限，强制移除最早的非 fastFade 涟漪
+            if (activeClickRipples.length >= CONFIG.CLICK_COUNT_MAX) {
+                const toFade = activeClickRipples[0]; // 最早的非 fastFade 涟漪
+                if (toFade) {
+                    // 保存触发瞬间的强度和半径，用于平滑过渡
+                    toFade.fadeStartIntensity = toFade.intensity;
+                    toFade.fastFade = true;
+                    toFade.fastFadeStart = performance.now();
+                    toFade.frozenRadius = toFade.radius;
                 }
-                // 注意：不移除数组元素，让 fastFade 完成后自然移除
             }
 
             const maxR = this._calcMaxRadius('click');
