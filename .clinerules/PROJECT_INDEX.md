@@ -2,7 +2,7 @@
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
 > **更新日期**：2026-05-29
-> **变更摘要**：从 script.js 拆分目录树模块（buildTreeHTML、bindTreeEvents、findFirstFile、loadTree）到独立文件 js/tree.js；script.js ~477 行；更新目录结构、索引和行数
+> **变更摘要**：重写 `frontend/js/ripple.js` — 改用 WebGL 着色器实现，位移映射 + 高光/暗纹 + 双池涟漪管理；在 `index.html` 中引入该脚本
 
 ---
 
@@ -49,7 +49,8 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   │   ├── friends.js          # 友链模块：友链页面渲染
 │   │   ├── notes.js            # 笔记渲染模块：Markdown渲染、图片/视频预览
 │   │   ├── toc.js              # TOC模块：目录树生成、滚动高亮
-│   │   └── tree.js             # 目录树模块：从tree.json加载、构建HTML、绑定交互事件
+│   │   ├── tree.js             # 目录树模块：从tree.json加载、构建HTML、绑定交互事件
+│   │   ├── ripple.js           # ★ 水面涟漪特效模块（WebGL）：位移映射着色器 + 高光/暗纹 + 双池涟漪管理
 │   ├── libs/                   # 第三方库
 │   │   ├── js/                 # JS库（marked, highlight.js, KaTeX, markdown-it 等）
 │   │   ├── css/                # CSS库（如 github.min.css 语法高亮主题）
@@ -78,7 +79,6 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - **角色**：SPA 唯一 HTML 页面
 - **内容**：顶栏（首页/笔记/友链/日志按钮 + 移动端菜单按钮）、左侧目录树侧边栏、中间内容区、右侧 TOC 侧边栏
 - **加载的库**：`marked` + `highlight.js` + `markdown-it` + `markdown-it-imsize` + `KaTeX` + `texmath`
-- **入口脚本**：按序加载 `core.js` → `toc.js` → `notes.js` → `friends.js` → `home.js` → `log.js` → `script.js`（均为 defer）
 
 #### `frontend/script.js`（~435 行）
 - **角色**：主要交互逻辑（路由、树渲染、内容渲染）
@@ -192,6 +192,20 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 #### `frontend/404.html`
 - **角色**：OSS 自定义 404，当访问不存在的路径时自动跳转到 `index.html#原路径`
 - **逻辑**：`window.location.pathname` → 设置 `window.location.href = '/index.html#' + currentPath`
+
+
+#### `frontend/js/ripple.js`
+- **角色**：水面涟漪特效模块（WebGL 着色器实现）
+- **依赖**：无（纯原生 WebGL 1.0，无第三方库）
+- **核心功能**：
+  - 使用 WebGL 片段着色器实现位移映射（Displacement Mapping），对背景纹理坐标进行径向偏移采样
+  - 高光/暗纹：在着色器中基于正弦波相位计算亮度增减，增强立体感
+  - 自动涟漪池（固定 3 个）+ 鼠标涟漪池（最多 3 个），双池独立管理
+  - 涟漪生命周期：强度从 0 攀升至峰值（0.2s），再衰减至 0
+  - 鼠标涟漪快速淡化（fastFade）逻辑：0.5s 内强度线性归零
+  - 背景图自动检测：通过 `body.className` 切换对应的背景图纹理
+  - CSS 背景兼容：图片加载失败时保持透明画布，让 CSS 背景透出
+  - 性能优化：`requestAnimationFrame` + `visibilitychange` 暂停
 
 #### `frontend/picture-link-convert.py`
 - **角色**：一次性工具脚本
@@ -355,6 +369,9 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 1. `update.ps1` — 部署流程
 2. `scripts/generate-tree.js` — 目录树生成
 3. 相应的 Python 脚本
+
+如果只需要做**前端视觉特效修改**（涟漪/水面效果），读：
+ 1. `frontend/js/ripple.js` — 完整的 WebGL 涟漪特效模块
 
 如果只需要了解**Obsidian 插件**：
 1. `update-script/main.js`
