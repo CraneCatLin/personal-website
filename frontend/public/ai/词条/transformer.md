@@ -10,7 +10,7 @@ https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-s
 每个编码器由一个前馈神经网络(feed forward neural network, ffnn)和一个自注意力（self-attention）组件组成  
 每个解码器由一个ffnn，一个编码器注意力层，一个自注意力层组成  
 数据流动顺序以及组件图示如下  
-![Transformer_decoder](Transformer_decoder.png)  
+![Transformer_decoder](../rcs/Transformer_decoder.png)  
   
 不同编码器的ffnn参数可以不一样  
   
@@ -25,7 +25,7 @@ $$
 \mathbf{x}_{\text{out}} = \mathrm{LayerNorm}\big(\mathbf{x} + \mathrm{Dropout}(\mathrm{FFN}(\mathbf{x}_{\text{attn}}))\big)  
 $$  
 编码器每次接受一个向量列表；最底部的编码器接受的就是embedding的直接产物  
-![encoder_with_tensors](encoder_with_tensors_2.png)  
+![encoder_with_tensors](../rcs/encoder_with_tensors_2.png)  
 多个向量都会逐层通过encoder  
 #### feed forward neural network  
 ffnn部分是可以并行的  
@@ -42,7 +42,7 @@ $$\mathrm{FFN}(\mathbf{x}) = \mathbf{W}_2 \, \sigma(\mathbf{W}_1 \mathbf{x} + \m
 ###### QKV向量  
 对于向量（对应一个token），我们创建一个Query向量，一个Key向量和一个Value向量  
 具体方法为嵌入向量与三个不同矩阵相乘，如$x_1 W^Q=q_1$  
-![transformer_self_attention_vectors](transformer_self_attention_vectors.png)  
+![transformer_self_attention_vectors](../rcs/transformer_self_attention_vectors.png)  
 通常QKV向量长度小于嵌入向量，例如文中嵌入向量512，QKV为64  
 $W^Q$$W^K$$W^V$这些矩阵会在训练过程中优化  
 ###### 注意力分数  
@@ -57,12 +57,12 @@ $W^Q$$W^K$$W^V$这些矩阵会在训练过程中优化
 	除以 $\sqrt{d_k}$ 是为了将方差缩放回 1，使 softmax 保持合理的“温度”，梯度更稳定。默认用平方根是因为 Q·K 的方差正比于 $d_k$，所以除以标准差 $\sqrt{d_k}$ 是自然的选择。  
 ###### 加权  
 每个token的value向量乘以注意力分数后求和，得到self-attention对于当前输入token的输出  
-![self-attention-output](self-attention-output.png)  
+![self-attention-output](../rcs/self-attention-output.png)  
   
 ###### 矩阵运算实现并行化  
 如图  
-![self-attention-matrix-calculation|500](self-attention-matrix-calculation.png)  
-![self-attention-matrix-calculation-2](self-attention-matrix-calculation-2.png)  
+![../rcs/self-attention-matrix-calculation|500](self-attention-matrix-calculation.png)  
+![self-attention-matrix-calculation-2](../rcs/self-attention-matrix-calculation-2.png)  
   
 ###### 多头注意力  
 上述过程中，一个编码器内只有一组$W^Q$$W^K$$W^V$矩阵  
@@ -83,7 +83,7 @@ $W^O$矩阵也是随着整个模型一起训练的
 #### 残差结构  
 每个编码器中的每个子层（Self-Attention，ffnn）在其周围都有残差连接与层归一化（layer normalization）操作。  
 self-attention层的残差连接与层归一化如下  
-![transformer_resideual_layer_norm_2|500](transformer_resideual_layer_norm_2.png)  
+![transformer_resideual_layer_norm_2|500](../rcs/transformer_resideual_layer_norm_2.png)  
   
   
 ## decoder  
@@ -92,7 +92,7 @@ self-attention层的残差连接与层归一化如下
 第一个token被处理时，输入解码器的是KV以及一个特定token（标注开始），多层处理后生成最终结果的token；  
 其后的token同样输入KV，特定token则由*上一时间步编码器的输出token加上位置向量*代替  
 最后一个输出应当为\<eos\>这样的表示结束的特殊token  
-![transformer_decoding_1](transformer_decoding_1.gif)  
+![transformer_decoding_1](../rcs/transformer_decoding_1.gif)  
 ![transformer_decoding_2](transformer_decoding_2.gif)  
 具体来说每一层decoder中：  
 - self-attention部分：与单层encoder基本相同，但是在softmax之前要把未来位置的注意力分数设置为负无穷以确保只能解码器只能看见前面的token  

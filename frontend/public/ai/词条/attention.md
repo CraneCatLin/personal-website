@@ -22,7 +22,7 @@ https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-s
 3. 对这些分数进行 softmax 归一化，得到注意力权重；  
 4. 将每个 hidden state 乘以对应的权重，放大重要部分的信号，抑制无关部分；  
 5. 将所有加权后的 hidden states 逐元素求和，得到最终的context vector，用于当前时刻的输出生成。  
-![attention_decoder](attention_process.mp4)  
+![attention_decoder](../rcs/attention_process.mp4)  
   
   
   
@@ -41,7 +41,7 @@ attention seq2seq相较seq2seq，改进如下：
 3. 完成上述attention step。在这里就是encoder 传入的HSV与$h_4$按照上述步骤处理。处理得到新的context vector（图中为$c_4$）  
 4. $h_4$和$c_4$拼接出一个向量，输入decoder的输出层，例如一个前馈神经网络，得到output，即这步真正的输出  
 在后续步骤中，输入变成上一步的output（对应起始信号）和$h_4$(对应初始HSV)，重复直到处理完所有的向量。  
-![attention_tensor_dance](attention_tensor_dance.mp4)  
+![attention_tensor_dance](../rcs/attention_tensor_dance.mp4)  
   
   
 注意，Attention step中所用的encoder的HSV是全部的，encoder所有时间步的HSV  
