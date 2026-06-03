@@ -15,69 +15,76 @@
           "children": [
             {
               "type": "file",
+              "name": "贝叶斯逆规划.md",
+              "path": "ai/词条/贝叶斯逆规划.md",
+              "ext": ".md",
+              "mtime": "2026-06-03T07:26:12.838Z"
+            },
+            {
+              "type": "file",
               "name": "名词解释.md",
               "path": "ai/词条/名词解释.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.411Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "attention.md",
               "path": "ai/词条/attention.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.406Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "CNN.md",
               "path": "ai/词条/CNN.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.406Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "DQN.md",
               "path": "ai/词条/DQN.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.407Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "lora.md",
               "path": "ai/词条/lora.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.408Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "RNN.md",
               "path": "ai/词条/RNN.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.409Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "seq2seq.md",
               "path": "ai/词条/seq2seq.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.409Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "softmax.md",
               "path": "ai/词条/softmax.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.410Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "transformer.md",
               "path": "ai/词条/transformer.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.410Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             }
           ],
-          "mtime": "2026-06-02T08:39:18.829Z"
+          "mtime": "2026-06-02T16:14:34.427Z"
         },
         {
           "type": "folder",
@@ -94,7 +101,7 @@
                   "name": "week1 正则化避免过拟合，加速，梯度检验.md",
                   "path": "ai/课程/Improving Deep Neural Networks Hyperparameter tuning, Regularization and Optimization/week1 正则化避免过拟合，加速，梯度检验.md",
                   "ext": ".md",
-                  "mtime": "2026-06-02T08:39:37.412Z"
+                  "mtime": "2026-06-03T07:26:12.838Z"
                 }
               ],
               "mtime": "2026-03-12T12:37:31.617Z"
@@ -109,28 +116,28 @@
                   "name": "作业总结.md",
                   "path": "ai/课程/Neural Networks and Deep Learning/作业总结.md",
                   "ext": ".md",
-                  "mtime": "2026-06-02T08:39:37.414Z"
+                  "mtime": "2026-06-03T07:26:12.838Z"
                 },
                 {
                   "type": "file",
                   "name": "week1-2 以logistic为例的简单神经网络.md",
                   "path": "ai/课程/Neural Networks and Deep Learning/week1-2 以logistic为例的简单神经网络.md",
                   "ext": ".md",
-                  "mtime": "2026-06-02T08:39:37.412Z"
+                  "mtime": "2026-06-03T07:26:12.838Z"
                 },
                 {
                   "type": "file",
                   "name": "week3 有隐藏层的神经网络.md",
                   "path": "ai/课程/Neural Networks and Deep Learning/week3 有隐藏层的神经网络.md",
                   "ext": ".md",
-                  "mtime": "2026-06-02T08:39:37.413Z"
+                  "mtime": "2026-06-03T07:26:12.838Z"
                 },
                 {
                   "type": "file",
                   "name": "week4 深层神经网络.md",
                   "path": "ai/课程/Neural Networks and Deep Learning/week4 深层神经网络.md",
                   "ext": ".md",
-                  "mtime": "2026-06-02T08:39:37.414Z"
+                  "mtime": "2026-06-03T07:26:12.838Z"
                 }
               ],
               "mtime": "2026-05-17T06:41:38.204Z"
@@ -148,42 +155,42 @@
               "name": "模型构建.md",
               "path": "ai/BNN/模型构建.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.405Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "因果表征学习.md",
               "path": "ai/BNN/因果表征学习.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.404Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "自由能原理.md",
               "path": "ai/BNN/自由能原理.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.405Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "BPL.md",
               "path": "ai/BNN/BPL.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.402Z"
+              "mtime": "2026-06-03T07:26:12.837Z"
             },
             {
               "type": "file",
               "name": "DreamCoder.md",
               "path": "ai/BNN/DreamCoder.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.402Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             },
             {
               "type": "file",
               "name": "NS-CL.md",
               "path": "ai/BNN/NS-CL.md",
               "ext": ".md",
-              "mtime": "2026-06-02T08:39:37.403Z"
+              "mtime": "2026-06-03T07:26:12.838Z"
             }
           ],
           "mtime": "2026-06-02T08:17:11.942Z"
@@ -237,42 +244,42 @@
           "name": "2. 数字图像基础.md",
           "path": "DIP G/2. 数字图像基础.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.415Z"
+          "mtime": "2026-06-03T07:26:12.838Z"
         },
         {
           "type": "file",
           "name": "3.1 强度变换.md",
           "path": "DIP G/3.1 强度变换.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.416Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "3.2 空间滤波.md",
           "path": "DIP G/3.2 空间滤波.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.416Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "10 图像分割.md",
           "path": "DIP G/10 图像分割.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.415Z"
+          "mtime": "2026-06-03T07:26:12.838Z"
         },
         {
           "type": "file",
           "name": "Dictionary.md",
           "path": "DIP G/Dictionary.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.417Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "tips.md",
           "path": "DIP G/tips.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.418Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         }
       ],
       "mtime": "2026-02-20T08:02:08.460Z"
@@ -287,70 +294,70 @@
           "name": "变换.md",
           "path": "GAMES/变换.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.421Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "材料&外观.md",
           "path": "GAMES/材料&外观.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.421Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "动画.md",
           "path": "GAMES/动画.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.420Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "光追.md",
           "path": "GAMES/光追.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.419Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "几何.md",
           "path": "GAMES/几何.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.420Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "三角形光栅化.md",
           "path": "GAMES/三角形光栅化.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.418Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "纹理.md",
           "path": "GAMES/纹理.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.423Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "相机.md",
           "path": "GAMES/相机.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.422Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "颜色.md",
           "path": "GAMES/颜色.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.425Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "着色.md",
           "path": "GAMES/着色.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.423Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         }
       ],
       "mtime": "2026-02-20T08:02:08.465Z"
@@ -365,105 +372,105 @@
           "name": "2.3. 射影几何.md",
           "path": "Multiple View Geometry in CV/2.3. 射影几何.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.429Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "4. 估计.md",
           "path": "Multiple View Geometry in CV/4. 估计.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.430Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "5. 算法评价与误差分析.md",
           "path": "Multiple View Geometry in CV/5. 算法评价与误差分析.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.431Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "6.7. 摄像机模型与计算.md",
           "path": "Multiple View Geometry in CV/6.7. 摄像机模型与计算.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.432Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "8. 单视图几何.md",
           "path": "Multiple View Geometry in CV/8. 单视图几何.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.432Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "9. 对极几何和基本矩阵.md",
           "path": "Multiple View Geometry in CV/9. 对极几何和基本矩阵.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.433Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "10. 摄像机与结构的重构.md",
           "path": "Multiple View Geometry in CV/10. 摄像机与结构的重构.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.426Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "11. 基本矩阵数值估计.md",
           "path": "Multiple View Geometry in CV/11. 基本矩阵数值估计.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.426Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "12. 结构计算.md",
           "path": "Multiple View Geometry in CV/12. 结构计算.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.427Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "13. 场景平面和单应.md",
           "path": "Multiple View Geometry in CV/13. 场景平面和单应.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.428Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "14. 仿射对极几何.md",
           "path": "Multiple View Geometry in CV/14. 仿射对极几何.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.429Z"
+          "mtime": "2026-06-03T07:26:12.854Z"
         },
         {
           "type": "file",
           "name": "射影几何中几何体的关系.md",
           "path": "Multiple View Geometry in CV/射影几何中几何体的关系.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.435Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "总结.md",
           "path": "Multiple View Geometry in CV/总结.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.435Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "sfm.md",
           "path": "Multiple View Geometry in CV/sfm.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.434Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "tips.md",
           "path": "Multiple View Geometry in CV/tips.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.434Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         }
       ],
       "mtime": "2026-02-20T08:02:08.475Z"
@@ -478,59 +485,73 @@
           "name": "光照.md",
           "path": "opengl/光照.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.437Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "模板测试(Stencil Test).md",
           "path": "opengl/模板测试(Stencil Test).md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.438Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "深度测试.md",
           "path": "opengl/深度测试.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.438Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "投影矩阵(projection mat).md",
           "path": "opengl/投影矩阵(projection mat).md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.437Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "纹理贴图.md",
           "path": "opengl/纹理贴图.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.440Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "渲染管线.md",
           "path": "opengl/渲染管线.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.439Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "着色器.md",
           "path": "opengl/着色器.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.439Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         },
         {
           "type": "file",
           "name": "Assimp模型库.md",
           "path": "opengl/Assimp模型库.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.436Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         }
       ],
       "mtime": "2026-02-20T08:02:08.475Z"
+    },
+    {
+      "type": "file",
+      "name": "名词解释.md",
+      "path": "名词解释.md",
+      "ext": ".md",
+      "mtime": "2026-06-03T07:26:12.836Z"
+    },
+    {
+      "type": "file",
+      "name": "层次贝叶斯学习.md",
+      "path": "层次贝叶斯学习.md",
+      "ext": ".md",
+      "mtime": "2026-06-03T07:26:12.836Z"
     },
     {
       "type": "folder",
@@ -542,7 +563,7 @@
           "name": "论文概况提示词.md",
           "path": "提示词/论文概况提示词.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.440Z"
+          "mtime": "2026-06-03T07:26:12.870Z"
         }
       ],
       "mtime": "2026-06-01T16:54:32.889Z"
@@ -557,7 +578,7 @@
           "name": "坐忘论.md",
           "path": "杂书/坐忘论.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.460Z"
+          "mtime": "2026-06-03T07:26:12.886Z"
         }
       ],
       "mtime": "2026-05-22T18:32:34.557Z"
@@ -572,21 +593,21 @@
           "name": "bugs.md",
           "path": "项目记录/bugs.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.460Z"
+          "mtime": "2026-06-03T07:26:12.886Z"
         },
         {
           "type": "file",
           "name": "pixelFace.md",
           "path": "项目记录/pixelFace.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.461Z"
+          "mtime": "2026-06-03T07:26:12.886Z"
         },
         {
           "type": "file",
           "name": "Render.md",
           "path": "项目记录/Render.md",
           "ext": ".md",
-          "mtime": "2026-06-02T08:39:37.462Z"
+          "mtime": "2026-06-03T07:26:12.886Z"
         }
       ],
       "mtime": "2026-06-02T08:39:20.601Z"
