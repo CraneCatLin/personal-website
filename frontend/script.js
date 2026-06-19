@@ -391,12 +391,50 @@
     }
     function initTopbar() {
         initTOCSidebar();
+        // ========== 移动端侧边栏切换（overlay 模式） ==========
+        const sidebarEl = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebarOpen(open) {
+            if (!sidebarEl) return;
+            const isOpen = open !== undefined ? open : !sidebarEl.classList.contains('open');
+            sidebarEl.classList.toggle('open', isOpen);
+            if (sidebarOverlay) sidebarOverlay.classList.toggle('active', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+
         if (menuToggle) {
             menuToggle.addEventListener('click', (e) => {
                 e.stopPropagation();
-                body.classList.toggle('sidebar-open');
+                toggleSidebarOpen();
             });
         }
+
+        // Overlay click to close sidebar
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function () {
+                toggleSidebarOpen(false);
+            });
+        }
+
+        // ========== 侧边栏移动端导航按钮 ==========
+        const sidebarNavBtns = document.querySelectorAll('.sidebar-nav-btn');
+        sidebarNavBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const hash = this.dataset.hash;
+                if (hash === '') {
+                    window.location.hash = '#/';
+                } else if (hash === 'notes') {
+                    window.location.hash = '#/notes';
+                } else if (hash === 'friends') {
+                    window.location.hash = '#/friends';
+                } else if (hash === 'logs') {
+                    window.location.hash = '#/logs';
+                }
+                // Close sidebar on mobile after navigation
+                toggleSidebarOpen(false);
+            });
+        });
 
         if (homeBtn) {
             homeBtn.addEventListener('click', () => {

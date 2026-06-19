@@ -1,8 +1,8 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-05-30
-> **变更摘要**：新增页面切换平滑过渡系统（背景双缓冲 + viewer 淡入淡出 + TOC 延迟显示），涉及 core.js / script.js / style.css / toc.js / notes.js / index.html
+> **更新日期**：2026-06-20
+> **变更摘要**：新增移动端适配（侧边栏 overlay 遮罩 + .open 类切换 + 响应式 viewer 排版 + 紧凑顶栏）+ 页面切换平滑过渡系统（背景双缓冲 + viewer 淡入淡出 + TOC 延迟显示），涉及 index.html / style.css / script.js / core.js / toc.js / notes.js
 
 ---
 
@@ -36,8 +36,8 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 ├── frontend/                   # ★ 前端站点根目录（部署到 OSS 的目录）
 │   ├── index.html              # 入口 HTML，单页面骨架
 │   ├── 404.html                # 自定义 404 页面（自动跳转首页 + hash）
-│   ├── script.js               # ★ 核心 JS：路由、树渲染、内容加载 (~659行)
-│   ├── style.css               # ★ 全部样式 (~1728行)
+│   ├── script.js               # ★ 核心 JS：路由、树渲染、内容加载 (~435行)
+│   ├── style.css               # ★ 全部样式 (~1880行)
 │   ├── tree.json               # 目录树 JSON（由 generate-tree.js 生成）
 │   ├── tree-log.json           # 日志目录树 JSON（由 generate-tree.js 单独为日志目录生成）
 │   ├── picture-link-convert.py # 一次性工具：转换图片链接格式
@@ -77,10 +77,10 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 
 #### `frontend/index.html`
 - **角色**：SPA 唯一 HTML 页面
-- **内容**：顶栏（首页/笔记/友链/日志按钮 + 移动端菜单按钮）、左侧目录树侧边栏、中间内容区、右侧 TOC 侧边栏
+- **内容**：顶栏（首页/笔记/友链/日志按钮 + 移动端菜单按钮）、左侧目录树侧边栏、中间内容区、右侧 TOC 侧边栏、底部 `#sidebarOverlay`（移动端侧边栏半透明遮罩层）
 - **加载的库**：`marked` + `highlight.js` + `markdown-it` + `markdown-it-imsize` + `KaTeX` + `texmath`
 
-#### `frontend/script.js`（~435 行）
+#### `frontend/script.js`（~450 行）
 - **角色**：主要交互逻辑（路由、树渲染、内容渲染）
 - **说明**：原始全部逻辑已拆分，部分功能移至 `js/core.js`（共享工具函数）、`js/home.js`（首页模块）、`js/log.js`（日志模块）、`js/friends.js`（友链模块）、`js/notes.js`（笔记渲染模块）、`js/toc.js`（TOC 模块）、`js/tree.js`（目录树模块）
 - **IIFE 变量暴露**：通过 `Object.defineProperty` getter 将 `treeData`、`defaultNotePath`、`loadFileByPath`、`loadFromHash` 暴露为 `window.treeData` 等全局属性，供 `js/home.js` 以自由变量形式访问
@@ -96,6 +96,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - **代码复制按钮**：`enhanceCodeBlocks()` 为每个 pre 包裹 wrapper + 复制按钮（移至 `js/core.js`）
   - **骨架屏**：加载时显示 CSS 动画骨架
   - **最后修改时间**：从 `tree.json` 的 `mtime` 读取显示在每个笔记底部
+  - **移动端侧边栏**：`initTopbar()` 中的 `toggleSidebarOpen()` 管理 `.sidebar.open` + `#sidebarOverlay.active` + body 滚动锁定；侧边栏内导航按钮（`.sidebar-nav-btn`）点击后自动导航并关闭侧边栏
   - **页面切换**：`smoothPageTransition()` 统一管理平滑过渡（core.js），支持四种模式即时首页、note-page、friends-page、log-page，先淡出 viewer/背景 → 执行变更 → 淡入 viewer/背景 → TOC 延迟显示
 - **全局状态**：
   - `treeData`：tree.json 解析结果
@@ -103,12 +104,15 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - `fileNameMap` / `fullPathNoExtMap`：Wiki 链接快速查找 Map
   - `defaultNotePath`：默认第一个笔记路径（供"笔记"按钮使用）
 
-#### `frontend/style.css`（~1728 行）
+#### `frontend/style.css`（~1880 行）
 - **角色**：全部视觉样式
 - **关键设计**：
   - CSS 变量定义在 `:root`（颜色、阴影、过渡）
   - 布局：`grid-template-columns: 250px 1fr`（左侧边栏 + 主区域），主区域再 flex 分内容区和 TOC
-  - 移动端：768px 以下左侧边栏变为固定侧滑菜单（`transform: translateX`），TOC 隐藏
+  - 移动端：768px 以下左侧边栏变为固定侧滑菜单（`.sidebar.open` + `transform: translateX`），伴随 `#sidebarOverlay` 半透明遮罩层（`.active` 控制显隐）；TOC 隐藏
+  - 移动端：笔记标题/正文/表格/代码块/图片/KaTeX 公式等比缩小
+  - 移动端顶栏紧凑排版：按钮内边距/字体缩小，菜单按钮居中
+  - 移动端溢出处理：表格横向滚动、图片/视频 `max-width: 100%`
   - 背景：`#bgLayer` 独立 div 实现首页/笔记页/友链页背景切换（双缓冲淡入淡出）；`body::before` 作为背景回退
   - viewer/TOC 过渡：`viewer`、`#tocContent` 使用 `opacity + transition` 实现淡入淡出（`toc-hidden` 类控制 TOC 显隐）
   - 骨架屏动画：`skeleton-shimmer` keyframes
@@ -341,6 +345,14 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - `add_line_breaks.py` 在每行末尾加两个空格 → Markdown 硬换行
 - 这可能导致不必要的换行——如果某些行不需要硬换行，这是已知副作用
 
+### 5.8 移动端竖版背景图
+- 桌面端使用横版图（`home-bg.jpg`, `note-bg.png`），移动端（≤768px）自动切换为竖版裁切图
+- 竖版图位于 `frontend/images/` 下：
+  - `home-bg-mobile.jpg` — 首页/友链页
+  - `note-bg-mobile.png` — 笔记页
+- 切换逻辑通过 CSS media query `@media (max-width: 768px)` 覆盖 `body::before` 的 `background-image` 实现
+- 需要在 images/ 目录下放置竖版图后才生效
+
 ### 5.6 页面切换过渡机制
 - **背景双缓冲**：通过 `#bgLayer` 独立 div 实现背景图淡出 → 替换 → 淡入（setBackgroundSmooth），不再依赖 body::before 的 transition，消除背景闪烁
 - **viewer 淡入淡出**：`smoothPageTransition()` 统一管理：先淡出 viewer（200ms），执行页面变更，再淡入（280ms）。异步页面（笔记 fetch）由渲染完成回调 `revealViewerContent` 淡入
@@ -353,13 +365,20 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - 笔记页/友链页：`#bgLayer` 的 `background-image: url('/images/note-bg.png')`
 - 日志页：清除 bgLayer 背景 + 隐藏 sidebar + body 纯色背景透出
 
-### 5.8 tree.json 更新时机
+### 5.9 tree.json 更新时机
 - 仅在运行 `update.ps1` 时由 `generate-tree.js` 重新生成
 - 新增/删除笔记文件后必须重新生成，否则目录树不更新
 
-### 5.9 tree-log.json 更新时机
+### 5.10 tree-log.json 更新时机
 - 与 tree.json 同时由 `generate-tree.js` 生成（扫描 `public/日志/` 目录）
 - 新增/删除日志文件后必须重新生成，否则日志日历不更新
+
+### 5.11 移动端适配机制
+- 侧边栏切换不再使用 `body.sidebar-open` 类，改为 `#sidebar` 的 `.open` 类 + `#sidebarOverlay` 的 `.active` 类
+- `toggleSidebarOpen()` 统一管理：打开时 `body.style.overflow = 'hidden'` 锁定背景滚动
+- 侧边栏内导航按钮（首页/笔记/友链/日志）点击后自动关闭侧边栏（`toggleSidebarOpen(false)`）
+- 手机竖屏优先：所有内容区元素（标题/图片/代码/表格/公式）在 768px 以下自动等比缩小，无需水平滚动
+- 顶栏按钮在移动端紧凑排列，菜单按钮居中
 
 ---
 

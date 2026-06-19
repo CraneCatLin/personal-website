@@ -1568,15 +1568,52 @@ body.hide-sidebar .main-content {
     }
 }
 
+/* ---- Sidebar mobile nav (only visible on mobile) ---- */
+.sidebar-nav-mobile {
+    display: none;
+}
+
 @media (max-width: 768px) {
+    .sidebar-nav-mobile {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 12px 16px 8px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .sidebar-nav-btn {
+        flex: 1;
+        min-width: calc(50% - 6px);
+        padding: 8px 10px;
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-sm);
+        background: var(--bg-glass-strong);
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .sidebar-nav-btn:active {
+        background: rgba(91, 155, 213, 0.15);
+        color: var(--primary);
+    }
+
     .sidebar {
         position: fixed;
         left: 0;
         top: var(--topbar-height);
         z-index: 50;
+        width: 280px;
+        max-width: 85vw;
         transform: translateX(-100%);
         transition: transform var(--transition);
         box-shadow: var(--shadow-lg);
+        overflow-y: auto;
     }
 
     .sidebar.open {
@@ -1600,11 +1637,11 @@ body.hide-sidebar .main-content {
     }
 
     .main-content {
-        padding: 16px 12px;
+        padding: 12px 10px;
     }
 
     .viewer {
-        padding: 24px 20px;
+        padding: 20px 16px;
         border-radius: var(--radius-md);
     }
 
@@ -1614,6 +1651,133 @@ body.hide-sidebar .main-content {
 
     .home-cards .card-span-2 {
         grid-column: span 1;
+    }
+
+    /* ---- Mobile topbar adjustments ---- */
+    .topbar-inner {
+        padding: 0 12px;
+    }
+
+    .topbar-right {
+        gap: 2px;
+    }
+
+    .nav-btn {
+        padding: 6px 10px;
+        font-size: 0.82rem;
+    }
+
+    .site-title {
+        font-size: 1rem;
+    }
+
+    /* ---- Mobile viewer content adjustments ---- */
+    .viewer img {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: var(--radius-sm);
+    }
+
+    .viewer pre {
+        font-size: 0.78rem;
+        padding: 12px 10px;
+    }
+
+    .viewer table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .viewer table th,
+    .viewer table td {
+        padding: 6px 8px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    .viewer blockquote {
+        padding: 6px 12px;
+        margin: 12px 0;
+    }
+
+    .viewer h1 {
+        font-size: 1.35rem;
+    }
+
+    .viewer h2 {
+        font-size: 1.15rem;
+    }
+
+    .viewer h3 {
+        font-size: 1.02rem;
+    }
+
+    .viewer h4 {
+        font-size: 0.95rem;
+    }
+
+    .viewer .katex {
+        font-size: 0.92em;
+    }
+
+    .viewer .note-title {
+        font-size: 1.35rem;
+    }
+
+    .viewer p {
+        font-size: 0.92rem;
+    }
+
+    .viewer li {
+        font-size: 0.92rem;
+    }
+
+    .viewer .code-block-wrapper {
+        margin: 10px 0;
+    }
+
+    .viewer .code-copy-btn {
+        top: 4px;
+        right: 4px;
+        padding: 2px 8px;
+        font-size: 0.72rem;
+    }
+
+    /* ---- Mobile content footer decorations ---- */
+    .content-footer-decoration {
+        font-size: 1.2rem;
+        letter-spacing: 0.3em;
+        opacity: 0.35;
+    }
+
+    /* ---- Mobile note title meta ---- */
+    .note-meta {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .note-meta .note-meta-item {
+        font-size: 0.78rem;
+    }
+
+    /* ---- Mobile TOC ---- */
+    .toc-sidebar {
+        display: none !important;
+    }
+
+    /* ---- Mobile background images ---- */
+    body.homepage::before {
+        background-image: url('/images/home-bg-mobile.jpg');
+    }
+
+    body.note-page::before {
+        background-image: url('/images/note-bg-mobile.png');
+    }
+
+    body.friends-page::before {
+        background-image: url('/images/home-bg-mobile.jpg');
     }
 }
 

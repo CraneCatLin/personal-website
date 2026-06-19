@@ -51,6 +51,9 @@
         </div>
     </div>
 
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Layout: sidebar + content -->
     <div class="app-grid" id="appGrid">
         <!-- Sidebar: collapsible tree -->
@@ -60,6 +63,13 @@
                     <span class="emoji-icon">笔记目录</span>
                 </div>
                 <button class="collapse-btn" id="toggleSidebar" style="display:none;">⏴⏵</button>
+            </div>
+            <!-- Mobile-only nav links in sidebar -->
+            <div class="sidebar-nav-mobile">
+                <button class="sidebar-nav-btn" data-hash="">🏠 首页</button>
+                <button class="sidebar-nav-btn" data-hash="notes">📝 笔记</button>
+                <button class="sidebar-nav-btn" data-hash="friends">🔗 友链</button>
+                <button class="sidebar-nav-btn" data-hash="logs">📋 日志</button>
             </div>
             <!-- Tree renders here -->
             <nav class="tree-container" id="treeContainer">
