@@ -49,9 +49,9 @@ function renderDefaultAbout() {
         <div class="card-title">关于本站</div>
         <p class="card-desc">所有原创笔记采用 <strong>CC BY-NC-SA 4.0</strong> 协议共享。非商业性分享、演绎需保留署名并以相同方式共享。</p>
         <div class="about-info">
-            <p>📧 邮箱：cranecat_rain@163.com</p>
-            <p>💬 QQ：2019412832</p>
-            <p>🐙 GitHub：<a href="https://github.com/CraneCatLin" target="_blank">CraneCatLin</a></p>
+            <p>邮箱：cranecat_rain@163.com</p>
+            <p>QQ：2019412832</p>
+            <p>GitHub：<a href="https://github.com/CraneCatLin" target="_blank">CraneCatLin</a></p>
             <p style="margin-top:8px; font-size:0.82rem; color:var(--text-muted);">内容有误、显示 bug、建议想法都欢迎联系~</p>
         </div>
     </div>`);
