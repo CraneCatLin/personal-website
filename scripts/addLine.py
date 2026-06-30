@@ -67,7 +67,7 @@ def fix_latex_formulas(file_path):
 
     # 如果内容被修改，写回文件
     if modified:
-        with open(file_path, "w", encoding="utf-8") as f:
+        with open(file_path, "w", encoding="utf-8", newline="\n") as f:
             f.writelines(new_lines)
 
     return modified

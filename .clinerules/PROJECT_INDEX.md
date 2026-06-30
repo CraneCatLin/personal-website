@@ -1,8 +1,8 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-06-20
-> **变更摘要**：新增移动端适配（侧边栏 overlay 遮罩 + .open 类切换 + 响应式 viewer 排版 + 紧凑顶栏）+ 页面切换平滑过渡系统（背景双缓冲 + viewer 淡入淡出 + TOC 延迟显示），涉及 index.html / style.css / script.js / core.js / toc.js / notes.js
+> **更新日期**：2026-06-30
+> **变更摘要**：修复 update.ps1 部署脚本导致所有文件 mtime 被刷新的问题 — add_line_breaks.py 内容未变时不再写回文件；三个 Python 预处理脚本统一使用 LF 换行符写入；新增 .gitattributes 统一仓库换行符规范。涉及 .gitattributes / scripts/add_line_breaks.py / scripts/addLine.py / scripts/gatherToAligned.py
 
 ---
 

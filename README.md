@@ -112,3 +112,8 @@
 
 @2026-06-20
 移动端适配
+
+@2026-06-30
+修复 update.ps1 部署导致所有文件 mtime 被刷新的问题 — add_line_breaks.py 内容未变时不再写回
+三个 Python 预处理脚本统一使用 LF 换行符写入
+新增 .gitattributes 统一仓库换行符规范

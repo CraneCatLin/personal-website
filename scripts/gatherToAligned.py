@@ -23,7 +23,7 @@ def replace_in_markdown_files(directory):
 
                 # 如果内容发生了变化，写回文件
                 if content != updated_content:
-                    with open(file_path, "w", encoding="utf-8") as f:
+                    with open(file_path, "w", encoding="utf-8", newline="\n") as f:
                         f.write(updated_content)
                     print(f"已更新: {file_path}")
                 else:

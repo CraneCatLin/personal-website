@@ -43,11 +43,13 @@ def process_markdown_files(root_dir):
             # 重新组合内容
             processed_content = "\n".join(processed_lines)
 
-            # 写回文件
-            with open(file_path, "w", encoding="utf-8", newline="\n") as f:
-                f.write(processed_content)
-
-            print(f"已处理: {os.path.relpath(file_path, root_dir)}")
+            # 只有内容实际变化时才写回文件，避免刷新 mtime
+            if content != processed_content:
+                with open(file_path, "w", encoding="utf-8", newline="\n") as f:
+                    f.write(processed_content)
+                print(f"已处理: {os.path.relpath(file_path, root_dir)}")
+            else:
+                print(f"无需修改: {os.path.relpath(file_path, root_dir)}")
 
         except Exception as e:
             print(f"处理文件 {file_path} 时出错: {str(e)}")
