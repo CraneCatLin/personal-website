@@ -294,7 +294,13 @@ function loadLogFile(filePath) {
             return response.text();
         })
         .then(markdown => {
-            renderLogMarkdown(markdown, filePath);
+            // 确定上一篇/下一篇（logFilesAll 按日期降序：最新在前）
+            // 索引越小越新，越大越旧
+            // 上一篇 = 更旧的（索引+1），下一篇 = 更新的（索引-1）
+            const idx = logFilesAll.findIndex(f => f.path === filePath);
+            const prevFile = (idx >= 0 && idx < logFilesAll.length - 1) ? logFilesAll[idx + 1] : null;
+            const nextFile = (idx > 0 && idx < logFilesAll.length) ? logFilesAll[idx - 1] : null;
+            renderLogMarkdown(markdown, filePath, prevFile, nextFile);
         })
         .catch(error => {
             viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 加载日志失败</h2><p>无法加载 ${filePath} (${error.message})</p></div>`;
@@ -305,8 +311,8 @@ function loadLogFile(filePath) {
     setBackgroundForPage('log');
 }
 
-// 渲染日志 Markdown（带头部返回按钮，无 TOC）
-function renderLogMarkdown(markdownText, filePath) {
+// 渲染日志 Markdown（带头部返回按钮 + 上一篇/下一篇导航，无 TOC）
+function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
     if (!window.markdownit) {
         viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>markdown-it 未加载</p></div>`;
         return;
@@ -365,7 +371,15 @@ function renderLogMarkdown(markdownText, filePath) {
             return match;
         });
 
-        // 返回按钮 + 内容
+        // 构建上一篇/下一篇导航 HTML
+        const prevBtnHtml = prevFile
+            ? `<button class="log-nav-article-btn" data-path="${escapeHtml(prevFile.path)}">← ${escapeHtml(prevFile.name.replace(/\.[^.]+$/, ''))}</button>`
+            : `<button class="log-nav-article-btn disabled">← 上一篇</button>`;
+        const nextBtnHtml = nextFile
+            ? `<button class="log-nav-article-btn" data-path="${escapeHtml(nextFile.path)}">${escapeHtml(nextFile.name.replace(/\.[^.]+$/, ''))} →</button>`
+            : `<button class="log-nav-article-btn disabled">下一篇 →</button>`;
+
+        // 返回按钮 + 内容 + 上一篇/下一篇导航
         viewer.innerHTML = `
             <div class="log-reading">
                 <div class="log-reading-header">
@@ -375,7 +389,24 @@ function renderLogMarkdown(markdownText, filePath) {
                 <div class="log-reading-content markdown-body">
                     ${finalHtml}
                 </div>
+                <div class="log-nav-prev-next">
+                    ${prevBtnHtml}
+                    <span class="log-nav-spacer"></span>
+                    ${nextBtnHtml}
+                </div>
             </div>`;
+
+        // 绑定上一篇/下一篇点击事件
+        const navBtns = viewer.querySelectorAll('.log-nav-article-btn:not(.disabled)');
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const path = btn.dataset.path;
+                if (path) {
+                    window.location.hash = '#' + encodeURIComponent('log:' + path);
+                    loadLogFile(path);
+                }
+            });
+        });
 
         if (window.hljs && !md.options.highlight) {
             document.querySelectorAll('.log-reading-content pre code').forEach((block) => {

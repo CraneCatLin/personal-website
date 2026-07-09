@@ -117,3 +117,10 @@
 修复 update.ps1 部署导致所有文件 mtime 被刷新的问题 — add_line_breaks.py 内容未变时不再写回
 三个 Python 预处理脚本统一使用 LF 换行符写入
 新增 .gitattributes 统一仓库换行符规范
+
+@2026-07-09
+日志阅读页面新增上一篇/下一篇导航功能
+  - 基于 logFilesAll 按日期降序计算相邻文章
+  - 边界情况自动禁用按钮（第一篇无"下一篇"，最后一篇无"上一篇"）
+  - 长标题使用 text-overflow: ellipsis 自动截断
+  - 涉及 frontend/js/log.js、frontend/style.css

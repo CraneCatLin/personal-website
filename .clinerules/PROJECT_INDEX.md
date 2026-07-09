@@ -1,8 +1,8 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-06-30
-> **变更摘要**：修复 update.ps1 部署脚本导致所有文件 mtime 被刷新的问题 — add_line_breaks.py 内容未变时不再写回文件；三个 Python 预处理脚本统一使用 LF 换行符写入；新增 .gitattributes 统一仓库换行符规范。涉及 .gitattributes / scripts/add_line_breaks.py / scripts/addLine.py / scripts/gatherToAligned.py
+> **更新日期**：2026-07-09
+> **变更摘要**：日志阅读页面新增上一篇/下一篇导航功能 — 基于 logFilesAll（日期降序）计算相邻文章，支持边界禁用状态和长标题截断。涉及 frontend/js/log.js / frontend/style.css
 
 ---
 
