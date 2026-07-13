@@ -64,6 +64,36 @@ function renderUnsupported(filePath) {
     `;
 }
 
+// ---------- 从 treeData 递归查找文件 mtime ----------
+function findMtimeInTree(nodes, targetPath) {
+    if (!nodes) return null;
+    for (const node of nodes) {
+        if (node.type === 'file' && node.path === targetPath) {
+            return node.mtime;
+        }
+        if (node.children) {
+            const result = findMtimeInTree(node.children, targetPath);
+            if (result) return result;
+        }
+    }
+    return null;
+}
+// 生成修改日期 HTML（仅用于笔记，日志不调用此函数）
+function getMtimeHtml(filePath) {
+    const mtime = findMtimeInTree(window.treeData, filePath);
+    if (!mtime) return '';
+    const date = new Date(mtime);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    let text;
+    if (year === 2026 && month <= 6) {
+        text = '2026.6及之前';
+    } else {
+        text = `${year}.${month}`;
+    }
+    return `<div class="note-mtime">${text}</div>`;
+}
+
 // ---------- 渲染 Markdown (使用 marked、highlight.js 和 KaTeX) ----------
 function renderMarkdown(markdownText, filePath) {
     function replaceWikilinks(text) {
@@ -239,7 +269,8 @@ function renderMarkdown(markdownText, filePath) {
         }
         finalHtml = convertVideoImgs(finalHtml);
 
-        viewer.innerHTML = `<div class="markdown-body">${finalHtml}</div>`;
+        const mtimeHtml = getMtimeHtml(filePath);
+        viewer.innerHTML = `<div class="markdown-body">${finalHtml}${mtimeHtml}</div>`;
 
         if (window.hljs && !md.options.highlight) {
             document.querySelectorAll('.markdown-body pre code').forEach((block) => {

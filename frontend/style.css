@@ -911,6 +911,17 @@ body.log-page::before {
     padding-left: 10px;
 }
 
+/* ---- Note modification time ---- */
+.note-mtime {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 2.5em;
+    padding-top: 1em;
+    border-top: 1px solid var(--border-light);
+    opacity: 0.7;
+}
+
 /* ---------- Markdown Content Styling ---------- */
 .viewer h1 {
     font-size: 1.7rem;
