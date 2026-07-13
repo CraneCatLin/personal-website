@@ -124,3 +124,11 @@
   - 边界情况自动禁用按钮（第一篇无"下一篇"，最后一篇无"上一篇"）
   - 长标题使用 text-overflow: ellipsis 自动截断
   - 涉及 frontend/js/log.js、frontend/style.css
+
+@2026-07-14
+笔记页面底部新增修改日期标签
+  - 从 tree.json 中的 mtime 字段自动读取，显示在笔记标题下方
+  - 2026年6月及之前的笔记显示为"2026.6及之前"
+  - 2026年7月及之后的笔记精确显示到日（YYYY.M.D）
+  - 日志页面不显示修改日期
+  - 涉及 frontend/js/notes.js、frontend/style.css

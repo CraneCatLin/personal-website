@@ -1,8 +1,8 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-07-09
-> **变更摘要**：日志阅读页面新增上一篇/下一篇导航功能 — 基于 logFilesAll（日期降序）计算相邻文章，支持边界禁用状态和长标题截断。涉及 frontend/js/log.js / frontend/style.css
+> **更新日期**：2026-07-14
+> **变更摘要**：笔记页面底部新增修改日期标签 — 从 tree.json mtime 自动读取，2026.6及之前显示为"2026.6及之前"，之后的精确到日。涉及 frontend/js/notes.js / frontend/style.css
 
 ---
 

@@ -67,7 +67,10 @@ function renderUnsupported(filePath) {
 // ---------- 从 treeData 递归查找文件 mtime ----------
 function findMtimeInTree(nodes, targetPath) {
     if (!nodes) return null;
-    for (const node of nodes) {
+    // nodes 可能是根对象（有 type/children）或者数组
+    const list = Array.isArray(nodes) ? nodes : nodes.children;
+    if (!list) return null;
+    for (const node of list) {
         if (node.type === 'file' && node.path === targetPath) {
             return node.mtime;
         }
@@ -86,10 +89,11 @@ function getMtimeHtml(filePath) {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     let text;
-    if (year === 2026 && month <= 6) {
+    if (year < 2026 || (year === 2026 && month <= 6)) {
         text = '2026.6及之前';
     } else {
-        text = `${year}.${month}`;
+        const day = date.getDate();
+        text = `${year}.${month}.${day}`;
     }
     return `<div class="note-mtime">${text}</div>`;
 }
