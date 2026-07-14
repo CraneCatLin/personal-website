@@ -1,8 +1,8 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-07-14
-> **变更摘要**：笔记页面底部新增修改日期标签 — 从 tree.json mtime 自动读取，2026.6及之前显示为"2026.6及之前"，之后的精确到日。涉及 frontend/js/notes.js / frontend/style.css
+> **更新日期**：2026-07-15
+> **变更摘要**：新增页面访问次数计数器系统 — Cloudflare Workers + KV，自动记录每篇笔记/日志的访问次数，在页面底部显示"阅读 X 次"。涉及 scripts/counter-worker.js、scripts/wrangler.toml、frontend/js/core.js、frontend/js/notes.js、frontend/js/log.js、frontend/style.css、update.ps1
 
 ---
 
@@ -58,11 +58,13 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   └── public/                 # ★ 笔记文件仓库 + Obsidian Vault
 │       ├── .obsidian/          # Obsidian 配置 + 插件（update-script 插件在此）
 │
-├── scripts/                    # ★ 预处理脚本（update.ps1 调用）
+├── scripts/                    # ★ 预处理脚本 + Worker 源码（update.ps1 调用）
 │   ├── generate-tree.js        # Node：扫描 public/ 生成 frontend/tree.json
 │   ├── addLine.py              # Python：确保 $$ 公式前有空行
 │   ├── add_line_breaks.py      # Python：每行末尾加两个空格（Markdown 换行用）
-│   └── gatherToAligned.py      # Python：替换 aligned → gathered 环境名
+│   ├── gatherToAligned.py      # Python：替换 aligned → gathered 环境名
+│   ├── counter-worker.js       # ★ Cloudflare Worker：页面访问次数计数器（POST 记录/ GET 查询，KV 存储）
+│   └── wrangler.toml           # Worker 部署配置（KV 命名空间绑定、路由、兼容性标志）
 │
 └── update-script/              # Obsidian 插件源码
     ├── main.js                 # 插件逻辑：在 Obsidian Ribbon 添加按钮调用 update.ps1
@@ -250,6 +252,24 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - **角色**：将 Markdown 中的 `aligned` LaTeX 环境替换为 `gathered`
 - **实际行为**：正则 `\baligned\b` → `gathered`
 - **输入/输出**：原地修改 `frontend/public/**/*.md`
+
+#### `scripts/counter-worker.js`
+- **角色**：Cloudflare Workers 页面访问次数计数器（自建，替代方案二不蒜子）
+- **运行方式**：由 `wrangler deploy` 部署到 Cloudflare Workers
+- **API 接口**（路由绑定 `pv-counter.cranecat.workers.dev`）：
+  - `POST /pv?path=xxx` — 记录一次访问，返回 `{ count: number }`
+  - `GET /pv?path=xxx` — 查询当前访问次数，返回 `{ count: number }`
+- **存储**：Cloudflare KV 命名空间 `PV_COUNTER`，key 为文件路径，value 为计数字符串
+- **CORS**：允许所有来源的跨域请求（`Access-Control-Allow-Origin: *`）
+- **错误处理**：KV 读写失败时返回 `count: -1`，前端友好降级
+
+#### `scripts/wrangler.toml`
+- **角色**：Worker 部署配置
+- **关键字段**：
+  - `name = "pv-counter"` — Worker 名称
+  - `compatibility_flags = ["nodejs_compat"]` — Node.js 兼容模式
+  - `route` — 路由绑定到 `pv-counter.cranecat.workers.dev/pv`（或 `cranecat.cn/api/pv`）
+  - `[[kv_namespaces]]` — 绑定 KV 命名空间 `PV_COUNTER`，binding 名为 `PV_COUNTER`
 
 ---
 

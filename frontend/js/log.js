@@ -415,6 +415,12 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
         }
         enhanceCodeBlocks();
         window.TOCModule.clearTOC();
+
+        // 显示阅读次数
+        const logContent = viewer.querySelector('.log-reading-content');
+        if (logContent) {
+            renderPageViewCount(logContent, filePath);
+        }
     } catch (error) {
         console.error('日志 Markdown 渲染出错:', error);
         viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p></div>`;

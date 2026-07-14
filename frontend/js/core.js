@@ -137,6 +137,44 @@ function enhanceCodeBlocks() {
     });
 }
 
+/**
+ * 获取并记录页面的访问次数
+ * @param {string} filePath - 文件相对路径（如 "ai/CNN.md"）
+ * @returns {Promise<number>} 返回更新后的访问次数
+ */
+async function recordPageView(filePath) {
+    try {
+        const apiUrl = 'https://pv-counter.cranecat.workers.dev/pv?path=' + encodeURIComponent(filePath);
+        const response = await fetch(apiUrl, { method: 'POST' });
+        if (!response.ok) return -1;
+        const data = await response.json();
+        return data.count || 0;
+    } catch (err) {
+        console.warn('记录访问次数失败:', err);
+        return -1;
+    }
+}
+
+/**
+ * 渲染阅读次数到指定容器
+ * @param {HTMLElement} container - 要插入计数信息的元素
+ * @param {string} filePath - 文件相对路径
+ */
+function renderPageViewCount(container, filePath) {
+    const pvEl = document.createElement('div');
+    pvEl.className = 'page-view-count';
+    pvEl.textContent = '阅读次数加载中...';
+    container.appendChild(pvEl);
+
+    recordPageView(filePath).then(count => {
+        if (count >= 0) {
+            pvEl.textContent = `阅读 ${count} 次`;
+        } else {
+            pvEl.textContent = '';
+        }
+    });
+}
+
 // 导出到全局，供其他模块使用
 window.CoreModule = {
     viewer: viewer,
@@ -149,5 +187,7 @@ window.CoreModule = {
     showContentSkeleton: showContentSkeleton,
     escapeHtml: escapeHtml,
     processMathFormulas: processMathFormulas,
-    enhanceCodeBlocks: enhanceCodeBlocks
+    enhanceCodeBlocks: enhanceCodeBlocks,
+    recordPageView: recordPageView,
+    renderPageViewCount: renderPageViewCount
 };

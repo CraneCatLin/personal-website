@@ -41,6 +41,24 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "执行 git push"
 git push
 
+# 部署 Worker（访问次数计数器）
+Write-Host "----------------------------------------"
+Write-Host "部署 Worker（页面访问计数）..."
+try {
+    $workerDir = Join-Path $PSScriptRoot "scripts"
+    Push-Location $workerDir
+    & npx --yes wrangler deploy 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "⚠ Worker 部署可能失败，请检查 wrangler 配置"
+    } else {
+        Write-Host "✓ Worker 部署完成（pv-counter）"
+    }
+    Pop-Location
+} catch {
+    Write-Host "⚠ Worker 部署出错: $_"
+    Write-Host "    跳过 Worker 部署，继续执行后续步骤..."
+}
+
 # 执行 OSS 同步
 Write-Host "----------------------------------------"
 if (-not $OSS_BUCKET_URL) {

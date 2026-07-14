@@ -295,6 +295,12 @@ function renderMarkdown(markdownText, filePath) {
         window.TOCModule.renderTOCFromDOM();
         window.TOCModule.updateTOCActive();
         enhanceCodeBlocks();
+
+        // 显示阅读次数
+        const noteContent = viewer.querySelector('.markdown-body');
+        if (noteContent) {
+            renderPageViewCount(noteContent, filePath);
+        }
     } catch (error) {
         console.error('Markdown 渲染出错:', error);
         viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p><pre>${escapeHtml(markdownText.substring(0, 200))}...</pre></div>`;
