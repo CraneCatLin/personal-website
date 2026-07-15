@@ -132,3 +132,10 @@
   - 2026年7月及之后的笔记精确显示到日（YYYY.M.D）
   - 日志页面不显示修改日期
   - 涉及 frontend/js/notes.js、frontend/style.css
+
+@2026-07-14
+新增页面访问次数计数器系统
+  - 使用 Cloudflare Workers + KV 自建计数器，替代第三方服务
+  - 自动记录每篇笔记/日志的访问次数，在页面底部显示"阅读 X 次"
+  - 新增 scripts/counter-worker.js（Worker 源码）和 scripts/wrangler.toml（部署配置）
+  - 涉及 scripts/counter-worker.js、scripts/wrangler.toml、frontend/js/core.js、frontend/js/notes.js、frontend/js/log.js、frontend/style.css、update.ps1

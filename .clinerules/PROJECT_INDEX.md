@@ -2,7 +2,7 @@
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
 > **更新日期**：2026-07-15
-> **变更摘要**：新增页面访问次数计数器系统 — Cloudflare Workers + KV，自动记录每篇笔记/日志的访问次数，在页面底部显示"阅读 X 次"。涉及 scripts/counter-worker.js、scripts/wrangler.toml、frontend/js/core.js、frontend/js/notes.js、frontend/js/log.js、frontend/style.css、update.ps1
+> **变更摘要**：新增全站全文搜索功能 — 构建时生成 search-index.json（排除日志目录），前端使用 Fuse.js 实时模糊搜索（标题权重 0.7 + 全文权重 0.3），支持 Ctrl+K 快捷键、高亮匹配结果。涉及 scripts/generate-search-index.js、frontend/libs/js/fuse.min.js、frontend/js/search.js、frontend/index.html、frontend/style.css、frontend/script.js、update.ps1
 
 ---
 
@@ -63,6 +63,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   ├── addLine.py              # Python：确保 $$ 公式前有空行
 │   ├── add_line_breaks.py      # Python：每行末尾加两个空格（Markdown 换行用）
 │   ├── gatherToAligned.py      # Python：替换 aligned → gathered 环境名
+│   ├── generate-search-index.js # Node：扫描 public/ 下所有 .md 文件（排除日志目录），生成 frontend/search-index.json
 │   ├── counter-worker.js       # ★ Cloudflare Worker：页面访问次数计数器（POST 记录/ GET 查询，KV 存储）
 │   └── wrangler.toml           # Worker 部署配置（KV 命名空间绑定、路由、兼容性标志）
 │
@@ -280,7 +281,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - **流程**：
   1. 加载 `config.ps1`（OSS/CF 凭证）
   2. 选择提交模式（自动/手动 commit message）
-  3. 依次运行预处理脚本：`addLine.py` → `gatherToAligned.py` → `add_line_breaks.py` → `generate-tree.js`
+  3. 依次运行预处理脚本：`addLine.py` → `gatherToAligned.py` → `add_line_breaks.py` → `generate-tree.js` → `generate-search-index.js`
   4. `git add .` → `git commit` → `git push`
   5. `ossutil sync ./frontend/ $OSS_BUCKET_URL --update --delete`
   6. 调用 Cloudflare API 刷新全站缓存
@@ -314,6 +315,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │       ├─► scripts/gatherToAligned.py  (替换 LaTeX 环境)  │
 │       ├─► scripts/add_line_breaks.py  (添加换行符)       │
 │       ├─► scripts/generate-tree.js    (生成 tree.json)   │
+│       ├─► scripts/generate-search-index.js (生成 search-index.json) │
 │       ├─► git add/commit/push                             │
 │       ├─► ossutil sync ./frontend/ → OSS桶               │
 │       └─► Cloudflare API: purge_cache (刷新全站)         │

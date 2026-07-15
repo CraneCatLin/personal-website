@@ -16,6 +16,7 @@ python ./scripts/addLine.py > ./logs/addLine.log
 python ./scripts/gatherToAligned.py > ./logs/gatherToAligned.log
 python ./scripts/add_line_breaks.py > ./logs/add_line_breaks.log
 node ./scripts/generate-tree.js > ./logs/generate-tree.log
+node ./scripts/generate-search-index.js > ./logs/generate-search-index.log
 # 根据模式获取提交信息
 if ($mode -eq "1") {
     $commitMsg = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') note update"

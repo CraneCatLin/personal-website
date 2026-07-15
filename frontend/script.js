@@ -506,6 +506,10 @@
             mainContent.addEventListener('scroll', onScroll, { passive: true });
         }
 
+        if (window.SearchModule) {
+            window.SearchModule.init();
+        }
+
         if (!window.marked) console.warn('marked.js 未加载，Markdown 将无法渲染。');
         if (!window.hljs) console.warn('highlight.js 未加载，代码块将无高亮。');
         if (!window.katex) console.warn('katex 未加载，数学公式将无法渲染。');
