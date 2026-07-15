@@ -49,6 +49,23 @@
 - 提交Git仓库
 - 同步到OSS存储
 
+### 页面访问计数器部署（仅限首次）
+本站点内置了基于 Cloudflare Workers + KV 的页面访问次数计数器，每篇笔记/日志底部会显示"阅读 X 次"。
+
+**首次部署步骤（只需执行一次）：**
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/) → Workers & Pages → KV，创建一个命名空间 `PV_COUNTER`
+2. 打开 `scripts/wrangler.toml`，找到 `[[kv_namespaces]]` 下的 `id` 字段，填入上一步获取的 **Namespace ID**
+3. 确保已安装 wrangler CLI 并登录：
+   ```
+   npm install -g wrangler
+   wrangler login
+   ```
+4. 运行一次性部署脚本：
+   ```
+   powershell -File scripts/deploy-worker.ps1
+   ```
+部署成功后，之后每次运行 `update.ps1` 时不会再重复部署，计数服务持续可用。
+
 ## 使用说明
 
 ### 图片引用格式
@@ -77,6 +94,7 @@
 - [addLine.py](\scripts\addLine.py)：处理文件编码和换行符
 - [gatherToAligned.py](\scripts\gatherToAligned.py)：整理文件对齐
 - [add_line_breaks.py](file:\scripts\add_line_breaks.py)：添加必要的换行符
+- [deploy-worker.ps1](file:\scripts\deploy-worker.ps1)：一次性部署 Cloudflare Worker（页面访问计数器，仅首次部署需要）
 
 ### 更新流程
 1. 编辑或添加笔记文件

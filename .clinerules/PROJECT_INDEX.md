@@ -2,7 +2,7 @@
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
 > **更新日期**：2026-07-15
-> **变更摘要**：新增全站全文搜索功能 — 构建时生成 search-index.json（排除日志目录），前端使用 Fuse.js 实时模糊搜索（标题权重 0.7 + 全文权重 0.3），支持 Ctrl+K 快捷键、高亮匹配结果。涉及 scripts/generate-search-index.js、frontend/libs/js/fuse.min.js、frontend/js/search.js、frontend/index.html、frontend/style.css、frontend/script.js、update.ps1
+> **变更摘要**：新增全站全文搜索功能 — 构建时生成 search-index.json（排除日志目录），前端使用 Fuse.js 实时模糊搜索（标题权重 0.7 + 全文权重 0.3），支持 Ctrl+K 快捷键、高亮匹配结果。涉及 scripts/generate-search-index.js、frontend/libs/js/fuse.min.js、frontend/js/search.js、frontend/index.html、frontend/style.css、frontend/script.js、update.ps1。新增页面访问次数计数器（Cloudflare Workers + KV），将 Worker 部署从 update.ps1 分离为一次性脚本 scripts/deploy-worker.ps1
 
 ---
 
@@ -65,6 +65,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   ├── gatherToAligned.py      # Python：替换 aligned → gathered 环境名
 │   ├── generate-search-index.js # Node：扫描 public/ 下所有 .md 文件（排除日志目录），生成 frontend/search-index.json
 │   ├── counter-worker.js       # ★ Cloudflare Worker：页面访问次数计数器（POST 记录/ GET 查询，KV 存储）
+│   ├── deploy-worker.ps1       # ★ 一次性部署 Worker 脚本（仅首次部署需要）
 │   └── wrangler.toml           # Worker 部署配置（KV 命名空间绑定、路由、兼容性标志）
 │
 └── update-script/              # Obsidian 插件源码

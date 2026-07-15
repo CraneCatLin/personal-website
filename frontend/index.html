@@ -27,9 +27,9 @@
     <script src="/js/log.js" defer></script>
     <script src="/js/friends.js" defer></script>
     <script src="/js/tree.js" defer></script>
-    <script src="/script.js" defer></script>
     <script src="/libs/js/fuse.min.js"></script>
     <script src="/js/search.js" defer></script>
+    <script src="/script.js" defer></script>
     <script src="/js/ripple.js" defer></script>
 </head>
 
@@ -48,7 +48,7 @@
                 <button class="nav-btn" id="notesBtn">笔记</button>
                 <button class="nav-btn" id="friendsBtn">友链</button>
                 <button class="nav-btn" id="logBtn">日志</button>
-                <button class="nav-btn search-btn" id="searchBtn" aria-label="搜索" title="搜索 (Ctrl+K)">🔍</button>
+                <button class="nav-btn search-btn" id="searchBtn" aria-label="搜索" title="搜索 (Ctrl+K)">搜索</button>
                 <!-- <button class="nav-btn" id="aboutBtn">关于</button> -->
             </div>
         </div>
@@ -134,11 +134,10 @@
             }
         })();
     </script>
-    <!-- 🔍 Search overlay -->
+    <!-- Search overlay -->
     <div class="search-overlay" id="searchOverlay">
         <div class="search-modal">
             <div class="search-header">
-                <span class="search-header-icon">🔍</span>
                 <input type="text" class="search-input" id="searchInput" placeholder="搜索笔记全文..." autocomplete="off"
                     spellcheck="false">
                 <button class="search-close-btn" id="searchCloseBtn" aria-label="关闭搜索">✕</button>

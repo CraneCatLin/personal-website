@@ -27,7 +27,7 @@
     const INDEX_URL = '/search-index.json';
     const DEBOUNCE_MS = 200;
     const HIGHLIGHT_CLASS = 'search-highlight';
-    const MAX_RESULTS = 20;
+    const MAX_RESULTS = 50;
     const SNIPPET_RADIUS = 60; // 匹配位置前后截取字符数
 
     /**
@@ -162,11 +162,12 @@
                     { name: 'title', weight: 0.7 },
                     { name: 'content', weight: 0.3 }
                 ],
-                threshold: 0.4,
-                distance: 200,
+                threshold: 0.5,
+                distance: 100000,
                 includeMatches: true,
                 shouldSort: true,
-                minMatchCharLength: 1
+                minMatchCharLength: 2,
+                limit: MAX_RESULTS
             });
         }
     }
@@ -281,10 +282,20 @@
      * 高亮片段中的匹配位置（基于 Fuse 返回的 indices）
      */
     function _highlightMatches(snippet, indices, offset) {
-        var result = escapeHtml(snippet);
-        // 由于 snippet 已经过 escapeHtml，indices 位置需要重新计算
-        // 简化方案：直接用 _highlightText 基于原始文本
-        return _highlightText(snippet, '');
+        // 从 Fuse 的 indices（相对于全文）提取所有匹配词
+        var queryWords = [];
+        for (var m = 0; m < indices.length; m++) {
+            var wordStart = indices[m][0] - offset;
+            var wordEnd = indices[m][1] - offset + 1;
+            if (wordStart < 0) wordStart = 0;
+            if (wordEnd > snippet.length) wordEnd = snippet.length;
+            if (wordStart >= wordEnd) continue;
+            var word = snippet.substring(wordStart, wordEnd);
+            if (word && queryWords.indexOf(word) === -1) {
+                queryWords.push(word);
+            }
+        }
+        return _highlightText(snippet, queryWords.join(' '));
     }
 
     /**

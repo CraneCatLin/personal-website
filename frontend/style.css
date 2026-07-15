@@ -1988,11 +1988,6 @@ body.hide-sidebar .main-content {
     background: var(--bg-primary);
 }
 
-.search-header-icon {
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
 .search-input {
     flex: 1;
     border: none;
@@ -2161,12 +2156,6 @@ body.hide-sidebar .main-content {
     .search-footer {
         display: none;
     }
-}
-
-/* 搜索按钮在顶栏中的样式 */
-.search-btn {
-    font-size: 1.15rem !important;
-    padding: 6px 10px !important;
 }
 
 /* ===== 全局过渡动画 ===== */
