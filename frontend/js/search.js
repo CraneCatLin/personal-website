@@ -7,7 +7,9 @@
  * 功能：
  * - 顶栏搜索图标点击弹出搜索面板
  * - 实时模糊搜索（Fuse.js），防抖 200ms
- * - 结果标题 + 匹配片段 + 路径显示
+ * - 同一篇笔记的多个匹配合并为一个结果显示多个片段+匹配计数
+ * - 基于 Fuse 精确 indices 位置高亮，消除假高亮
+ * - 统计显示：'x 篇笔记中共有 y 个结果'
  * - ESC/点击遮罩/✕ 关闭
  * - 移动端全屏适配
  */
@@ -34,7 +36,6 @@
      * 初始化搜索模块
      */
     function init() {
-        // 需要 DOM 加载后再查找元素
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', _initDOM);
         } else {
@@ -50,11 +51,9 @@
         closeBtn = document.getElementById('searchCloseBtn');
 
         if (!searchBtn || !overlay || !input || !resultsContainer || !closeBtn) {
-            // 搜索按钮/面板尚未渲染，稍后重试
             return;
         }
 
-        // 绑定事件
         searchBtn.addEventListener('click', openSearch);
         closeBtn.addEventListener('click', closeSearch);
         overlay.addEventListener('click', function (e) {
@@ -62,14 +61,12 @@
         });
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && isOpen) closeSearch();
-            // Ctrl+K 或 Cmd+K 快捷键打开搜索
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 openSearch();
             }
         });
 
-        // 输入防抖搜索
         input.addEventListener('input', function () {
             clearTimeout(debounceTimer);
             const query = input.value.trim();
@@ -92,12 +89,10 @@
 
         overlay.classList.add('active');
 
-        // 延迟聚焦，等待 CSS 过渡完成
         setTimeout(function () {
             input.focus();
         }, 100);
 
-        // 如果索引未加载，加载索引
         if (!fuse && !indexData) {
             _showHint('正在加载搜索索引...');
             _loadIndex();
@@ -141,7 +136,6 @@
                 indexData = data;
                 _ensureFuse();
                 _showHint('输入关键词开始搜索');
-                // 如果输入框有内容，执行搜索
                 if (input.value.trim()) {
                     _performSearch(input.value.trim());
                 }
@@ -166,8 +160,7 @@
                 distance: 100000,
                 includeMatches: true,
                 shouldSort: true,
-                minMatchCharLength: 2,
-                limit: MAX_RESULTS
+                minMatchCharLength: 2
             });
         }
     }
@@ -177,7 +170,6 @@
      */
     function _performSearch(query) {
         if (!fuse) {
-            // Fuse 可能还没初始化完成
             return;
         }
 
@@ -193,32 +185,78 @@
     }
 
     /**
+     * 从 matches 中提取指定 key 的 indices
+     */
+    function _getIndices(matches, key) {
+        if (!matches) return null;
+        for (var i = 0; i < matches.length; i++) {
+            if (matches[i].key === key) {
+                return matches[i].indices;
+            }
+        }
+        return null;
+    }
+
+    /**
      * 渲染搜索结果列表
+     * 
+     * 需求：
+     * 1. 同一篇笔记多个匹配合并为一个结果项，显示该篇标题、多个匹配片段（加高亮）、该篇匹配数量
+     * 2. 统计信息显示 "x篇笔记中共有y个结果"
+     * 3. 高亮基于 Fuse 精确 indices 位置，消除位移
      */
     function _renderResults(results, query) {
+        var totalMatchCount = 0;   // 所有笔记匹配位置数量之和
         var html = '';
-        // 显示结果数量
-        html += '<div class="search-stats">找到 ' + results.length + ' 条结果</div>';
 
         for (var i = 0; i < results.length; i++) {
             var item = results[i].item;
             var matches = results[i].matches;
-            var snippet = _extractSnippet(item.content, matches, query);
-            var displayPath = item.path;
+
+            // 获取 content 和 title 的匹配 indices
+            var contentIndices = _getIndices(matches, 'content') || [];
+            var titleIndices = _getIndices(matches, 'title') || [];
+
+            // 该篇的总匹配数 = content 匹配数 + title 匹配数
+            var noteMatchCount = contentIndices.length + titleIndices.length;
+            totalMatchCount += noteMatchCount;
+
+            // 提取多个匹配片段（每个匹配位置一个片段，重叠的合并）
+            var snippets = _extractSnippets(item.content, contentIndices);
 
             html += '<div class="search-result-item" data-path="' + encodeURIComponent(item.path) + '">';
-            html += '<div class="search-result-title">' + _highlightText(item.title, query) + '</div>';
-            html += '<div class="search-result-snippet">' + snippet + '</div>';
-            html += '<div class="search-result-path">' + displayPath + '</div>';
+
+            // 标题（有精确 indices 则用精确高亮，否则用回退正则）
+            if (titleIndices && titleIndices.length > 0) {
+                html += '<div class="search-result-title">' + _buildHighlightedSnippet(item.title, titleIndices) + '</div>';
+            } else {
+                html += '<div class="search-result-title">' + _highlightText(item.title, query) + '</div>';
+            }
+
+            // 多个匹配片段
+            for (var k = 0; k < snippets.length; k++) {
+                html += '<div class="search-result-snippet">' + snippets[k] + '</div>';
+            }
+
+            // 底部信息：路径 + 匹配计数
+            html += '<div class="search-result-meta">';
+            html += '<span class="search-result-path">' + escapeHtml(item.path) + '</span>';
+            html += '<span class="search-result-count">' + noteMatchCount + ' 个匹配</span>';
+            html += '</div>';
+
             html += '</div>';
         }
 
-        resultsContainer.innerHTML = html;
+        // 统计信息
+        var statsHtml = '<div class="search-stats">' + results.length + ' 篇笔记中共有 ' + totalMatchCount + ' 个结果</div>';
+
+        resultsContainer.innerHTML = statsHtml + html;
 
         // 绑定点击事件
         var items = resultsContainer.querySelectorAll('.search-result-item');
         for (var j = 0; j < items.length; j++) {
             items[j].addEventListener('click', function (e) {
+                // 点击内部元素不冒泡到 .search-result-meta 等
                 var path = decodeURIComponent(this.getAttribute('data-path'));
                 _navigateTo(path);
             });
@@ -226,45 +264,151 @@
     }
 
     /**
-     * 从匹配结果中提取摘要片段
+     * 从 content 中提取多个匹配片段
+     * 
+     * 对每个匹配位置截取前后 SNIPPET_RADIUS 字符，
+     * 相邻或重叠的片段自动合并，
+     * 返回数组，每个元素是已高亮的 HTML 字符串
      */
-    function _extractSnippet(content, matches, query) {
-        if (!matches || matches.length === 0) {
-            return content.substring(0, SNIPPET_RADIUS * 2) + '...';
+    function _extractSnippets(content, indices) {
+        if (!indices || indices.length === 0) {
+            // 无内容匹配时显示开头片段（无高亮）
+            var fallback = content.substring(0, SNIPPET_RADIUS * 2);
+            if (content.length > SNIPPET_RADIUS * 2) fallback += '...';
+            return ['<span class="snippet-text">' + escapeHtml(fallback) + '</span>'];
         }
 
-        // 取 content 字段的第一个匹配位置
-        var contentMatch = null;
-        for (var i = 0; i < matches.length; i++) {
-            if (matches[i].key === 'content') {
-                contentMatch = matches[i];
-                break;
+        // 按起始位置排序
+        var sorted = indices.slice().sort(function (a, b) { return a[0] - b[0]; });
+
+        // 构建片段列表（合并重叠/相邻片段）
+        var rawSnippets = [];
+
+        for (var i = 0; i < sorted.length; i++) {
+            var matchStart = sorted[i][0];
+            var matchEnd = sorted[i][1];
+
+            var snipStart = Math.max(0, matchStart - SNIPPET_RADIUS);
+            var snipEnd = Math.min(content.length, matchEnd + SNIPPET_RADIUS);
+
+            // 尝试与上一个片段合并
+            if (rawSnippets.length > 0) {
+                var prev = rawSnippets[rawSnippets.length - 1];
+                // 如果当前片段与上一个重叠或相邻（间隔不超过 10 字符）
+                if (snipStart <= prev.snipEnd + 10) {
+                    // 扩展上一个片段的结束位置
+                    if (snipEnd > prev.snipEnd) {
+                        prev.snipEnd = snipEnd;
+                    }
+                    // 添加当前匹配位置到上一个片段的 indices 列表中
+                    prev.matchIndices.push({
+                        start: matchStart - prev.snipStart,
+                        end: matchEnd - prev.snipStart
+                    });
+                    continue;
+                }
             }
+
+            // 新建片段
+            rawSnippets.push({
+                snipStart: snipStart,
+                snipEnd: snipEnd,
+                matchIndices: [{
+                    start: matchStart - snipStart,
+                    end: matchEnd - snipStart
+                }]
+            });
         }
 
-        if (!contentMatch || !contentMatch.indices || contentMatch.indices.length === 0) {
-            return content.substring(0, SNIPPET_RADIUS * 2) + '...';
+        // 渲染为 HTML
+        var result = [];
+        for (var i = 0; i < rawSnippets.length; i++) {
+            var s = rawSnippets[i];
+            var rawText = content.substring(s.snipStart, s.snipEnd);
+
+            var prefix = s.snipStart > 0 ? '...' : '';
+            var suffix = s.snipEnd < content.length ? '...' : '';
+
+            // 用精确 indices 构建高亮 HTML
+            var highlighted = _buildHighlightedSnippet(rawText, s.matchIndices);
+            result.push(prefix + highlighted + suffix);
         }
 
-        // 取第一个匹配片段的起始位置
-        var startIdx = contentMatch.indices[0][0];
-        var endIdx = contentMatch.indices[0][1];
-
-        var snippetStart = Math.max(0, startIdx - SNIPPET_RADIUS);
-        var snippetEnd = Math.min(content.length, endIdx + SNIPPET_RADIUS);
-
-        var snippet = content.substring(snippetStart, snippetEnd);
-
-        // 添加省略号
-        if (snippetStart > 0) snippet = '...' + snippet;
-        if (snippetEnd < content.length) snippet = snippet + '...';
-
-        // 高亮匹配文本
-        return _highlightMatches(snippet, contentMatch.indices, snippetStart);
+        return result;
     }
 
     /**
-     * 高亮文本中的匹配词
+     * 基于精确位置索引构建带高亮的 HTML
+     * 
+     * 将文本按匹配位置切分成普通段和高亮段，
+     * 直接 escapeHtml 后包裹 <span>，消除假高亮位移
+     * 
+     * @param {string} text - 要渲染的原始文本
+     * @param {Array} indices - 匹配位置数组 [[start, end], ...]（相对于 text 的偏移）
+     * @returns {string} 带 <span> 高亮的 HTML
+     */
+    function _buildHighlightedSnippet(text, indices) {
+        if (!indices || indices.length === 0) {
+            return escapeHtml(text);
+        }
+
+        // 按起始位置排序
+        var sorted = indices.slice().sort(function (a, b) { return a[0] - b[0]; });
+
+        var segments = [];
+        var lastEnd = 0;
+
+        for (var i = 0; i < sorted.length; i++) {
+            var idxStart = sorted[i][0];
+            var idxEnd = sorted[i][1];
+
+            // 裁剪到有效范围
+            if (idxStart < 0) idxStart = 0;
+            if (idxEnd >= text.length) idxEnd = text.length - 1;
+            if (idxStart > idxEnd) continue;
+
+            // 普通段（高亮区域前的文本）
+            if (idxStart > lastEnd) {
+                segments.push({
+                    text: text.substring(lastEnd, idxStart),
+                    highlight: false
+                });
+            }
+
+            // 高亮段（Fuse 的 indices 是包含区间，[start, end]）
+            segments.push({
+                text: text.substring(idxStart, idxEnd + 1),
+                highlight: true
+            });
+
+            lastEnd = idxEnd + 1;
+        }
+
+        // 剩余普通段
+        if (lastEnd < text.length) {
+            segments.push({
+                text: text.substring(lastEnd),
+                highlight: false
+            });
+        }
+
+        // 构建 HTML：只对高亮段包裹 <span>，普通段直接输出 escaped HTML
+        var html = '';
+        for (var i = 0; i < segments.length; i++) {
+            var seg = segments[i];
+            var escaped = escapeHtml(seg.text);
+            if (seg.highlight) {
+                html += '<span class="' + HIGHLIGHT_CLASS + '">' + escaped + '</span>';
+            } else {
+                // 非高亮段也用 <span> 包裹，避免 -webkit-box 渲染模式下裸文本节点不显示
+                html += '<span>' + escaped + '</span>';
+            }
+        }
+        return html;
+    }
+
+    /**
+     * 正则高亮文本（回退方案，用于无精确 indices 时）
      */
     function _highlightText(text, query) {
         if (!query) return escapeHtml(text);
@@ -276,26 +420,6 @@
             escaped = escaped.replace(regex, '<span class="' + HIGHLIGHT_CLASS + '">$1</span>');
         }
         return escaped;
-    }
-
-    /**
-     * 高亮片段中的匹配位置（基于 Fuse 返回的 indices）
-     */
-    function _highlightMatches(snippet, indices, offset) {
-        // 从 Fuse 的 indices（相对于全文）提取所有匹配词
-        var queryWords = [];
-        for (var m = 0; m < indices.length; m++) {
-            var wordStart = indices[m][0] - offset;
-            var wordEnd = indices[m][1] - offset + 1;
-            if (wordStart < 0) wordStart = 0;
-            if (wordEnd > snippet.length) wordEnd = snippet.length;
-            if (wordStart >= wordEnd) continue;
-            var word = snippet.substring(wordStart, wordEnd);
-            if (word && queryWords.indexOf(word) === -1) {
-                queryWords.push(word);
-            }
-        }
-        return _highlightText(snippet, queryWords.join(' '));
     }
 
     /**

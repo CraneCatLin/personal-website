@@ -151,9 +151,18 @@
   - 日志页面不显示修改日期
   - 涉及 frontend/js/notes.js、frontend/style.css
 
+
 @2026-07-14
 新增页面访问次数计数器系统
   - 使用 Cloudflare Workers + KV 自建计数器，替代第三方服务
   - 自动记录每篇笔记/日志的访问次数，在页面底部显示"阅读 X 次"
   - 新增 scripts/counter-worker.js（Worker 源码）和 scripts/wrangler.toml（部署配置）
   - 涉及 scripts/counter-worker.js、scripts/wrangler.toml、frontend/js/core.js、frontend/js/notes.js、frontend/js/log.js、frontend/style.css、update.ps1
+
+@2026-07-15
+修复搜索结果页的多个显示问题（search.js）
+  - 同一篇笔记的多个匹配合并为单个结果，显示多个片段 + 匹配计数
+  - 统计信息改为 "x 篇笔记中共有 y 个结果"
+  - 修复高亮位移：基于 Fuse 精确 indices 位置构建高亮，消除假高亮
+  - 修复片段文字不可见：-webkit-box 渲染模式下所有文本段均用 <span> 包裹
+  - 涉及 frontend/js/search.js

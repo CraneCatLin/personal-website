@@ -2097,9 +2097,6 @@ body.hide-sidebar .main-content {
     color: var(--text-secondary);
     line-height: 1.5;
     margin-bottom: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
     overflow: hidden;
     word-break: break-all;
 }
@@ -2117,6 +2114,26 @@ body.hide-sidebar .main-content {
     color: var(--text-muted);
     opacity: 0.6;
     font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.search-result-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.search-result-count {
+    font-size: 0.72rem;
+    color: var(--primary);
+    background: rgba(91, 155, 213, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.snippet-text {
+    line-height: 1.6;
 }
 
 /* 搜索底部提示 */
