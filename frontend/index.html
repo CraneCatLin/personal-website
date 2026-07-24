@@ -100,40 +100,6 @@
         </div>
     </div>
 
-    <!-- 首页 Fallback：JS 失效时展示静态卡片 -->
-    <script>
-        (function safeFallback() {
-            if (!document.getElementById('viewer').innerHTML.trim()) {
-                document.getElementById('viewer').innerHTML = `
-                    <div class="home-cards">
-                        <div class="home-card card-span-2" style="animation-delay:0s">
-                            <span class="card-icon">👋</span>
-                            <div class="card-title">你好，这里是 CraneCat 的笔记本</div>
-                            <p class="card-desc">一个关于 AI、编程、以及各种奇思妙想的个人知识库。</p>
-                            <div class="card-actions">
-                                <a class="card-link primary" href="https://github.com/CraneCatLin" target="_blank">📂 GitHub</a>
-                            </div>
-                        </div>
-                        <div class="home-card card-clickable" style="animation-delay:0.08s" onclick="location.hash='#README'">
-                            <span class="card-icon">📖</span>
-                            <div class="card-title">开始阅读</div>
-                            <p class="card-desc">浏览笔记，包含 AI、编程、数学等分类。</p>
-                        </div>
-                        <div class="home-card" style="animation-delay:0.16s">
-                            <span class="card-icon">💬</span>
-                            <div class="card-title">联系方式</div>
-                            <p class="card-desc">邮箱：cranecat_rain@163.com<br>QQ：2019412832</p>
-                        </div>
-                        <div class="home-card" style="animation-delay:0.24s">
-                            <span class="card-icon">ℹ️</span>
-                            <div class="card-title">关于本站</div>
-                            <p class="card-desc">SPA 单页笔记站，基于 Obsidian + markdown-it + KaTeX 构建。</p>
-                        </div>
-                    </div>
-                `;
-            }
-        })();
-    </script>
     <!-- Search overlay -->
     <div class="search-overlay" id="searchOverlay">
         <div class="search-modal">

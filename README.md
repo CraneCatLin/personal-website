@@ -166,3 +166,8 @@
   - 修复高亮位移：基于 Fuse 精确 indices 位置构建高亮，消除假高亮
   - 修复片段文字不可见：-webkit-box 渲染模式下所有文本段均用 <span> 包裹
   - 涉及 frontend/js/search.js
+
+@2026-07-24
+移除旧页面 safeFallback 脚本，消除首次加载时"我的笔记本"等旧卡片闪现
+  - viewer 保持空白，由 defer JS 无缝填充首页卡片
+  - 移除 frontend/index.html 中的内联 safeFallback 脚本块
