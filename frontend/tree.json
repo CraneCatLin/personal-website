@@ -627,6 +627,21 @@
     },
     {
       "type": "folder",
+      "name": "vulkan",
+      "path": "vulkan",
+      "children": [
+        {
+          "type": "file",
+          "name": "资料记录.md",
+          "path": "vulkan/资料记录.md",
+          "ext": ".md",
+          "mtime": "2026-07-28T17:06:05.754Z"
+        }
+      ],
+      "mtime": "2026-07-28T17:04:08.420Z"
+    },
+    {
+      "type": "folder",
       "name": "提示词",
       "path": "提示词",
       "children": [
