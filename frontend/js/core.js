@@ -142,10 +142,24 @@ function enhanceCodeBlocks() {
  * @param {string} filePath - 文件相对路径（如 "ai/CNN.md"）
  * @returns {Promise<number>} 返回更新后的访问次数
  */
+/**
+ * 带超时的 fetch 封装（AbortController）
+ */
+async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        return response;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 async function recordPageView(filePath) {
     try {
         const apiUrl = 'https://pv-counter.cranecat.workers.dev/pv?path=' + encodeURIComponent(filePath);
-        const response = await fetch(apiUrl, { method: 'POST' });
+        const response = await fetchWithTimeout(apiUrl, { method: 'POST' }, 5000);
         if (!response.ok) return -1;
         const data = await response.json();
         return data.count || 0;
@@ -170,7 +184,9 @@ function renderPageViewCount(container, filePath) {
         if (count >= 0) {
             pvEl.textContent = `阅读 ${count} 次`;
         } else {
-            pvEl.textContent = '';
+            pvEl.textContent = '阅读获取失败';
+            pvEl.style.color = '#999';
+            pvEl.style.fontSize = '0.85em';
         }
     });
 }
