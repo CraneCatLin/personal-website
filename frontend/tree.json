@@ -386,7 +386,7 @@
           "name": "光追.md",
           "path": "GAMES/光追.md",
           "ext": ".md",
-          "mtime": "2026-06-30T15:06:59.927Z"
+          "mtime": "2026-08-06T19:42:26.837Z"
         },
         {
           "type": "file",
@@ -650,7 +650,7 @@
           "name": "论文概况提示词.md",
           "path": "提示词/论文概况提示词.md",
           "ext": ".md",
-          "mtime": "2026-06-30T15:06:59.951Z"
+          "mtime": "2026-08-06T19:42:26.853Z"
         },
         {
           "type": "file",
@@ -693,6 +693,21 @@
     },
     {
       "type": "folder",
+      "name": "环境配置",
+      "path": "环境配置",
+      "children": [
+        {
+          "type": "file",
+          "name": "vcpkg.md",
+          "path": "环境配置/vcpkg.md",
+          "ext": ".md",
+          "mtime": "2026-08-06T19:42:26.863Z"
+        }
+      ],
+      "mtime": "2026-08-06T19:40:26.906Z"
+    },
+    {
+      "type": "folder",
       "name": "词条",
       "path": "词条",
       "children": [
@@ -702,9 +717,30 @@
           "path": "词条/焦散.md",
           "ext": ".md",
           "mtime": "2026-07-29T07:40:18.446Z"
+        },
+        {
+          "type": "file",
+          "name": "说明.md",
+          "path": "词条/说明.md",
+          "ext": ".md",
+          "mtime": "2026-08-06T19:42:26.863Z"
+        },
+        {
+          "type": "file",
+          "name": "NPR.md",
+          "path": "词条/NPR.md",
+          "ext": ".md",
+          "mtime": "2026-08-06T19:42:26.863Z"
+        },
+        {
+          "type": "file",
+          "name": "SRE.md",
+          "path": "词条/SRE.md",
+          "ext": ".md",
+          "mtime": "2026-08-06T19:42:26.863Z"
         }
       ],
-      "mtime": "2026-07-29T06:38:39.787Z"
+      "mtime": "2026-07-31T18:55:32.850Z"
     },
     {
       "type": "folder",
