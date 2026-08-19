@@ -4,13 +4,6 @@
   "path": "",
   "children": [
     {
-      "type": "file",
-      "name": "2026-08-14.md",
-      "path": "2026-08-14.md",
-      "ext": ".md",
-      "mtime": "2026-08-14T17:53:04.883Z"
-    },
-    {
       "type": "folder",
       "name": "ai",
       "path": "ai",
@@ -631,35 +624,6 @@
         }
       ],
       "mtime": "2026-07-25T17:01:41.390Z"
-    },
-    {
-      "type": "folder",
-      "name": "vulkan",
-      "path": "vulkan",
-      "children": [
-        {
-          "type": "file",
-          "name": "记录.md",
-          "path": "vulkan/记录.md",
-          "ext": ".md",
-          "mtime": "2026-08-11T17:00:37.711Z"
-        },
-        {
-          "type": "file",
-          "name": "三角形.md",
-          "path": "vulkan/三角形.md",
-          "ext": ".md",
-          "mtime": "2026-08-14T17:53:04.895Z"
-        },
-        {
-          "type": "file",
-          "name": "资料记录.md",
-          "path": "vulkan/资料记录.md",
-          "ext": ".md",
-          "mtime": "2026-07-28T17:06:05.754Z"
-        }
-      ],
-      "mtime": "2026-08-07T18:07:45.714Z"
     },
     {
       "type": "folder",
