@@ -726,35 +726,6 @@
         }
       ],
       "mtime": "2026-07-31T18:55:32.850Z"
-    },
-    {
-      "type": "folder",
-      "name": "项目记录",
-      "path": "项目记录",
-      "children": [
-        {
-          "type": "file",
-          "name": "bugs.md",
-          "path": "项目记录/bugs.md",
-          "ext": ".md",
-          "mtime": "2026-06-30T15:06:59.983Z"
-        },
-        {
-          "type": "file",
-          "name": "pixelFace.md",
-          "path": "项目记录/pixelFace.md",
-          "ext": ".md",
-          "mtime": "2026-06-30T15:06:59.984Z"
-        },
-        {
-          "type": "file",
-          "name": "Render.md",
-          "path": "项目记录/Render.md",
-          "ext": ".md",
-          "mtime": "2026-06-30T15:06:59.984Z"
-        }
-      ],
-      "mtime": "2026-06-02T08:39:20.601Z"
     }
   ]
 }
