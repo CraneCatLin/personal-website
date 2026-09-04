@@ -171,3 +171,9 @@
 移除旧页面 safeFallback 脚本，消除首次加载时"我的笔记本"等旧卡片闪现
   - viewer 保持空白，由 defer JS 无缝填充首页卡片
   - 移除 frontend/index.html 中的内联 safeFallback 脚本块
+
+@2026-09-05
+修复首页首次加载时短暂闪现旧式三栏页面框架的问题
+  - 初始阶段隐藏尚未完成路由判定的通用页面框架，目录数据加载后再显示正确页面
+  - 目录加载失败时仍按当前 hash 初始化页面，并确保解除启动状态
+  - 涉及 frontend/index.html、frontend/style.css、frontend/js/tree.js

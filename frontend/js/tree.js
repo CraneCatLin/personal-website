@@ -141,7 +141,12 @@ function loadTree() {
         })
         .catch(error => {
             treeContainer.innerHTML = `<div style="padding:1rem; color:var(--text-secondary);">❌ 加载目录失败: ${error.message}<br>请确保 tree.json 存在且格式正确。</div>`;
-            window.HomeModule.renderDefaultAbout();
+            // 即使目录加载失败，也按当前 hash 初始化正确的页面布局和可用内容
+            window.loadFromHash();
+        })
+        .finally(() => {
+            // 当前路由已经决定并完成首轮同步渲染，可以安全显示页面框架
+            document.body.classList.remove('is-booting');
         });
 }
 

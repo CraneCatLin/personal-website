@@ -237,6 +237,11 @@ body.log-page::before {
     min-height: calc(100vh - var(--topbar-height));
 }
 
+/* 路由完成前不绘制通用页面框架，避免首页首次加载时闪现侧栏和空内容卡片 */
+body.is-booting .app-grid {
+    visibility: hidden;
+}
+
 /* ---------- Sidebar ---------- */
 .sidebar {
     position: sticky;
