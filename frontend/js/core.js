@@ -6,7 +6,6 @@
 // ---------- DOM 引用 ----------
 const viewer = document.getElementById('viewer');
 const body = document.body;
-let currentFilePath = '';                // 当前加载的文件路径（相对根目录）
 
 // ---------- 常量 ----------
 const SUPPORTED_IMG = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'];
@@ -195,7 +194,6 @@ function renderPageViewCount(container, filePath) {
 window.CoreModule = {
     viewer: viewer,
     body: body,
-    currentFilePath: currentFilePath,
     SUPPORTED_IMG: SUPPORTED_IMG,
     SUPPORTED_VIDEO: SUPPORTED_VIDEO,
     getFileExtension: getFileExtension,

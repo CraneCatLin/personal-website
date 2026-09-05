@@ -2,7 +2,6 @@
  * 目录树模块 - 从 script.js 拆分
  * 依赖：script.js 通过 Object.defineProperty 暴露的全局变量（window.treeData, window.defaultNotePath,
  *       window.fileNameMap, window.fullPathNoExtMap, window.loadFileByPath, window.loadFromHash）
- *       script.js 通过 window.getFileIcon 暴露的函数
  */
 
 // ---------- 构建目录树 ----------
@@ -16,7 +15,6 @@ function buildTreeHTML(nodes, parentPath = '') {
             html += `<li class="folder collapsed">`;
             html += `<div class="item" data-path="${nodePath}" data-type="folder">`;
             html += `<span class="folder-arrow">▸</span>`;
-            html += `<span class="folder-icon">📁</span>`;
             html += `<span class="item-name">${node.name}</span>`;
             if (fileCount + subFolderCount > 0) {
                 html += `<span class="folder-count">${fileCount + subFolderCount}</span>`;
@@ -25,16 +23,14 @@ function buildTreeHTML(nodes, parentPath = '') {
             if (node.children && node.children.length > 0) {
                 html += buildTreeHTML(node.children, nodePath);
             } else {
-                html += '<ul class="tree"><li class="empty-folder"><span class="empty-hint">📪 空文件夹</span></li></ul>';
+                html += '<ul class="tree"><li class="empty-folder"><span class="empty-hint">空文件夹</span></li></ul>';
             }
             html += `</li>`;
         } else if (node.type === 'file') {
             const displayName = node.name.replace(/\.[^/.]+$/, "");
             const ext = node.ext || '';
-            const icon = window.getFileIcon(ext);
             html += `<li class="file">`;
             html += `<div class="item" data-path="${nodePath}" data-type="file" data-ext="${ext}">`;
-            html += `<span class="file-icon">${icon}</span>`;
             html += `<span class="item-name">${displayName}</span>`;
             html += `</div>`;
             html += `</li>`;
@@ -140,7 +136,7 @@ function loadTree() {
             window.loadFromHash();
         })
         .catch(error => {
-            treeContainer.innerHTML = `<div style="padding:1rem; color:var(--text-secondary);">❌ 加载目录失败: ${error.message}<br>请确保 tree.json 存在且格式正确。</div>`;
+            treeContainer.innerHTML = `<div style="padding:1rem; color:var(--text-secondary);">加载目录失败: ${error.message}<br>请确保 tree.json 存在且格式正确。</div>`;
             // 即使目录加载失败，也按当前 hash 初始化正确的页面布局和可用内容
             window.loadFromHash();
         })

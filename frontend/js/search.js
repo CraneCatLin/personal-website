@@ -555,7 +555,6 @@
         input.setAttribute('aria-expanded', 'false');
         resultsContainer.setAttribute('aria-busy', 'false');
         resultsContainer.innerHTML = '<div class="search-state search-hint">' +
-            '<span class="search-state-symbol" aria-hidden="true">⌕</span>' +
             '<span>' + escapeHtml(text) + '</span></div>';
     }
 
@@ -571,7 +570,6 @@
         input.setAttribute('aria-expanded', 'false');
         resultsContainer.setAttribute('aria-busy', 'false');
         resultsContainer.innerHTML = '<div class="search-state search-empty" role="status">' +
-            '<span class="search-state-symbol" aria-hidden="true">∅</span>' +
             '<span>' + escapeHtml(text) + '</span>' +
             '<small>试试更短的关键词，或只搜索标题中的核心词</small></div>';
     }

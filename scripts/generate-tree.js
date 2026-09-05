@@ -61,10 +61,9 @@ function shouldIgnorePath(currentPath, baseDir) {
  * 递归扫描目录，返回文件夹对象或 null（应忽略）
  * @param {string} currentPath - 当前绝对路径
  * @param {string} baseDir - 根目录绝对路径（用于计算相对路径）
- * @param {string} relPath - 相对于 baseDir 的路径（用于 path 字段）
  * @returns {object|null} 节点对象或 null（如果该文件夹/文件应被忽略）
  */
-function walkDir(currentPath, baseDir, parentRelPath = '') {
+function walkDir(currentPath, baseDir) {
     let stats;
     try {
         stats = fs.statSync(currentPath);
@@ -109,7 +108,7 @@ function walkDir(currentPath, baseDir, parentRelPath = '') {
 
         for (const item of items) {
             const itemPath = path.join(currentPath, item);
-            const child = walkDir(itemPath, baseDir, currentRelPath);
+            const child = walkDir(itemPath, baseDir);
             if (child) {
                 children.push(child);
             }
@@ -155,7 +154,7 @@ function generateTree(baseDir, name) {
 
     for (const item of items) {
         const itemPath = path.join(baseDir, item);
-        const child = walkDir(itemPath, baseDir, item);
+        const child = walkDir(itemPath, baseDir);
         if (child) {
             tree.children.push(child);
         }

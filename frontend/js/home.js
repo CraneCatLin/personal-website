@@ -6,7 +6,7 @@
  *       window.loadFileByPath、window.loadFromHash（作为自由变量引用）
  */
 
-// 🏠 动态卡片风格首页
+// 动态卡片风格首页
 function renderDefaultAbout() {
     window.TOCModule.clearTOC();
 

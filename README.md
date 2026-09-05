@@ -10,7 +10,7 @@
 
 ### 前端技术栈
 - HTML5 + CSS3 + JavaScript
-- Markdown渲染：markdown-it + Marked.js（备用）
+- Markdown渲染：markdown-it
 - 代码高亮：Highlight.js
 - 数学公式渲染：KaTeX + texmath
 - 响应式设计
@@ -185,3 +185,17 @@
   - 搜索索引清理 Markdown 展示噪音，减小体积并提升摘要可读性
   - 完善搜索对话框语义、选中态、空状态、移动端布局与缓存更新
   - 涉及 frontend/index.html、frontend/style.css、frontend/js/search.js、frontend/search-index.json、scripts/generate-search-index.js
+
+@2026-09-05
+清理已确认不参与现有功能的历史代码
+  - 移除未使用的 marked、markdown-it-imsize、KaTeX auto-render 库及加载标签
+  - 路由脚本复用 core.js 的共享工具，删除无调用函数、只写不读状态和旧侧边栏逻辑
+  - 清理旧日志详情列表及配套样式、已完成的图片链接迁移脚本和未使用参数
+  - 保留公式回退、图片尺寸处理、日志导航、搜索和部署流程
+  - 验证记录见 docs/unused-code-audit.md
+
+@2026-09-05
+移除页面装饰图标，统一采用文字标签
+  - 去掉笔记目录、日志、友链、文件预览和错误提示中的 emoji
+  - 去掉搜索按钮、输入框和提示状态的装饰图标，移动端保留“搜索”文字
+  - 删除文件图标映射及对应样式，保留目录展开、菜单、关闭及翻页操作

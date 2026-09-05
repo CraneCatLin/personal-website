@@ -34,7 +34,7 @@ function renderImage(filePath) {
     window.TOCModule.clearTOC();
     viewer.innerHTML = `
         <div class="markdown-body image-view">
-            <h2>🖼️ 图片预览</h2>
+            <h2>图片预览</h2>
             <img src="${filePath}" alt="${filePath.split('/').pop()}" style="max-width:100%;">
             <p><a href="${filePath}" target="_blank">查看原图</a></p>
         </div>
@@ -45,7 +45,7 @@ function renderVideo(filePath) {
     window.TOCModule.clearTOC();
     viewer.innerHTML = `
         <div class="markdown-body video-view">
-            <h2>🎬 视频播放</h2>
+            <h2>视频播放</h2>
             <video controls src="${filePath}" style="width:100%; max-height:70vh;"></video>
             <p><a href="${filePath}" target="_blank">下载视频</a></p>
         </div>
@@ -57,7 +57,7 @@ function renderUnsupported(filePath) {
     const fileName = filePath.split('/').pop();
     viewer.innerHTML = `
         <div class="markdown-body unsupported">
-            <h2>📄 文件无法预览</h2>
+            <h2>文件无法预览</h2>
             <p>文件类型 "${getFileExtension(filePath)}" 暂不支持在线预览。</p>
             <p><a href="${filePath}" download="${fileName}">点击下载文件</a></p>
         </div>
@@ -98,7 +98,7 @@ function getMtimeHtml(filePath) {
     return `<div class="note-mtime">${text}</div>`;
 }
 
-// ---------- 渲染 Markdown (使用 marked、highlight.js 和 KaTeX) ----------
+// ---------- 渲染 Markdown (使用 markdown-it、highlight.js 和 KaTeX) ----------
 function renderMarkdown(markdownText, filePath) {
     function replaceWikilinks(text) {
         return text.replace(/\[\[([^\]]+)\]\]/g, function (match, p1) {
@@ -138,7 +138,6 @@ function renderMarkdown(markdownText, filePath) {
             quotes: '""\'\''
         });
 
-        let headings = [];
         let headingCounts = {};
 
         const defaultHeadingOpen = md.renderer.rules.heading_open || function (tokens, idx, options, env, self) {
@@ -162,12 +161,6 @@ function renderMarkdown(markdownText, filePath) {
             const id = headingCounts[baseId] === 0 ? baseId : baseId + '-' + headingCounts[baseId];
 
             token.attrSet('id', id);
-
-            headings.push({
-                level: parseInt(token.tag.substring(1)),
-                text: text,
-                id: id
-            });
 
             return defaultHeadingOpen(tokens, idx, options, env, self);
         };
@@ -303,7 +296,7 @@ function renderMarkdown(markdownText, filePath) {
         }
     } catch (error) {
         console.error('Markdown 渲染出错:', error);
-        viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p><pre>${escapeHtml(markdownText.substring(0, 200))}...</pre></div>`;
+        viewer.innerHTML = `<div class="markdown-body error"><h2>渲染失败</h2><p>${error.message}</p><pre>${escapeHtml(markdownText.substring(0, 200))}...</pre></div>`;
         window.TOCModule.clearTOC();
     }
 }

@@ -272,39 +272,6 @@ body.is-booting .app-grid {
     text-transform: uppercase;
 }
 
-.collapse-btn {
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 0.75rem;
-    transition: all var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.collapse-btn:hover {
-    background: rgba(91, 155, 213, 0.1);
-    color: var(--primary);
-}
-
-/* Sidebar collapsed */
-.sidebar.collapsed {
-    width: 42px;
-    padding: 12px 4px;
-    overflow: hidden;
-}
-
-.sidebar.collapsed .sidebar-header span,
-.sidebar.collapsed .tree-container,
-.sidebar.collapsed .sidebar-footer {
-    display: none;
-}
-
 /* Tree Container */
 .tree-container {
     flex: 1;
@@ -396,14 +363,6 @@ body.is-booting .app-grid {
 
 .tree .folder.collapsed>.tree {
     display: none;
-}
-
-.tree .folder-icon {
-    font-size: 0.85rem;
-}
-
-.tree .file-icon {
-    font-size: 0.9rem;
 }
 
 .tree .item-name {
@@ -562,12 +521,6 @@ body.is-booting .app-grid {
 /* JS 接管 hover，不再用 CSS hover 位移 */
 .home-card:hover {
     box-shadow: var(--shadow-lg), var(--shadow-glow);
-}
-
-/* 卡片内图标 */
-.home-card .card-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
 }
 
 /* 卡片标题 */
@@ -1305,146 +1258,6 @@ body.is-booting .app-grid {
     z-index: 1;
 }
 
-/* ---- 图例 ---- */
-.log-calendar-legend {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 14px;
-    font-size: 0.76rem;
-    color: var(--text-muted);
-}
-
-.log-legend-cell {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-}
-
-.log-legend-cell.l0 {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.log-legend-cell.l1 {
-    background: rgba(91, 155, 213, 0.18);
-}
-
-.log-legend-cell.l2 {
-    background: rgba(91, 155, 213, 0.32);
-}
-
-.log-legend-cell.l3 {
-    background: rgba(91, 155, 213, 0.50);
-}
-
-/* ---- 日期详情区域 ---- */
-.log-date-detail {
-    max-width: 520px;
-    margin: 0 auto;
-}
-
-/* ---- 日志列表 ---- */
-.log-list-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 28px 0 16px 0;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-}
-
-.log-entry {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 16px 20px;
-    margin: 8px 0;
-    border-radius: var(--radius-md);
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    transition: all var(--transition);
-    animation: cardFadeInUp 0.4s ease forwards;
-    opacity: 0;
-}
-
-.log-entry:hover {
-    transform: translateX(4px);
-    border-color: rgba(91, 155, 213, 0.2);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
-}
-
-.log-entry-date {
-    flex-shrink: 0;
-    width: 52px;
-    text-align: center;
-    padding-top: 2px;
-}
-
-.log-entry-month-day {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
-}
-
-.log-entry-weekday {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-.log-entry-dot {
-    flex-shrink: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--primary-light);
-    margin-top: 8px;
-    box-shadow: 0 0 6px rgba(91, 155, 213, 0.4);
-}
-
-.log-entry-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.log-entry-name {
-    font-size: 0.98rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.log-entry-preview {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.log-entry-arrow {
-    flex-shrink: 0;
-    color: var(--text-muted);
-    font-size: 1rem;
-    margin-top: 6px;
-    transition: transform var(--transition);
-}
-
-.log-entry:hover .log-entry-arrow {
-    transform: translateX(4px);
-    color: var(--primary);
-}
-
 /* ---- 日志阅读页 ---- */
 .log-reading-header {
     display: flex;
@@ -1530,57 +1343,10 @@ body.is-booting .app-grid {
     flex: 0 0 auto;
 }
 
-/* ---- 空状态 ---- */
-.log-empty {
-    text-align: center;
-    padding: 48px 20px;
-    color: var(--text-muted);
-}
-
-.log-empty-icon {
-    font-size: 3rem;
-    margin-bottom: 12px;
-}
-
-.log-empty-text {
-    font-size: 0.95rem;
-}
-
 /* ---- 日历响应式 ---- */
 @media (max-width: 768px) {
     .log-calendar-container {
         padding: 16px 12px;
-    }
-
-    .log-heatmap-cell {
-        width: 10px;
-        height: 10px;
-    }
-
-    .log-heatmap-grid {
-        gap: 2px;
-    }
-
-    .log-entry {
-        padding: 12px 14px;
-        gap: 10px;
-    }
-
-    .log-entry-date {
-        width: 42px;
-    }
-
-    .log-entry-month-day {
-        font-size: 0.95rem;
-    }
-
-    .log-category-tabs {
-        gap: 6px;
-    }
-
-    .log-category-tab {
-        padding: 6px 14px;
-        font-size: 0.82rem;
     }
 
     .log-reading-header {
@@ -1945,16 +1711,6 @@ body.hide-sidebar .main-content {
     gap: 6px;
 }
 
-.search-btn-icon,
-.search-header-icon {
-    width: 17px;
-    height: 17px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-}
-
 .search-dialog-title {
     position: absolute;
     width: 1px;
@@ -2024,13 +1780,6 @@ body.search-open {
     padding: 15px 18px;
     border-bottom: 1px solid var(--border-light);
     background: rgba(255, 255, 255, 0.025);
-}
-
-.search-header-icon {
-    width: 20px;
-    height: 20px;
-    color: var(--primary-light);
-    flex-shrink: 0;
 }
 
 .search-input {
@@ -2128,18 +1877,6 @@ body.search-open {
 .search-error {
     color: var(--text-muted);
     font-size: 0.92rem;
-}
-
-.search-state-symbol {
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    margin-bottom: 3px;
-    border-radius: 50%;
-    background: rgba(91, 155, 213, 0.09);
-    color: var(--primary-light);
-    font-size: 1.35rem;
 }
 
 .search-empty small {
@@ -2367,10 +2104,6 @@ body.search-open {
 
     .search-btn {
         padding-inline: 8px;
-    }
-
-    .search-btn span {
-        display: none;
     }
 }
 

@@ -1,13 +1,12 @@
 /**
  * 日志模块 - 从 script.js 拆分
- * 依赖：core.js（提供全局 viewer, body, currentFilePath, showContentSkeleton, 
+ * 依赖：core.js（提供全局 viewer, body, showContentSkeleton,
  *       escapeHtml, processMathFormulas, enhanceCodeBlocks 等变量和函数）
  * 依赖：toc.js（提供 window.TOCModule.clearTOC）
  */
 
 // ==================== 日志页面 ====================
 // 日志数据结构：所有日志文件 + 按日期索引
-let logTreeData = null;
 let logFilesAll = [];
 let logDateMap = {}; // "2026-05-27" -> [file, file, ...]
 
@@ -23,8 +22,6 @@ function renderLogPage() {
             return response.json();
         })
         .then(data => {
-            logTreeData = data;
-
             let nodes = [];
             if (Array.isArray(data)) {
                 nodes = data;
@@ -83,7 +80,7 @@ function renderLogPage() {
             buildLogPageUI(curYear, curMonth);
         })
         .catch(error => {
-            viewer.innerHTML = `<div class="log-page"><p style="text-align:center;color:var(--text-muted);">❌ 加载日志失败: ${error.message}</p></div>`;
+            viewer.innerHTML = `<div class="log-page"><p style="text-align:center;color:var(--text-muted);">加载日志失败: ${error.message}</p></div>`;
         });
 }
 
@@ -160,20 +157,19 @@ function buildLogPageUI(year, month) {
     viewer.innerHTML = `
         <div class="log-page">
             <div class="log-page-header">
-                <h1>📅 日志</h1>
+                <h1>日志</h1>
             </div>
             <div class="log-calendar-container">
                 <div class="log-calendar-header">
-                    <button class="log-nav-btn" id="logPrevMonth" title="上个月">◀</button>
+                    <button class="log-nav-btn" id="logPrevMonth" title="上个月">‹</button>
                     <div class="log-calendar-jump">
                         <select id="logJumpYear" class="log-jump-select">${yearSelectHTML}</select>
                         <select id="logJumpMonth" class="log-jump-select">${monthSelectHTML}</select>
                     </div>
-                    <button class="log-nav-btn" id="logNextMonth" title="下个月">▶</button>
+                    <button class="log-nav-btn" id="logNextMonth" title="下个月">›</button>
                 </div>
                 ${calHTML}
             </div>
-            <div id="log-date-detail" class="log-date-detail" style="display:none;"></div>
         </div>`;
 
     // 年份/月份下拉跳转
@@ -221,63 +217,6 @@ function buildLogPageUI(year, month) {
     });
 }
 
-// 显示某一天的日志条目（从日历点击进入）
-function showLogDateDetail(dateKey, entries) {
-    const detailDiv = document.getElementById('log-date-detail');
-    if (!detailDiv) return;
-
-    if (entries.length === 0) {
-        detailDiv.innerHTML = `<p style="text-align:center;color:var(--text-muted);">该日无日志</p>`;
-        detailDiv.style.display = 'block';
-        return;
-    }
-
-    // 解析日期用于显示
-    const parts = dateKey.split('-');
-    const displayDate = parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日';
-
-    let listHTML = `<div class="log-detail-header">
-        <button class="log-back-btn" id="logBackToCal">← 返回日历</button>
-        <span class="log-detail-date">${displayDate}</span>
-        <span class="log-detail-count">${entries.length} 篇</span>
-    </div>`;
-    listHTML += '<ul class="log-detail-list">';
-
-    for (const f of entries) {
-        const displayName = (f.name || '').replace(/\.[^.]+$/, '');
-        const path = f.path || '';
-        listHTML += `<li class="log-item" data-path="${escapeHtml(path)}">
-            <span class="log-item-icon">📝</span>
-            <span class="log-item-name">${escapeHtml(displayName)}</span>
-        </li>`;
-    }
-    listHTML += '</ul>';
-
-    detailDiv.innerHTML = listHTML;
-    detailDiv.style.display = 'block';
-
-    // 返回按钮
-    const backBtn = detailDiv.querySelector('#logBackToCal');
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
-            detailDiv.style.display = 'none';
-        });
-    }
-
-    // 日志条目点击 → 阅读日志
-    detailDiv.querySelectorAll('.log-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const path = item.dataset.path;
-            if (path) {
-                window.location.hash = '#' + encodeURIComponent('log:' + path);
-                loadLogFile(path);
-            }
-        });
-    });
-
-    detailDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 // 加载单个日志文件
 function loadLogFile(filePath) {
     showContentSkeleton();
@@ -303,9 +242,8 @@ function loadLogFile(filePath) {
             renderLogMarkdown(markdown, filePath, prevFile, nextFile);
         })
         .catch(error => {
-            viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 加载日志失败</h2><p>无法加载 ${filePath} (${error.message})</p></div>`;
+            viewer.innerHTML = `<div class="markdown-body error"><h2>加载日志失败</h2><p>无法加载 ${filePath} (${error.message})</p></div>`;
         });
-    currentFilePath = filePath;
     document.body.classList.remove('homepage', 'note-page');
     document.body.classList.add('hide-sidebar');
     setBackgroundForPage('log');
@@ -314,7 +252,7 @@ function loadLogFile(filePath) {
 // 渲染日志 Markdown（带头部返回按钮 + 上一篇/下一篇导航，无 TOC）
 function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
     if (!window.markdownit) {
-        viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>markdown-it 未加载</p></div>`;
+        viewer.innerHTML = `<div class="markdown-body error"><h2>渲染失败</h2><p>markdown-it 未加载</p></div>`;
         return;
     }
 
@@ -423,7 +361,7 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
         }
     } catch (error) {
         console.error('日志 Markdown 渲染出错:', error);
-        viewer.innerHTML = `<div class="markdown-body error"><h2>❌ 渲染失败</h2><p>${error.message}</p></div>`;
+        viewer.innerHTML = `<div class="markdown-body error"><h2>渲染失败</h2><p>${error.message}</p></div>`;
         window.TOCModule.clearTOC();
     }
 }

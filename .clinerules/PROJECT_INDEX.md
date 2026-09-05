@@ -2,6 +2,8 @@
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
 > **更新日期**：2026-09-05
+> **本次维护**：清理未调用依赖、重复共享函数、旧日志列表和侧栏逻辑，以及已完成的图片迁移工具；校正索引中旧的背景过渡描述。清理依据与验证见 docs/unused-code-audit.md。
+> **界面约定**：页面标签采用文字，不使用装饰性 emoji 或搜索放大镜图标；保留菜单、展开、关闭和翻页等操作符号，移动端搜索按钮显示文字。
 > **变更摘要**：改进全站搜索体验 — 搜索索引在构建时清理 Markdown 展示噪音，搜索面板支持方向键选择、Enter 打开、焦点管理、加载重试、移动端全屏布局与可访问状态；结果限制为每篇最多两个相关片段，并修复片段高亮偏移。涉及 scripts/generate-search-index.js、frontend/search-index.json、frontend/js/search.js、frontend/index.html、frontend/style.css。页面访问次数计数器继续使用 Cloudflare Workers + KV，Worker 部署由 scripts/deploy-worker.ps1 单独负责
 
 ---
@@ -40,7 +42,6 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   ├── style.css               # ★ 全部样式 (~1880行)
 │   ├── tree.json               # 目录树 JSON（由 generate-tree.js 生成）
 │   ├── tree-log.json           # 日志目录树 JSON（由 generate-tree.js 单独为日志目录生成）
-│   ├── picture-link-convert.py # 一次性工具：转换图片链接格式
 │   ├── images/                 # 背景图片（home-bg.jpg, note-bg.png）
 │   ├── js/                     # ★ JS 模块目录
 │   │   ├── core.js             # 共享模块：DOM引用、工具函数、KaTeX公式渲染、代码复制按钮
@@ -53,7 +54,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   │   ├── search.js           # 全文搜索模块：Fuse.js检索、结果摘要、键盘导航与焦点管理
 │   │   ├── ripple.js           # ★ 水面涟漪特效模块（WebGL）：位移映射着色器 + 高光/暗纹 + 双池涟漪管理
 │   ├── libs/                   # 第三方库
-│   │   ├── js/                 # JS库（marked, highlight.js, KaTeX, markdown-it 等）
+│   │   ├── js/                 # JS库（highlight.js, KaTeX, markdown-it, texmath, Fuse.js）
 │   │   ├── css/                # CSS库（如 github.min.css 语法高亮主题）
 │   │   └── katex/              # KaTeX CSS 样式
 │   └── public/                 # ★ 笔记文件仓库 + Obsidian Vault
@@ -83,7 +84,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 #### `frontend/index.html`
 - **角色**：SPA 唯一 HTML 页面
 - **内容**：顶栏（首页/笔记/友链/日志按钮 + 移动端菜单按钮）、左侧目录树侧边栏、中间内容区、右侧 TOC 侧边栏、底部 `#sidebarOverlay`（移动端侧边栏半透明遮罩层）
-- **加载的库**：`marked` + `highlight.js` + `markdown-it` + `markdown-it-imsize` + `KaTeX` + `texmath`
+- **加载的库**：`highlight.js` + `markdown-it` + `KaTeX` + `texmath` + `Fuse.js`；图片尺寸由 notes.js 处理，未使用 marked、imsize 或 KaTeX auto-render
 
 #### `frontend/script.js`（~450 行）
 - **角色**：主要交互逻辑（路由、树渲染、内容渲染）
@@ -102,10 +103,9 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - **骨架屏**：加载时显示 CSS 动画骨架
   - **最后修改时间**：从 `tree.json` 的 `mtime` 读取显示在每个笔记底部
   - **移动端侧边栏**：`initTopbar()` 中的 `toggleSidebarOpen()` 管理 `.sidebar.open` + `#sidebarOverlay.active` + body 滚动锁定；侧边栏内导航按钮（`.sidebar-nav-btn`）点击后自动导航并关闭侧边栏
-  - **页面切换**：`smoothPageTransition()` 统一管理平滑过渡（core.js），支持四种模式即时首页、note-page、friends-page、log-page，先淡出 viewer/背景 → 执行变更 → 淡入 viewer/背景 → TOC 延迟显示
+  - **页面切换**：路由同步调整 body 页面类，调用 core.js 的 `setBackgroundForPage()`；异步内容显示共享骨架屏，渲染完成后替换内容
 - **全局状态**：
   - `treeData`：tree.json 解析结果
-  - `currentFilePath`：当前加载的文件相对路径
   - `fileNameMap` / `fullPathNoExtMap`：Wiki 链接快速查找 Map
   - `defaultNotePath`：默认第一个笔记路径（供"笔记"按钮使用）
 
@@ -118,32 +118,29 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - 移动端：笔记标题/正文/表格/代码块/图片/KaTeX 公式等比缩小
   - 移动端顶栏紧凑排版：按钮内边距/字体缩小，菜单按钮居中
   - 移动端溢出处理：表格横向滚动、图片/视频 `max-width: 100%`
-  - 背景：`#bgLayer` 独立 div 实现首页/笔记页/友链页背景切换（双缓冲淡入淡出）；`body::before` 作为背景回退
-  - viewer/TOC 过渡：`viewer`、`#tocContent` 使用 `opacity + transition` 实现淡入淡出（`toc-hidden` 类控制 TOC 显隐）
+  - 背景：`body::before` 根据页面类切换图片和透明度；`ripple.js` 在画布中绘制对应背景纹理及水波效果
+  - 启动显示：`is-booting` 在目录加载和首次路由判定完成前隐藏页面框架
   - 骨架屏动画：`skeleton-shimmer` keyframes
   - 代码块复制按钮：`.code-copy-btn` 绝对定位在 `pre` 右上角
 
 #### `frontend/js/core.js`（~220 行）
-- **角色**：核心共享模块，新增页面切换平滑过渡管理
+- **角色**：路由、笔记和日志共用的 DOM 引用与工具函数
 - **内容**：
-  - **DOM 引用**：`viewer`、`body`、`currentFilePath`、`bgLayer`（背景双缓冲层）、`tocSidebar`、`sidebar`、`tocContent`
+  - **DOM 引用**：`viewer`、`body`
   - **常量**：`SUPPORTED_IMG` / `SUPPORTED_VIDEO`
   - **工具函数**：
     - `getFileExtension()` — 获取文件扩展名
-    - `setBackgroundSmooth()` — **双缓冲背景切换**：淡出→更换→淡入，支持首页/笔记/友链/日志四模式
-    - `initBackground()` — 初始化背景层
-    - `fadeViewerContent()` — 淡出 viewer + TOC（200ms），回调后执行变更
-    - `revealViewerContent()` — 淡入 viewer，TOC 延迟 150ms 淡入
-    - `showContentSkeleton()` — 显示骨架屏（半透明 0.6）
+    - `setBackgroundForPage()` — 切换笔记/友链/日志 body 类，首页移除这些类
+    - `showContentSkeleton()` — 清空 TOC 并显示内容骨架屏
     - `escapeHtml()` — HTML 转义
     - `processMathFormulas()` — 手动 KaTeX 公式渲染
     - `enhanceCodeBlocks()` — 代码块复制按钮
-    - `smoothPageTransition(changeFn, isAsync)` — **页面切换统一入口**：淡出→变更→自动/手动淡入（async）
-- **导出**：通过 `window.CoreModule` 暴露
+    - `fetchWithTimeout()`、`recordPageView()`、`renderPageViewCount()` — 请求阅读计数并显示结果
+- **共享方式**：其他脚本直接引用全局函数与 DOM 变量；同时保留 `window.CoreModule` 导出
 
 #### `frontend/js/log.js`（~397 行）
 - **角色**：日志模块（从 `script.js` 拆分）
-- **依赖**：`js/core.js`（使用 CoreModule 导出的函数）
+- **依赖**：`js/core.js` 的全局共享函数与 DOM 引用
 - **核心功能**：
   - **日志日历页**：`renderLogPage()` — 加载 `tree-log.json`，构建月份日历表格，支持年/月选择切换
   - **日志数据**：`logDateMap` 以日期为 key 索引日志文件
@@ -176,17 +173,16 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - **角色**：TOC 模块（从 `script.js` 拆分）
 - **依赖**：通过 `window.TOCModule` 导出 `renderTOCFromDOM`、`clearTOC`、`updateTOCActive`
 - **核心功能**：
-  - `renderTOCFromDOM()` — 从渲染后的 DOM 提取标题，构建嵌套目录树；移除 `toc-hidden` 类触发淡入
-  - `clearTOC()` — 添加 `toc-hidden` 类触发淡出后再清空 HTML
+  - `renderTOCFromDOM()` — 从渲染后的 DOM 提取标题，构建嵌套目录树并绑定滚动跳转
+  - `clearTOC()` — 清空目录 HTML 并更新选中状态
   - `updateTOCActive()` — 滚动时高亮当前目录项（滚动监听事件在 `script.js` 的 `init()` 中绑定）
-- **过渡机制**：使用 `toc-hidden` CSS 类（opacity: 0 + transition）实现 TOC 平滑显隐，避免闪烁
 - **导出**：通过 `window.TOCModule` 暴露给其他模块
 
 #### `frontend/js/notes.js`（~243 行）
 - **角色**：笔记渲染模块（从 `script.js` 拆分）
-- **依赖**：通过 `window.CoreModule` 使用 `processMathFormulas`、`escapeHtml`、`revealViewerContent` 等函数
+- **依赖**：core.js 的全局 `processMathFormulas`、`escapeHtml`、`enhanceCodeBlocks`、`renderPageViewCount` 等函数
 - **核心功能**：
-  - `renderMarkdown()` — 使用 markdown-it 渲染 Markdown 内容，处理 Wikilink、图片尺寸、代码高亮、TOC 生成；渲染完成后调用 `revealViewerContent()` 淡入内容
+  - `renderMarkdown()` — 使用 markdown-it 渲染 Markdown 内容，处理 Wikilink、图片尺寸、代码高亮、TOC 生成；直接更新 viewer 内容
   - `renderImage()` — 渲染图片文件（根据扩展名判断是否支持的图片格式）
   - `renderVideo()` — 渲染视频文件
   - `renderUnsupported()` — 显示不支持的文件类型提示
@@ -233,10 +229,8 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - CSS 背景兼容：图片加载失败时保持透明画布，让 CSS 背景透出
   - 性能优化：`requestAnimationFrame` + `visibilitychange` 暂停
 
-#### `frontend/picture-link-convert.py`
-- **角色**：一次性工具脚本
-- **功能**：将 `![](path =WxH)` 格式批量转换为 `![](alt|WxH)` 格式
-- **已执行完毕，不再需要常规运行**
+#### 已完成的图片格式迁移
+- 旧格式 `![](path =WxH)` 已迁移为 `![](alt|WxH)`，一次性 `picture-link-convert.py` 已在遗留清理中删除
 
 ---
 
@@ -370,7 +364,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 ### 5.3 图片尺寸
 - 语法：`![alt|宽度x高度](path)` 或 `![alt|宽度](path)`
 - 渲染后在 DOM 层面通过 `img.setAttribute('width'/'height')` 实现
-- `picture-link-convert.py` 用于迁移旧格式
+- 图片尺寸由 `notes.js` 的 `processImageSizes()` 在渲染后处理；旧格式迁移已完成
 
 ### 5.4 数学公式
 - 双渲染路径：优先 `markdown-it-texmath` 插件；失败则回退到手动正则 + KaTeX
@@ -388,17 +382,15 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 - 切换逻辑通过 CSS media query `@media (max-width: 768px)` 覆盖 `body::before` 的 `background-image` 实现
 - 需要在 images/ 目录下放置竖版图后才生效
 
-### 5.6 页面切换过渡机制
-- **背景双缓冲**：通过 `#bgLayer` 独立 div 实现背景图淡出 → 替换 → 淡入（setBackgroundSmooth），不再依赖 body::before 的 transition，消除背景闪烁
-- **viewer 淡入淡出**：`smoothPageTransition()` 统一管理：先淡出 viewer（200ms），执行页面变更，再淡入（280ms）。异步页面（笔记 fetch）由渲染完成回调 `revealViewerContent` 淡入
-- **TOC 延迟显示**：TOC 淡入延迟 150ms，确保内容先渲染完成；切换时 TOC 与 viewer 同步淡出
-- **骨架屏**：异步加载笔记时先显示骨架屏（viewer 半透明 0.6），渲染完成后替换为实际内容并淡入至 1
-- 背景层 z-index 层级：`body::before`（背景回退）→ `#bgLayer`（实际背景图）→ 内容
+### 5.6 页面切换与启动显示
+- 路由调整 body 类，再同步渲染页面或异步加载文件；异步笔记/日志先显示共享骨架屏，加载完成后替换内容
+- `is-booting` 隐藏首次路由判定前的通用框架，由 tree.js 的 finally 解除；失败时也解除
+- 背景使用 `body::before` 和 ripple.js 的 WebGL 画布；当前实现没有 `bgLayer`、`smoothPageTransition` 或 TOC 延迟淡入流程
 
 ### 5.7 背景图
-- 首页：`#bgLayer` 的 `background-image: url('/images/home-bg.jpg')`
-- 笔记页/友链页：`#bgLayer` 的 `background-image: url('/images/note-bg.png')`
-- 日志页：清除 bgLayer 背景 + 隐藏 sidebar + body 纯色背景透出
+- 首页/友链页：`body::before` 使用 `/images/home-bg.jpg`
+- 笔记/日志页：`body::before` 使用 `/images/note-bg.png`
+- ripple.js 按 body 页面类选择对应背景纹理；日志页通过 `hide-sidebar` 隐藏侧栏
 
 ### 5.9 tree.json 更新时机
 - 仅在运行 `update.ps1` 时由 `generate-tree.js` 重新生成

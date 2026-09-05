@@ -34,7 +34,7 @@ function renderTOCFromDOM() {
         stack.push(node);
     }
 
-    // 递归生成 HTML（注意直接插入 node.html，无需转义，因为已由 marked 和 KaTeX 安全渲染）
+    // 递归生成 HTML（保留 markdown-it 和 KaTeX 渲染后的标题格式）
     function buildHTML(nodes) {
         if (nodes.length === 0) return '';
         let html = '<ul>';

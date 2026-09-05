@@ -36,10 +36,6 @@
 
         // 渲染
         MAX_RIPPLES: 6,                  // 总涟漪上限（自动 + 鼠标）
-        AMPLITUDE_NORMALIZED: 0.02,      // 最大位移幅度（归一化纹理坐标）
-        HIGHLIGHT_STRENGTH: 0.2,        // 高光/暗纹强度系数
-        WAVELENGTH_FACTOR: 0.2,          // 波长 = maxRadius × 此因子
-        WAVE_SPEED: 3.0,                 // 波动速度
 
         // 背景图片映射（与 style.css 一致）
         BG_MAP: {
@@ -365,7 +361,6 @@
                             const retryImg = new Image();
                             // 替换当前 img 的引用
                             const parentOnLoad = img.onload;
-                            const parentOnError = img.onerror;
                             retryImg.onload = parentOnLoad;
                             retryImg.onerror = () => {
                                 console.warn('[ripple] 背景图片彻底加载失败:', url, '保持透明，让 CSS 背景透出');

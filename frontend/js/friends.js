@@ -32,13 +32,13 @@ function renderFriendsPage() {
                     <div class="friend-name">${f.name}</div>
                     <div class="friend-desc">${f.desc}</div>
                 </div>
-                <a class="friend-link-btn" href="${f.url}" target="_blank" rel="noopener noreferrer">🔗 访问</a>
+                <a class="friend-link-btn" href="${f.url}" target="_blank" rel="noopener noreferrer">访问</a>
             </div>`;
     }
 
     viewer.innerHTML = `
         <div class="friends-page">
-            <div class="friends-page-title">🔗 友链</div>
+            <div class="friends-page-title">友链</div>
             <div class="friends-cards">${cardsHTML}</div>
         </div>
     `;
