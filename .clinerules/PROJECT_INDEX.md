@@ -1,8 +1,8 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-07-15
-> **变更摘要**：新增全站全文搜索功能 — 构建时生成 search-index.json（排除日志目录），前端使用 Fuse.js 实时模糊搜索（标题权重 0.7 + 全文权重 0.3），支持 Ctrl+K 快捷键、高亮匹配结果。涉及 scripts/generate-search-index.js、frontend/libs/js/fuse.min.js、frontend/js/search.js、frontend/index.html、frontend/style.css、frontend/script.js、update.ps1。新增页面访问次数计数器（Cloudflare Workers + KV），将 Worker 部署从 update.ps1 分离为一次性脚本 scripts/deploy-worker.ps1
+> **更新日期**：2026-09-05
+> **变更摘要**：改进全站搜索体验 — 搜索索引在构建时清理 Markdown 展示噪音，搜索面板支持方向键选择、Enter 打开、焦点管理、加载重试、移动端全屏布局与可访问状态；结果限制为每篇最多两个相关片段，并修复片段高亮偏移。涉及 scripts/generate-search-index.js、frontend/search-index.json、frontend/js/search.js、frontend/index.html、frontend/style.css。页面访问次数计数器继续使用 Cloudflare Workers + KV，Worker 部署由 scripts/deploy-worker.ps1 单独负责
 
 ---
 
@@ -50,6 +50,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │   │   ├── notes.js            # 笔记渲染模块：Markdown渲染、图片/视频预览
 │   │   ├── toc.js              # TOC模块：目录树生成、滚动高亮
 │   │   ├── tree.js             # 目录树模块：从tree.json加载、构建HTML、绑定交互事件
+│   │   ├── search.js           # 全文搜索模块：Fuse.js检索、结果摘要、键盘导航与焦点管理
 │   │   ├── ripple.js           # ★ 水面涟漪特效模块（WebGL）：位移映射着色器 + 高光/暗纹 + 双池涟漪管理
 │   ├── libs/                   # 第三方库
 │   │   ├── js/                 # JS库（marked, highlight.js, KaTeX, markdown-it 等）
@@ -192,6 +193,17 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - `processImageSizes()` — 在 DOM 层面设置图片宽高属性
   - `convertVideoImgs()` — 转换视频相关的 `<img>` 标签
 - **导出**：通过 `window.NotesModule` 暴露 `renderMarkdown`、`renderImage`、`renderVideo`、`renderUnsupported`
+
+#### `frontend/js/search.js`
+- **角色**：全站搜索面板与搜索结果交互模块
+- **依赖**：Fuse.js；搜索数据来自构建生成的 `search-index.json`
+- **核心功能**：
+  - 标题权重 0.7、正文权重 0.3 的实时模糊搜索，最多展示 50 篇笔记
+  - 每篇笔记最多展示两个相关正文片段，按 Fuse 精确区间高亮并统计命中数
+  - 支持 Ctrl/Cmd+K 打开、方向键选择、Enter 打开、Esc 关闭以及清空和加载重试
+  - 搜索框获得焦点时预加载索引；面板打开时锁定背景滚动，关闭后恢复原焦点
+  - 通过 dialog、combobox、listbox 语义和动态 ARIA 状态提供键盘及读屏支持
+- **导出**：通过 `window.SearchModule` 暴露 `init`、`open`、`close`
 
 #### `frontend/tree.json`
 - **角色**：目录树数据（由 `scripts/generate-tree.js` 每次部署前生成）

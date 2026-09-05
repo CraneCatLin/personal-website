@@ -177,3 +177,11 @@
   - 初始阶段隐藏尚未完成路由判定的通用页面框架，目录数据加载后再显示正确页面
   - 目录加载失败时仍按当前 hash 初始化页面，并确保解除启动状态
   - 涉及 frontend/index.html、frontend/style.css、frontend/js/tree.js
+
+@2026-09-05
+改进全站搜索的视觉与操作体验
+  - 实现方向键选择、Enter 打开、焦点恢复、背景滚动锁定和加载失败重试
+  - 修复正文片段高亮偏移导致只显示省略号的问题，每篇结果最多展示两个相关片段
+  - 搜索索引清理 Markdown 展示噪音，减小体积并提升摘要可读性
+  - 完善搜索对话框语义、选中态、空状态、移动端布局与缓存更新
+  - 涉及 frontend/index.html、frontend/style.css、frontend/js/search.js、frontend/search-index.json、scripts/generate-search-index.js

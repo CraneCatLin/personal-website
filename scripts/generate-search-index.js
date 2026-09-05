@@ -2,7 +2,7 @@
  * generate-search-index.js
  * 
  * 扫描 frontend/public/ 下所有 .md 文件（排除 日志 目录），
- * 为每个文件提取标题和全文内容，生成 search-index.json
+ * 为每个文件提取标题和清理后的可读正文，生成 search-index.json
  * 供前端 Fuse.js 全文搜索使用。
  * 
  * 运行方式：node scripts/generate-search-index.js
@@ -27,6 +27,30 @@ function extractTitle(content, fileName) {
         return titleMatch[1].trim();
     }
     return fileName.replace(/\.md$/, '');
+}
+
+/**
+ * 清理只用于搜索展示的 Markdown 标记，保留正文、代码和公式内容。
+ * 搜索结果片段因此不会被标题符号、链接地址或连续换行干扰。
+ */
+function normalizeContent(content) {
+    return content
+        .replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, ' ')
+        .replace(/^#\s+.+?(?:\r?\n|$)/m, ' ')
+        .replace(/<!--[\s\S]*?-->/g, ' ')
+        .replace(/!\[([^\]|]*)(?:\|[^\]]+)?\]\([^)]+\)/g, '$1')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, target, alias) => alias || target)
+        .replace(/```[^\r\n]*(?:\r?\n|$)/g, ' ')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/^#{1,6}\s+/gm, '')
+        .replace(/^\s*>\s?/gm, '')
+        .replace(/^\s*[-*+]\s+/gm, '')
+        .replace(/^\s*\d+[.)]\s+/gm, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/[*_~]{1,3}/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 /**
@@ -83,7 +107,7 @@ function main() {
         index.push({
             path: relativePath,
             title: title,
-            content: content
+            content: normalizeContent(content)
         });
 
         if (index.length % 20 === 0) {
