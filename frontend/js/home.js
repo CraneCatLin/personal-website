@@ -2,8 +2,8 @@
  * 首页模块 - 从 script.js 拆分
  * 依赖：core.js（提供 viewer, escapeHtml 等全局变量和函数）
  * 依赖：toc.js（提供 window.TOCModule.clearTOC）
- * 依赖：script.js IIFE 赋值的全局变量 window.treeData、window.defaultNotePath、
- *       window.loadFileByPath、window.loadFromHash（作为自由变量引用）
+ * 依赖：script.js IIFE 赋值的全局变量 window.treeData、window.loadFileByPath
+ *       （作为自由变量引用）
  */
 
 // 动态卡片风格首页
@@ -35,16 +35,7 @@ function renderDefaultAbout() {
     // ----- 构建卡片 HTML -----
     const cards = [];
 
-    // 卡片1：欢迎 — 网站名 + 一句话介绍
-    cards.push(`<div class="home-card card-span-2" style="animation-delay: 0.05s;">
-        <div class="card-title">CraneCat 喵~</div>
-        <p class="card-desc">这里是我的个人网站，记录学习与生活。涵盖计算机科学、数学、杂谈等各种内容。</p>
-        <div class="card-actions">
-            <a href="#/" class="card-link primary">进入笔记库</a>
-        </div>
-    </div>`);
-
-    // 卡片2：关于 & 联系方式（上移，不折叠）
+    // 卡片1：关于 & 联系方式（上移，不折叠）
     cards.push(`<div class="home-card card-span-2" style="animation-delay: 0.10s;">
         <div class="card-title">关于本站</div>
         <p class="card-desc">所有原创笔记采用 <strong>CC BY-NC-SA 4.0</strong> 协议共享。非商业性分享、演绎需保留署名并以相同方式共享。</p>
@@ -56,7 +47,7 @@ function renderDefaultAbout() {
         </div>
     </div>`);
 
-    // 卡片3：随机阅读（一次三篇，带刷新按钮）
+    // 卡片2：随机阅读（一次三篇，带刷新按钮）
     if (randomPicks.length > 0) {
         const picksHTML = randomPicks.map(p => {
             const pName = (p.name || '').replace(/\.[^.]+$/, '');
@@ -76,7 +67,7 @@ function renderDefaultAbout() {
         </div>`);
     }
 
-    // 卡片5：统计数据
+    // 卡片3：统计数据
     cards.push(`<div class="home-card" style="animation-delay: 0.26s;">
         <div class="card-title">站点统计</div>
         <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap;">
@@ -91,7 +82,7 @@ function renderDefaultAbout() {
         </div>
     </div>`);
 
-    // 卡片6：热门标签（分类文件夹名作为标签）
+    // 卡片4：热门标签（分类文件夹名作为标签）
     if (folderNames.length > 0) {
         const tagHTML = folderNames.slice(0, 10).map(name =>
             `<span class="tag-item" data-tag="${escapeHtml(name)}"># ${escapeHtml(name)}</span>`
@@ -108,17 +99,8 @@ function renderDefaultAbout() {
     bindHomeCardEvents();
 }
 
-// 首页卡片交互：点击卡片内链接/笔记项/随机推荐
+// 首页卡片交互：点击随机推荐、分类标签和刷新按钮
 function bindHomeCardEvents() {
-    // "进入笔记库" 按钮
-    const primaryLink = viewer.querySelector('.card-link.primary');
-    if (primaryLink) {
-        primaryLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateToFirstNote();
-        });
-    }
-
     // 随机阅读卡片点击（多篇）
     viewer.querySelectorAll('.random-note').forEach(randomNote => {
         randomNote.addEventListener('click', () => {
@@ -271,22 +253,7 @@ function findFirstMd(folderNode) {
     return null;
 }
 
-// 跳转到第一篇笔记
-function navigateToFirstNote() {
-    if (defaultNotePath) {
-        window.location.hash = '#' + encodeURIComponent(defaultNotePath);
-        loadFromHash();
-    } else if (treeData && treeData.children) {
-        const firstMd = findFirstMd({ children: treeData.children });
-        if (firstMd && firstMd.path) {
-            window.location.hash = '#' + encodeURIComponent(firstMd.path);
-            loadFromHash();
-        }
-    }
-}
-
 // 导出到全局，供 script.js 使用
 window.HomeModule = {
-    renderDefaultAbout: renderDefaultAbout,
-    navigateToFirstNote: navigateToFirstNote
+    renderDefaultAbout: renderDefaultAbout
 };

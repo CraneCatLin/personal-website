@@ -204,3 +204,9 @@
 修复日志中的 Obsidian 图片嵌入不渲染问题
   - 支持 `![[图片路径]]` 和可选尺寸语法，并按日志所在目录补全图片地址
   - 涉及 frontend/js/log.js、frontend/index.html
+
+@2026-09-15
+精简首页欢迎区域
+  - 删除个人网站介绍卡片及“进入笔记库”按钮
+  - 清理按钮专属事件绑定、导出函数和样式，不影响随机阅读、统计与分类标签功能
+  - 涉及 frontend/js/home.js、frontend/style.css、frontend/index.html
