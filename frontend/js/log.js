@@ -290,6 +290,18 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
 
         const fileNameWithoutExt = filePath.split('/').pop().replace(/\.[^/.]+$/, "");
 
+        // 兼容 Obsidian 图片嵌入语法：![[image.png]] 或 ![[image.png|300x200]]
+        markdownText = markdownText.replace(/!\[\[([^\]\r\n]+)\]\]/g, function (match, embed) {
+            const parts = embed.split('|');
+            const imagePath = parts.shift().trim();
+            if (!imagePath) return match;
+
+            const size = parts.join('|').trim();
+            const alt = imagePath.split('/').pop() || imagePath;
+            const altWithSize = size ? `${alt}|${size}` : alt;
+            return `![${altWithSize}](${imagePath})`;
+        });
+
         let finalHtml;
         if (!pluginEnabled && window.katex) {
             finalHtml = md.render(processMathFormulas(markdownText));
@@ -308,6 +320,25 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
             }
             return match;
         });
+
+        // 复用笔记中的图片尺寸约定：![alt|宽度x高度](path)
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = finalHtml;
+        tempDiv.querySelectorAll('img').forEach(img => {
+            const alt = img.getAttribute('alt') || '';
+            if (!alt.includes('|')) return;
+
+            const parts = alt.split('|');
+            const newAlt = parts[0].trim();
+            const sizePart = parts[1].trim();
+            const sizeMatch = sizePart.match(/^(\d+)(?:x(\d+))?$/);
+            if (!sizeMatch) return;
+
+            img.setAttribute('width', sizeMatch[1]);
+            if (sizeMatch[2]) img.setAttribute('height', sizeMatch[2]);
+            img.setAttribute('alt', newAlt);
+        });
+        finalHtml = tempDiv.innerHTML;
 
         // 构建上一篇/下一篇导航 HTML
         const prevBtnHtml = prevFile
