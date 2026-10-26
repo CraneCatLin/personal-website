@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - 页面未找到</title>
     <style>
@@ -74,23 +76,7 @@
         <div class="small-note">喵？别担心，笔记都还在～</div>
     </div>
 
-    <script>
-        (function () {
-            // 获取当前请求的完整路径（包含路径和文件名，如 /notes/example.md）
-            var currentPath = window.location.pathname;
-            // 构造重定向目标：/index.html#/notes/example.md
-            // 使用绝对路径，确保在任何子目录下都能正确跳转
-            var redirectUrl = '/index.html#' + currentPath;
-            // 尝试自动跳转
-            window.location.href = redirectUrl;
-
-            // 同时更新链接的 href，方便用户手动点击（包含 hash）
-            var homeLink = document.getElementById('homeLink');
-            if (homeLink) {
-                homeLink.href = redirectUrl;
-            }
-        })();
-    </script>
+    <script src="/js/not-found.js" defer></script>
 </body>
 
 </html>

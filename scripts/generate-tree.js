@@ -11,6 +11,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { isPublishablePath } = require('./publish-policy');
 
 // 解析命令行参数
 const args = process.argv.slice(2);
@@ -27,7 +28,7 @@ const IGNORED_PATHS = new Set(['/images', '/日志']);
 
 function shouldIncludeFile(filename) {
     const extension = path.extname(filename).toLowerCase();
-    return !EXCLUDED_EXTENSIONS.includes(extension);
+    return !EXCLUDED_EXTENSIONS.includes(extension) && isPublishablePath('public/' + filename);
 }
 
 /**
@@ -54,7 +55,8 @@ function shouldIgnorePath(currentPath, baseDir) {
     }
 
     const name = path.basename(currentPath);
-    return isHidden(name) || IGNORED_NAMES.has(name);
+    return isHidden(name) || IGNORED_NAMES.has(name) ||
+        !isPublishablePath('public/' + relativePath.replace(/\\/g, '/'));
 }
 
 /**
@@ -66,7 +68,7 @@ function shouldIgnorePath(currentPath, baseDir) {
 function walkDir(currentPath, baseDir) {
     let stats;
     try {
-        stats = fs.statSync(currentPath);
+        stats = fs.lstatSync(currentPath);
     } catch (err) {
         console.error(`无法访问 ${currentPath}: ${err.message}`);
         return null;
@@ -237,4 +239,5 @@ function main() {
 }
 
 // 执行主函数
-main();
+if (require.main === module) main();
+module.exports = { generateTree };

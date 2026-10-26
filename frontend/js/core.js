@@ -7,6 +7,12 @@
 const viewer = document.getElementById('viewer');
 const body = document.body;
 
+if (window.location.protocol === 'http:' && ['cranecat.cn', 'www.cranecat.cn'].includes(window.location.hostname)) {
+    const secureUrl = new URL(window.location.href);
+    secureUrl.protocol = 'https:';
+    window.location.replace(secureUrl.href);
+}
+
 // ---------- 常量 ----------
 const SUPPORTED_IMG = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'];
 const SUPPORTED_VIDEO = ['.mp4', '.webm', '.ogg', '.mov'];
@@ -48,15 +54,61 @@ function showContentSkeleton() {
 
 // 转义 HTML 防止 XSS（使用 DOM API 避免字面量中的 HTML 实体被格式化器破坏）
 function escapeHtml(unsafe) {
-    const div = document.createElement('div');
-    div.appendChild(document.createTextNode(unsafe));
-    return div.innerHTML;
+    return String(unsafe).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function renderContentError(title, message) {
+    const container = document.createElement('div');
+    container.className = 'markdown-body error';
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+    const detail = document.createElement('p');
+    detail.textContent = message;
+    container.append(heading, detail);
+    viewer.replaceChildren(container);
+    window.TOCModule.clearTOC();
+}
+
+function normalizePublicPath(value) {
+    if (typeof value !== 'string' || !value || value.length > 2048 || /[\u0000-\u001f\u007f<>"'`\\?#]/.test(value)) return null;
+    const parts = value.split('/');
+    if (parts.some(part => !part || part === '..' || part.startsWith('.') || part.toLowerCase() === 'node_modules')) return null;
+    return value;
+}
+
+let publishedFilesPromise = null;
+async function getPublishedFileUrl(filePath) {
+    const safePath = normalizePublicPath(filePath);
+    if (!safePath) throw new Error('文件路径无效');
+    if (!publishedFilesPromise) {
+        publishedFilesPromise = fetchWithTimeout('/public-files.json', { cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) throw new Error('无法读取公开文件清单，请刷新后重试');
+                return response.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data.files)) throw new Error('公开文件清单格式无效');
+                return new Set(data.files.filter(path => normalizePublicPath(path)));
+            })
+            .catch(error => { publishedFilesPromise = null; throw error; });
+    }
+    if (!(await publishedFilesPromise).has(safePath)) throw new Error('文件不存在或未公开发布');
+    return '/public/' + safePath.split('/').map(encodeURIComponent).join('/');
+}
+
+function sanitizeNoteHtml(html) {
+    if (!window.DOMPurify) throw new Error('安全渲染组件未加载，请刷新页面');
+    return window.DOMPurify.sanitize(html, {
+        FORBID_TAGS: ['style', 'iframe', 'object', 'embed', 'base', 'form', 'input', 'button', 'textarea', 'select', 'meta', 'link'],
+        FORBID_ATTR: ['srcdoc']
+    });
 }
 
 function processMathFormulas(text) {
     text = text.replace(/\$\$(.*?)\$\$/gs, function (match, formula) {
         try {
-            return window.katex.renderToString(formula, { throwOnError: false, displayMode: true });
+            return window.katex.renderToString(formula, { throwOnError: false, displayMode: true, trust: false, maxExpand: 1000, maxSize: 20 });
         } catch (err) {
             console.warn('KaTeX 块级公式渲染错误:', err);
             return match;
@@ -65,7 +117,7 @@ function processMathFormulas(text) {
 
     text = text.replace(/\\\((.*?)\\\)/g, function (match, formula) {
         try {
-            return window.katex.renderToString(formula, { throwOnError: false, displayMode: false });
+            return window.katex.renderToString(formula, { throwOnError: false, displayMode: false, trust: false, maxExpand: 1000, maxSize: 20 });
         } catch (err) {
             console.warn('KaTeX 行内公式渲染错误:', err);
             return match;
@@ -74,7 +126,7 @@ function processMathFormulas(text) {
 
     text = text.replace(/\B\$(.+?)\$\B/g, function (match, formula) {
         try {
-            return window.katex.renderToString(formula, { throwOnError: false, displayMode: false });
+            return window.katex.renderToString(formula, { throwOnError: false, displayMode: false, trust: false, maxExpand: 1000, maxSize: 20 });
         } catch (err) {
             console.warn('KaTeX 行内公式渲染错误:', err);
             return match;
@@ -156,6 +208,14 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
 }
 
 async function recordPageView(filePath) {
+    if (pageViewRequests.has(filePath)) return pageViewRequests.get(filePath);
+    const request = sendPageView(filePath);
+    pageViewRequests.set(filePath, request);
+    return request;
+}
+
+const pageViewRequests = new Map();
+async function sendPageView(filePath) {
     try {
         const apiUrl = 'https://pv-counter.cranecat.workers.dev/pv?path=' + encodeURIComponent(filePath);
         const response = await fetchWithTimeout(apiUrl, { method: 'POST' }, 5000);
@@ -200,6 +260,10 @@ window.CoreModule = {
     setBackgroundForPage: setBackgroundForPage,
     showContentSkeleton: showContentSkeleton,
     escapeHtml: escapeHtml,
+    renderContentError: renderContentError,
+    normalizePublicPath: normalizePublicPath,
+    getPublishedFileUrl: getPublishedFileUrl,
+    sanitizeNoteHtml: sanitizeNoteHtml,
     processMathFormulas: processMathFormulas,
     enhanceCodeBlocks: enhanceCodeBlocks,
     recordPageView: recordPageView,

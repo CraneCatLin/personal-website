@@ -1,8 +1,14 @@
 ﻿node_modules/
 dist/
+.tools/
 .env
+.env.*
+!.env.example
 config.ps1
 logs/
+scripts/.wrangler/
+__pycache__/
+*.pyc
 frontend/public/.obsidian/
 frontend/public/.smtcmp_json_db/
-/frontend/public/.smtcmp_vector_db.tar.gz 
+/frontend/public/.smtcmp_vector_db.tar.gz

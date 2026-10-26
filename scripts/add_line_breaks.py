@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import glob
+from public_content import markdown_files
 
 
 def process_markdown_files(root_dir):
@@ -10,8 +10,7 @@ def process_markdown_files(root_dir):
     在指定目录及其子目录中的所有 Markdown 文件的每行末尾添加两个空格（如果尚未存在）
     """
     # 查找所有 .md 文件
-    pattern = os.path.join(root_dir, "**", "*.md")
-    md_files = glob.glob(pattern, recursive=True)
+    md_files = list(markdown_files(root_dir))
 
     print(f"找到 {len(md_files)} 个 Markdown 文件")
 
@@ -53,6 +52,7 @@ def process_markdown_files(root_dir):
 
         except Exception as e:
             print(f"处理文件 {file_path} 时出错: {str(e)}")
+            raise
 
     print("所有文件处理完成!")
 

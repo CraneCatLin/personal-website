@@ -39,7 +39,14 @@
 
     // ---------- 根据 hash 加载内容 ----------
     function loadFromHash() {
-        const hash = window.location.hash.slice(1) || '';
+        let hash;
+        try {
+            hash = decodeURIComponent(window.location.hash.slice(1) || '');
+            hash = hash.replace(/^\/(?=notes$|logs$|friends$|about$)/, '');
+        } catch (error) {
+            renderContentError('链接无效', '地址编码无法解析');
+            return;
+        }
         if (!hash) {
             window.HomeModule.renderDefaultAbout();
             document.querySelectorAll('.tree .item.active').forEach(el => el.classList.remove('active'));
@@ -79,7 +86,7 @@
         }
 
         // 日志文件阅读 — 通过 #log:文件路径 标识
-        const decodedHash = decodeURIComponent(hash);
+        const decodedHash = hash;
         if (decodedHash.startsWith('log:')) {
             body.classList.remove('homepage');
             body.classList.add('log-page', 'hide-sidebar');
@@ -92,14 +99,20 @@
         // 移除 homepage / log-page / hide-sidebar 类以显示侧边栏和 TOC
         body.classList.remove('homepage', 'log-page', 'hide-sidebar');
         setBackgroundForPage(false);
-        const filePath = decodeURIComponent(hash);
+        const filePath = hash;
         loadFileByPath(filePath);
     }
 
     // ---------- 加载文件：根据路径获取并渲染 ----------
-    function loadFileByPath(filePath) {
+    async function loadFileByPath(filePath) {
         showContentSkeleton();
-        const fullPath = '/public/' + filePath;
+        let fullPath;
+        try {
+            fullPath = await getPublishedFileUrl(filePath);
+        } catch (error) {
+            renderContentError('无法打开文件', error.message);
+            return;
+        }
         const ext = getFileExtension(filePath).toLowerCase();
 
         if (SUPPORTED_IMG.includes('.' + ext)) {
@@ -126,7 +139,7 @@
                     window.NotesModule.renderMarkdown(markdown, filePath);
                 })
                 .catch(error => {
-                    viewer.innerHTML = `<div class="markdown-body error"><h2>加载失败</h2><p>无法加载文件 ${filePath} (${error.message})</p></div>`;
+                    renderContentError('加载失败', `无法加载文件 ${filePath} (${error.message})`);
                 });
             updateActiveTreeItem(filePath);
         }

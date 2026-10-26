@@ -1,10 +1,27 @@
 # PROJECT INDEX — WebsiteNote 项目索引
 
 > **用途**：供 AI 接手项目时快速理解全局，减少需要阅读的文件数量。
-> **更新日期**：2026-09-05
+> **更新日期**：2026-10-26
+> **安全维护**：发布改为过滤后的 dist/site 副本，增加密钥阻断、公开文件清单、DOMPurify、路径校验和安全工具版本锁定。部署优先使用 .tools/ 中的 Node 24.22.1。Worker 源码新增来源/路径清单校验和平台限流绑定；上线状态见 docs/security-fix-2026-10-26.md。
 > **本次维护**：清理未调用依赖、重复共享函数、旧日志列表和侧栏逻辑，以及已完成的图片迁移工具；校正索引中旧的背景过渡描述。清理依据与验证见 docs/unused-code-audit.md。
 > **界面约定**：页面标签采用文字，不使用装饰性 emoji 或搜索放大镜图标；保留菜单、展开、关闭和翻页等操作符号，移动端搜索按钮显示文字。
 > **变更摘要**：改进全站搜索体验 — 搜索索引在构建时清理 Markdown 展示噪音，搜索面板支持方向键选择、Enter 打开、焦点管理、加载重试、移动端全屏布局与可访问状态；结果限制为每篇最多两个相关片段，并修复片段高亮偏移。涉及 scripts/generate-search-index.js、frontend/search-index.json、frontend/js/search.js、frontend/index.html、frontend/style.css。页面访问次数计数器继续使用 Cloudflare Workers + KV，Worker 部署由 scripts/deploy-worker.ps1 单独负责
+
+---
+
+## 2026-10-26 安全发布约定
+
+- `frontend/public/` 仍是原 Obsidian Vault，私有设置与 AI 数据库原样留在本地；不以删除本地配置的方式修复泄露。
+- `scripts/publish-policy.js` 统一过滤隐藏目录、node_modules、密钥文件等；`prepare-publish.js` 只构建 `dist/site/` 并阻断常见密钥。
+- `frontend/public-files.json` 是生成的公开资源/笔记清单，供路由校验；新 Worker 每 60 秒从网站更新笔记清单，因此新增笔记不需要重复部署 Worker。
+- 路由验证路径和公开清单，错误信息与媒体使用 DOM 安全赋值；Markdown 输出经 DOMPurify 消毒，保留数学公式、代码与图片尺寸。
+- 浏览器版本：markdown-it 15.0.3、KaTeX 0.19.1、DOMPurify 3.4.17；固定官方包与哈希见 `scripts/vendor-assets.json`，由 `vendor-assets.py` 校验/更新。markdown-it 15 应使用 dist/browser/markdown-it.umd.min.js。
+- 工具：项目 `.tools/` 中的 Node 24.22.1；新机器先运行 `scripts/setup-tools.ps1`。package-lock.json 固定 Wrangler 4.152.0、Undici 7.30.1 与 jsdom 测试依赖，不自动改全局软件。
+- `scripts/public_content.py` 约束 Python 预处理，跳过隐藏目录和链接；`scripts/project-tools.ps1` 负责安全 Node 与退出码检查。
+- `tests/security.test.js` 验证路由注入、公式/图片/Wikilink/日志兼容、发布私有数据隔离及 Worker 校验/限流。
+- 线上已公开的 33 个私有对象在 2026-10-26 改为 private ACL，记录在 gitignore 的 `logs/security-quarantine-2026-10-26.json`；保留云端对象与本地 Vault，CDN 已清缓存。
+- CSP/referrer meta 已加入 HTML；Cloudflare HTTP 重定向、HSTS 和完整响应头仍待有相应权限时配置。当前 Token 不具备读取/编辑 zone 安全设置的权限。
+- 处置与上线证据见 `docs/security-fix-2026-10-26.md`。索引中的旧行数仅供历史背景参考。
 
 ---
 
@@ -35,7 +52,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 ├── config.ps1                  # 敏感配置（OSS_BUCKET_URL, CF_ZONE_ID, CF_API_TOKEN），gitignore
 ├── update.ps1                  # 一键部署脚本（PowerShell）
 │
-├── frontend/                   # ★ 前端站点根目录（部署到 OSS 的目录）
+├── frontend/                   # ★ 前端源目录；过滤到 dist/site 后上传 OSS
 │   ├── index.html              # 入口 HTML，单页面骨架
 │   ├── 404.html                # 自定义 404 页面（自动跳转首页 + hash）
 │   ├── script.js               # ★ 核心 JS：路由、树渲染、内容加载 (~435行)
@@ -268,15 +285,15 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   - `POST /pv?path=xxx` — 记录一次访问，返回 `{ count: number }`
   - `GET /pv?path=xxx` — 查询当前访问次数，返回 `{ count: number }`
 - **存储**：Cloudflare KV 命名空间 `PV_COUNTER`，key 为文件路径，value 为计数字符串
-- **CORS**：允许所有来源的跨域请求（`Access-Control-Allow-Origin: *`）
-- **错误处理**：KV 读写失败时返回 `count: -1`，前端友好降级
+- **CORS**：仅允许本站 HTTPS 来源；POST/OPTIONS 必须有允许的 Origin，GET 可无 Origin。路径清单与平台限流不可由 CORS 替代
+- **错误处理**：新源码在 KV/公开清单/限流异常时返回 503 与 count: -1；前端同一页面加载为同一笔记只发送一次计数。KV 自增仍非原子。新 Worker 暂未部署，用户选择稍后手动上线
 
 #### `scripts/wrangler.toml`
 - **角色**：Worker 部署配置
 - **关键字段**：
   - `name = "pv-counter"` — Worker 名称
-  - `compatibility_flags = ["nodejs_compat"]` — Node.js 兼容模式
-  - `route` — 路由绑定到 `pv-counter.cranecat.workers.dev/pv`（或 `cranecat.cn/api/pv`）
+  - `compatibility_date = "2024-01-01"`；没有显式 Node.js 兼容标志
+  - 没有显式 `route`；前端使用 workers.dev/pv，新处理器校验 pathname。新增 PV_RATE_LIMIT 绑定（60 次/分钟/客户端 IP/边缘位置）
   - `[[kv_namespaces]]` — 绑定 KV 命名空间 `PV_COUNTER`，binding 名为 `PV_COUNTER`
 
 ---
@@ -290,8 +307,8 @@ WebsiteNote/                    # 项目根 = Git 仓库根
   2. 选择提交模式（自动/手动 commit message）
   3. 依次运行预处理脚本：`addLine.py` → `gatherToAligned.py` → `add_line_breaks.py` → `generate-tree.js` → `generate-search-index.js`
   4. `git add .` → `git commit` → `git push`
-  5. `ossutil sync ./frontend/ $OSS_BUCKET_URL --update --delete`
-  6. 调用 Cloudflare API 刷新全站缓存
+  5. prepare-publish.js 生成过滤后的 dist/site 与 public-files.json，再同步 dist/site；共享 OSS 排除规则保留已隔离私有对象
+  6. 使用正确 JSON 对象调用 Cloudflare 清缓存；所有外部步骤失败即停止；支持 -SkipGit 和 -BuildOnly
 
 #### `config.ps1`
 - **内容**：`$OSS_BUCKET_URL`, `$CF_ZONE_ID`, `$CF_API_TOKEN`
@@ -324,7 +341,7 @@ WebsiteNote/                    # 项目根 = Git 仓库根
 │       ├─► scripts/generate-tree.js    (生成 tree.json)   │
 │       ├─► scripts/generate-search-index.js (生成 search-index.json) │
 │       ├─► git add/commit/push                             │
-│       ├─► ossutil sync ./frontend/ → OSS桶               │
+│       ├─► 过滤到 dist/site → ossutil sync → OSS桶               │
 │       └─► Cloudflare API: purge_cache (刷新全站)         │
 └─────────────────────────────────────────────────────────┘
                            │

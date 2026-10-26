@@ -11,6 +11,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { isPublishablePath } = require('./publish-policy');
 
 const PUBLIC_DIR = path.resolve(__dirname, '../frontend/public');
 const OUTPUT_FILE = path.resolve(__dirname, '../frontend/search-index.json');
@@ -68,7 +69,7 @@ function scanMdFiles(dir, rootDir) {
         const parts = relativePath.split(path.sep);
         const shouldExclude = parts.some(part => EXCLUDE_DIRS.includes(part));
 
-        if (shouldExclude) {
+        if (shouldExclude || !isPublishablePath('public/' + relativePath.replace(/\\/g, '/')) || entry.isSymbolicLink()) {
             continue;
         }
 
@@ -126,4 +127,5 @@ function main() {
     console.log(`预计 gzip 后: ~${(fileSizeKB * 0.3).toFixed(1)} KB`);
 }
 
-main();
+if (require.main === module) main();
+module.exports = { scanMdFiles, normalizeContent };

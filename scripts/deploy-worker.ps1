@@ -1,4 +1,4 @@
-# ========================================
+﻿# ========================================
 #  一次性部署：Cloudflare Worker（页面访问次数计数器）
 #  此脚本只需运行一次，Worker 部署后永久生效
 # ========================================
@@ -11,7 +11,13 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Push-Location $scriptDir
 
 try {
-    & npx --yes wrangler deploy 2>&1
+    . (Join-Path $scriptDir 'project-tools.ps1')
+    $node = Get-ProjectNode
+    $env:Path = (Split-Path -Parent $node) + [IO.Path]::PathSeparator + $env:Path
+    $env:WRANGLER_SEND_METRICS = 'false'
+    $wrangler = Join-Path (Split-Path -Parent $scriptDir) 'node_modules/wrangler/bin/wrangler.js'
+    if (-not (Test-Path -LiteralPath $wrangler)) { throw '请先在项目根目录运行 npm ci --ignore-scripts 安装锁定的部署工具。' }
+    & $node $wrangler deploy 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Host "✗ 部署失败，请检查 wrangler 配置"
         Write-Host "  常见问题："

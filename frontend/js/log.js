@@ -80,7 +80,7 @@ function renderLogPage() {
             buildLogPageUI(curYear, curMonth);
         })
         .catch(error => {
-            viewer.innerHTML = `<div class="log-page"><p style="text-align:center;color:var(--text-muted);">加载日志失败: ${error.message}</p></div>`;
+            renderContentError('加载日志失败', error.message);
         });
 }
 
@@ -218,9 +218,16 @@ function buildLogPageUI(year, month) {
 }
 
 // 加载单个日志文件
-function loadLogFile(filePath) {
+async function loadLogFile(filePath) {
     showContentSkeleton();
-    const fullPath = '/public/' + filePath;
+    let fullPath;
+    try {
+        if (!filePath.toLowerCase().endsWith('.md')) throw new Error('日志必须是 Markdown 文件');
+        fullPath = await getPublishedFileUrl(filePath);
+    } catch (error) {
+        renderContentError('无法打开日志', error.message);
+        return;
+    }
     fetch(fullPath, {
         headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -242,7 +249,7 @@ function loadLogFile(filePath) {
             renderLogMarkdown(markdown, filePath, prevFile, nextFile);
         })
         .catch(error => {
-            viewer.innerHTML = `<div class="markdown-body error"><h2>加载日志失败</h2><p>无法加载 ${filePath} (${error.message})</p></div>`;
+            renderContentError('加载日志失败', `无法加载 ${filePath} (${error.message})`);
         });
     document.body.classList.remove('homepage', 'note-page');
     document.body.classList.add('hide-sidebar');
@@ -273,7 +280,7 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
                 md.use(window.texmath, {
                     engine: window.katex,
                     delimiters: 'dollars',
-                    katexOptions: { throwOnError: false }
+                    katexOptions: { throwOnError: false, trust: false, maxExpand: 1000, maxSize: 20 }
                 });
                 pluginEnabled = true;
             } catch (err) { }
@@ -323,7 +330,7 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
 
         // 复用笔记中的图片尺寸约定：![alt|宽度x高度](path)
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = finalHtml;
+        tempDiv.innerHTML = sanitizeNoteHtml(finalHtml);
         tempDiv.querySelectorAll('img').forEach(img => {
             const alt = img.getAttribute('alt') || '';
             if (!alt.includes('|')) return;
@@ -356,7 +363,7 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
                     <span class="log-reading-title">${escapeHtml(fileNameWithoutExt)}</span>
                 </div>
                 <div class="log-reading-content markdown-body">
-                    ${finalHtml}
+                    ${sanitizeNoteHtml(finalHtml)}
                 </div>
                 <div class="log-nav-prev-next">
                     ${prevBtnHtml}
@@ -392,7 +399,7 @@ function renderLogMarkdown(markdownText, filePath, prevFile, nextFile) {
         }
     } catch (error) {
         console.error('日志 Markdown 渲染出错:', error);
-        viewer.innerHTML = `<div class="markdown-body error"><h2>渲染失败</h2><p>${error.message}</p></div>`;
+        renderContentError('渲染失败', error.message);
         window.TOCModule.clearTOC();
     }
 }

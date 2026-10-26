@@ -32,36 +32,50 @@ function getInlineText(token) {
 // ---------- 图片/视频/不支持文件渲染 ----------
 function renderImage(filePath) {
     window.TOCModule.clearTOC();
-    viewer.innerHTML = `
-        <div class="markdown-body image-view">
-            <h2>图片预览</h2>
-            <img src="${filePath}" alt="${filePath.split('/').pop()}" style="max-width:100%;">
-            <p><a href="${filePath}" target="_blank">查看原图</a></p>
-        </div>
-    `;
+    const container = createFilePreview('image-view', '图片预览', filePath, '查看原图');
+    const image = document.createElement('img');
+    image.src = filePath;
+    image.alt = filePath.split('/').pop();
+    image.style.maxWidth = '100%';
+    container.insertBefore(image, container.lastChild);
+    viewer.replaceChildren(container);
 }
 
 function renderVideo(filePath) {
     window.TOCModule.clearTOC();
-    viewer.innerHTML = `
-        <div class="markdown-body video-view">
-            <h2>视频播放</h2>
-            <video controls src="${filePath}" style="width:100%; max-height:70vh;"></video>
-            <p><a href="${filePath}" target="_blank">下载视频</a></p>
-        </div>
-    `;
+    const container = createFilePreview('video-view', '视频播放', filePath, '下载视频');
+    const video = document.createElement('video');
+    video.controls = true;
+    video.src = filePath;
+    video.style.cssText = 'width:100%; max-height:70vh;';
+    container.insertBefore(video, container.lastChild);
+    viewer.replaceChildren(container);
 }
 
 function renderUnsupported(filePath) {
     window.TOCModule.clearTOC();
-    const fileName = filePath.split('/').pop();
-    viewer.innerHTML = `
-        <div class="markdown-body unsupported">
-            <h2>文件无法预览</h2>
-            <p>文件类型 "${getFileExtension(filePath)}" 暂不支持在线预览。</p>
-            <p><a href="${filePath}" download="${fileName}">点击下载文件</a></p>
-        </div>
-    `;
+    const container = createFilePreview('unsupported', '文件无法预览', filePath, '点击下载文件');
+    container.querySelector('a').download = filePath.split('/').pop();
+    const description = document.createElement('p');
+    description.textContent = `文件类型 "${getFileExtension(filePath)}" 暂不支持在线预览。`;
+    container.insertBefore(description, container.lastChild);
+    viewer.replaceChildren(container);
+}
+
+function createFilePreview(className, title, filePath, linkText) {
+    const container = document.createElement('div');
+    container.className = `markdown-body ${className}`;
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+    const paragraph = document.createElement('p');
+    const link = document.createElement('a');
+    link.href = filePath;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = linkText;
+    paragraph.appendChild(link);
+    container.append(heading, paragraph);
+    return container;
 }
 
 // ---------- 从 treeData 递归查找文件 mtime ----------
@@ -112,7 +126,7 @@ function renderMarkdown(markdownText, filePath) {
             }
             if (targetPath) {
                 const encodedPath = encodeURIComponent(targetPath);
-                return `<a href="#${encodedPath}" class="wikilink">${p1}</a>`;
+                return `<a href="#${encodedPath}" class="wikilink">${escapeHtml(p1)}</a>`;
             } else {
                 return match;
             }
@@ -171,7 +185,7 @@ function renderMarkdown(markdownText, filePath) {
                 md.use(window.texmath, {
                     engine: window.katex,
                     delimiters: 'dollars',
-                    katexOptions: { throwOnError: false }
+                    katexOptions: { throwOnError: false, trust: false, maxExpand: 1000, maxSize: 20 }
                 });
                 pluginEnabled = true;
             } catch (err) {
@@ -202,7 +216,7 @@ function renderMarkdown(markdownText, filePath) {
 
         document.title = `${fileNameWithoutExt} - 笔记系统`;
 
-        const contentWithHeader = `<h1 class="note-title">${fileNameWithoutExt}</h1>\n<div class="note-content">${finalHtml}</div>`;
+        const contentWithHeader = `<h1 class="note-title">${escapeHtml(fileNameWithoutExt)}</h1>\n<div class="note-content">${finalHtml}</div>`;
 
         finalHtml = contentWithHeader.replace(/<img\s+src="([^"]+)"([^>]*)>/gi, function (match, src, rest) {
             if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('/')) {
@@ -236,7 +250,7 @@ function renderMarkdown(markdownText, filePath) {
             return tempDiv.innerHTML;
         }
 
-        finalHtml = processImageSizes(finalHtml);
+        finalHtml = processImageSizes(sanitizeNoteHtml(finalHtml));
 
         function convertVideoImgs(html) {
             const tempDiv = document.createElement('div');
@@ -267,7 +281,7 @@ function renderMarkdown(markdownText, filePath) {
         finalHtml = convertVideoImgs(finalHtml);
 
         const mtimeHtml = getMtimeHtml(filePath);
-        viewer.innerHTML = `<div class="markdown-body">${finalHtml}${mtimeHtml}</div>`;
+        viewer.innerHTML = sanitizeNoteHtml(`<div class="markdown-body">${finalHtml}${mtimeHtml}</div>`);
 
         if (window.hljs && !md.options.highlight) {
             document.querySelectorAll('.markdown-body pre code').forEach((block) => {
@@ -296,7 +310,7 @@ function renderMarkdown(markdownText, filePath) {
         }
     } catch (error) {
         console.error('Markdown 渲染出错:', error);
-        viewer.innerHTML = `<div class="markdown-body error"><h2>渲染失败</h2><p>${error.message}</p><pre>${escapeHtml(markdownText.substring(0, 200))}...</pre></div>`;
+        renderContentError('渲染失败', error.message);
         window.TOCModule.clearTOC();
     }
 }

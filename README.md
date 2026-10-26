@@ -40,14 +40,16 @@
 1. 将笔记文件放入 `frontend/public/` 目录
 2. 运行 `node scripts/generate-tree.js` 生成目录结构
 3. 直接打开 `frontend/index.html` 即可浏览
-4. obsidian的提交插件是调用update.ps1，要求 Obsidian 仓库位于项目根目录下的 frontend/public，项目根目录下需包含 submit.ps1、config.ps1 等文件
+4. Obsidian 发布插件仍调用根目录 update.ps1；Vault 保持在 frontend/public。新机器先执行 powershell -File scripts/setup-tools.ps1，安装项目专用安全 Node。
 ### 线上部署
 配置oss地址，创建根目录脚本config.ps1并输入"$OSS_BUCKET_URL = "oss://your-bucket-name""
 运行 [update.ps1] 脚本：
 - 自动处理笔记文件格式
 - 生成目录树
 - 提交Git仓库
-- 同步到OSS存储
+- 仅将过滤后的 dist/site/ 同步到 OSS；Obsidian 配置、AI 数据库和 node_modules 不上传
+- 检出常见密钥或任一步骤失败时停止；Git 不可用时可明确使用 powershell -File update.ps1 -SkipGit
+- 换 Key、手动 Worker 部署和剩余配置见 [安全修补记录](docs/security-fix-2026-10-26.md)
 
 ### 页面访问计数器部署（仅限首次）
 本站点内置了基于 Cloudflare Workers + KV 的页面访问次数计数器，每篇笔记/日志底部会显示"阅读 X 次"。
@@ -57,8 +59,8 @@
 2. 打开 `scripts/wrangler.toml`，找到 `[[kv_namespaces]]` 下的 `id` 字段，填入上一步获取的 **Namespace ID**
 3. 确保已安装 wrangler CLI 并登录：
    ```
-   npm install -g wrangler
-   wrangler login
+   npm ci --ignore-scripts
+   .\.tools\node-v24.22.1-win-x64\node.exe .\node_modules\wrangler\bin\wrangler.js login
    ```
 4. 运行一次性部署脚本：
    ```
@@ -120,6 +122,15 @@
 
 
 # 更新日志
+@2026-10-26
+修复发布链路与前端安全问题
+  - 发布副本过滤私有 Vault 数据、依赖目录与密钥文件，并阻断常见明文 Key
+  - 路由增加公开清单与路径校验，修复媒体/错误信息注入，Markdown 使用 DOMPurify 消毒
+  - 更新 markdown-it 15.0.3、KaTeX 0.19.1；固定浏览器资产、Wrangler 与 Undici 版本
+  - 部署使用项目 Node 24.22.1，修正清缓存请求体，任一步骤失败立即停止
+  - Worker 源码增加来源、公开路径和平台限流校验；用户选择稍后手动部署
+  - 上线与剩余操作见 docs/security-fix-2026-10-26.md
+
 @2026-05-26
 修复了引用视频播放问题
 文件夹默认折叠

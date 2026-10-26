@@ -13,9 +13,9 @@ function buildTreeHTML(nodes, parentPath = '') {
             const fileCount = (node.children || []).filter(c => c.type === 'file').length;
             const subFolderCount = (node.children || []).filter(c => c.type === 'folder').length;
             html += `<li class="folder collapsed">`;
-            html += `<div class="item" data-path="${nodePath}" data-type="folder">`;
+            html += `<div class="item" data-path="${escapeHtml(nodePath)}" data-type="folder">`;
             html += `<span class="folder-arrow">▸</span>`;
-            html += `<span class="item-name">${node.name}</span>`;
+            html += `<span class="item-name">${escapeHtml(node.name)}</span>`;
             if (fileCount + subFolderCount > 0) {
                 html += `<span class="folder-count">${fileCount + subFolderCount}</span>`;
             }
@@ -30,8 +30,8 @@ function buildTreeHTML(nodes, parentPath = '') {
             const displayName = node.name.replace(/\.[^/.]+$/, "");
             const ext = node.ext || '';
             html += `<li class="file">`;
-            html += `<div class="item" data-path="${nodePath}" data-type="file" data-ext="${ext}">`;
-            html += `<span class="item-name">${displayName}</span>`;
+            html += `<div class="item" data-path="${escapeHtml(nodePath)}" data-type="file" data-ext="${escapeHtml(ext)}">`;
+            html += `<span class="item-name">${escapeHtml(displayName)}</span>`;
             html += `</div>`;
             html += `</li>`;
         }

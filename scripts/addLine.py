@@ -1,6 +1,7 @@
 # scripts/check_formula_spacing.py
 import os
 import re
+from public_content import markdown_files
 
 
 def check_and_fix_markdown_formulas(directory_path):
@@ -8,15 +9,12 @@ def check_and_fix_markdown_formulas(directory_path):
     检查指定目录下的所有 Markdown 文件，确保 $$...$$ 类型的公式前有空行
     """
     # 遍历目录中的所有 Markdown 文件
-    for root, dirs, files in os.walk(directory_path):
-        for file in files:
-            if file.lower().endswith(".md"):
-                file_path = os.path.join(root, file)
-                changed = fix_latex_formulas(file_path)
-                if changed:
-                    print(f"已更新: {file_path}")
-                else:
-                    print(f"无需修改: {file_path}")
+    for file_path in markdown_files(directory_path):
+        changed = fix_latex_formulas(file_path)
+        if changed:
+            print(f"已更新: {file_path}")
+        else:
+            print(f"无需修改: {file_path}")
 
 
 def fix_latex_formulas(file_path):

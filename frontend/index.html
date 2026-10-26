@@ -3,31 +3,34 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; media-src 'self' https:; font-src 'self'; connect-src 'self' https://pv-counter.cranecat.workers.dev; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>CraneCat喵~</title>
     <!-- CSS -->
-    <link rel="stylesheet" href="/style.css?v=20260915-home-cleanup">
+    <link rel="stylesheet" href="/style.css?v=20261026-security">
     <!-- Markdown renderer & syntax highlighter -->
     <script src="/libs/js/highlight.min.js"></script>
     <!-- Syntax highlight theme -->
     <link rel="stylesheet" href="/libs/css/github.min.css">
     <!-- KaTeX for math rendering -->
-    <link rel="stylesheet" href="/libs/katex/katex.min.css">
-    <script src="/libs/js/katex.min.js"></script>
+    <link rel="stylesheet" href="/libs/katex/katex.min.css?v=0.19.1">
+    <script src="/libs/js/katex.min.js?v=0.19.1"></script>
     <!-- MarkdownIt -->
-    <script src="/libs/js/markdown-it.min.js"></script>
+    <script src="/libs/js/markdown-it.min.js?v=15.0.3"></script>
     <script src="/libs/js/texmath.js"></script>
-    <script src="/js/core.js?v=20260905-cleanup-icons" defer></script>
-    <script src="/js/toc.js?v=20260905-cleanup-icons" defer></script>
-    <script src="/js/notes.js?v=20260905-cleanup-icons" defer></script>
-    <script src="/js/home.js?v=20260915-home-cleanup" defer></script>
-    <script src="/js/log.js?v=20260915-log-image-embed" defer></script>
-    <script src="/js/friends.js?v=20260905-cleanup-icons" defer></script>
-    <script src="/js/tree.js?v=20260905-cleanup-icons" defer></script>
+    <script src="/libs/js/purify.min.js?v=3.4.17"></script>
+    <script src="/js/core.js?v=20261026-security" defer></script>
+    <script src="/js/toc.js?v=20261026-security" defer></script>
+    <script src="/js/notes.js?v=20261026-security" defer></script>
+    <script src="/js/home.js?v=20261026-security" defer></script>
+    <script src="/js/log.js?v=20261026-security" defer></script>
+    <script src="/js/friends.js?v=20261026-security" defer></script>
+    <script src="/js/tree.js?v=20261026-security" defer></script>
     <script src="/libs/js/fuse.min.js"></script>
-    <script src="/js/search.js?v=20260905-cleanup-icons" defer></script>
-    <script src="/script.js?v=20260905-cleanup-icons" defer></script>
-    <script src="/js/ripple.js?v=20260905-cleanup-icons" defer></script>
+    <script src="/js/search.js?v=20261026-security" defer></script>
+    <script src="/script.js?v=20261026-security" defer></script>
+    <script src="/js/ripple.js?v=20261026-security" defer></script>
 </head>
 
 <body class="homepage hide-sidebar is-booting">
