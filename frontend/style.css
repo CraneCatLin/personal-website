@@ -229,6 +229,11 @@ body.log-page::before {
     color: var(--primary);
 }
 
+.cg-map-link {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
 /* ---------- App Grid Layout ---------- */
 .app-grid {
     display: flex;
@@ -1397,6 +1402,7 @@ body.hide-sidebar .main-content {
         cursor: pointer;
         transition: all var(--transition);
         text-align: center;
+        text-decoration: none;
         white-space: nowrap;
     }
 
@@ -1420,6 +1426,10 @@ body.hide-sidebar .main-content {
 
     .sidebar.open {
         transform: translateX(0);
+    }
+
+    body.hide-sidebar .sidebar.open {
+        display: block;
     }
 
     .sidebar-overlay {
@@ -1467,6 +1477,10 @@ body.hide-sidebar .main-content {
     .nav-btn {
         padding: 6px 10px;
         font-size: 0.82rem;
+    }
+
+    .cg-map-link {
+        display: none;
     }
 
     .site-title {

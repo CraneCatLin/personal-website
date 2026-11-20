@@ -215,7 +215,7 @@
         }
 
         // ========== 侧边栏移动端导航按钮 ==========
-        const sidebarNavBtns = document.querySelectorAll('.sidebar-nav-btn');
+        const sidebarNavBtns = document.querySelectorAll('.sidebar-nav-btn[data-hash]');
         sidebarNavBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const hash = this.dataset.hash;
